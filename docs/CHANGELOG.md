@@ -957,3 +957,9 @@ title, else a navy JCS monogram tile.
   scroll fade-ins. pricing.html rebuilt to match; hero photo switched to
   posters/3-n-la-senda.jpg (warm interior, brightness .72) to mirror the
   reference's mood. Verified locally at 1280px.
+
+### Pricing hero swap (same day)
+- Hero image → projects/55-del-monte-drive/1.jpg (The Innovation living
+  room — matched from Jacob's pasted photo) with a navy gradient overlay
+  (rgba(9,22,39) .68→.34 left-to-right) replacing the brightness filter,
+  per Jacob: dark overlay for text legibility.
