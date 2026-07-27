@@ -294,6 +294,97 @@ small.mut { color: var(--muted); }
 .adm-toast { background: var(--navy, #0f2240); color: #fff; font-size: 0.82rem; line-height: 1.45; padding: 0.65rem 1.1rem; box-shadow: 0 10px 30px rgba(15,34,64,0.28); opacity: 0; transform: translateY(8px); transition: opacity 0.3s, transform 0.3s; max-width: min(480px, 90vw); text-align: center; }
 .adm-toast.in { opacity: 1; transform: translateY(0); }
 .adm-toast--err { background: #6e2f2a; }
+/* ================= Licensing — Resid-inspired design system =================
+   Scoped to .lx-* (Licensing section only). Space Mono microlabels, teal
+   accent, dark ledger band, pill chips — Resid's texture, JCS's navy. */
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&display=swap');
+:root { --lx-teal: #3f7c92; --lx-dark: #0d1524; --lx-ink: #16233b; --lx-line: rgba(15,34,64,0.12); }
+.lx-mono { font-family: 'Space Mono', ui-monospace, Menlo, monospace; letter-spacing: 0.12em; text-transform: uppercase; }
+.lx-marker { display: flex; align-items: center; gap: 0.6rem; font-family: 'Space Mono', ui-monospace, monospace;
+  font-size: 0.68rem; letter-spacing: 0.12em; color: var(--lx-teal); text-transform: uppercase; }
+.lx-marker .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--lx-teal); flex: none; }
+.lx-marker .dim { color: var(--muted); }
+.lx-h1 { font-family: var(--sans); font-weight: 800; letter-spacing: -0.03em; color: var(--lx-ink);
+  font-size: clamp(1.7rem, 3.4vw, 2.3rem); line-height: 1.02; margin: 0.7rem 0 0.3rem; }
+.lx-h1 .t { color: var(--lx-teal); }
+.lx-sub { font-family: 'Space Mono', ui-monospace, monospace; font-size: 0.66rem; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--muted); }
+.lx-cursor { display: inline-block; width: 7px; height: 0.85em; background: var(--lx-teal);
+  vertical-align: -0.1em; margin-left: 4px; animation: lxblink 1.1s steps(1) infinite; }
+@keyframes lxblink { 50% { opacity: 0; } }
+
+.lx-ledger { background: var(--lx-dark); border-radius: 18px; padding: 1.3rem 1.5rem; margin: 1.2rem 0 1.4rem;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem 1.6rem; }
+.lx-ledger .cell b { display: block; font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700;
+  font-size: 1.45rem; color: #f7f5f0; letter-spacing: 0; }
+.lx-ledger .cell.teal b { color: #7fb3c8; }
+.lx-ledger .cell span { display: block; margin-top: 0.3rem; font-family: 'Space Mono', ui-monospace, monospace;
+  font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(247,245,240,0.45); }
+.lx-ledger .cell.click { cursor: pointer; }
+
+.lx-card { background: #fff; border: 1px solid var(--lx-line); border-radius: 18px;
+  padding: 1.35rem 1.5rem; margin-bottom: 1.3rem; }
+.lx-card__head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.9rem; flex-wrap: wrap; }
+.lx-card__head .grow { flex: 1; }
+
+.lx-input { font-family: var(--sans); font-size: 0.92rem; color: var(--lx-ink); background: #fff;
+  border: 1px solid rgba(15,34,64,0.2); border-radius: 999px; padding: 0.72rem 1.15rem; outline: none;
+  transition: border-color 0.25s; }
+.lx-input:focus { border-color: var(--lx-teal); }
+select.lx-input { border-radius: 999px; padding-right: 2rem; }
+.lx-btn { font-family: var(--sans); font-size: 0.78rem; font-weight: 600; color: #f7f5f0;
+  background: var(--navy); border: 0; border-radius: 999px; padding: 0.72rem 1.35rem; cursor: pointer;
+  transition: opacity 0.2s; }
+.lx-btn:hover { opacity: 0.88; }
+.lx-btn--ghost { background: transparent; color: var(--lx-ink); border: 1px solid rgba(15,34,64,0.25); }
+.lx-btn--teal { background: var(--lx-teal); }
+.lx-btn--sm { padding: 0.42rem 0.95rem; font-size: 0.7rem; }
+.lx-btn--danger { background: transparent; color: #a33; border: 1px solid rgba(170,51,51,0.35); }
+
+.lx-chip { display: inline-flex; align-items: center; gap: 0.4rem; font-family: 'Space Mono', ui-monospace, monospace;
+  font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.32rem 0.7rem;
+  border-radius: 999px; border: 1px solid rgba(15,34,64,0.18); color: var(--muted); background: #fff; white-space: nowrap; }
+.lx-chip .d { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.lx-chip--found { color: #8a6d1f; border-color: rgba(138,109,31,0.35); background: #faf6e9; }
+.lx-chip--contacted { color: var(--lx-teal); border-color: rgba(63,124,146,0.4); background: #eef4f7; }
+.lx-chip--replied { color: #2c5d8f; border-color: rgba(44,93,143,0.4); background: #ecf2f9; }
+.lx-chip--offer_sent { color: #6b4fa0; border-color: rgba(107,79,160,0.35); background: #f2eefa; }
+.lx-chip--licensed { color: #1d5d38; border-color: rgba(29,93,56,0.4); background: #e7f3ec; }
+.lx-chip--declined { color: #9c3a3a; border-color: rgba(156,58,58,0.35); background: #faeeee; }
+.lx-chip--role { color: var(--lx-ink); background: #f1f0ec; border-color: transparent; }
+.lx-chip--due { color: #b3541e; border-color: rgba(179,84,30,0.4); background: #fdf1e7; }
+
+.lx-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.lx-tab { font-family: 'Space Mono', ui-monospace, monospace; font-size: 0.6rem; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--muted); background: transparent; border: 1px solid rgba(15,34,64,0.16);
+  border-radius: 999px; padding: 0.42rem 0.9rem; cursor: pointer; }
+.lx-tab.on { background: var(--lx-dark); color: #f7f5f0; border-color: var(--lx-dark); }
+
+.lx-row { border: 1px solid var(--lx-line); border-radius: 14px; padding: 0.95rem 1.15rem; margin-bottom: 0.65rem;
+  background: #fff; transition: border-color 0.2s; }
+.lx-row:hover { border-color: rgba(63,124,146,0.45); }
+.lx-row__top { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
+.lx-row__co { font-weight: 700; font-size: 0.98rem; letter-spacing: -0.01em; color: var(--lx-ink); }
+.lx-fee { font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 0.9rem;
+  color: var(--lx-ink); border: 1px solid rgba(15,34,64,0.16); border-radius: 10px; padding: 0.3rem 0.7rem; }
+.lx-fee--paid { background: var(--lx-dark); color: #7fb3c8; border-color: var(--lx-dark); }
+.lx-row__meta { font-size: 0.8rem; color: var(--muted); margin-top: 0.35rem; }
+.lx-row__meta a { color: var(--lx-teal); }
+.lx-row__acts { display: flex; gap: 0.45rem; flex-wrap: wrap; margin-top: 0.7rem; }
+.lx-note { font-family: 'Space Mono', ui-monospace, monospace; font-size: 0.62rem; letter-spacing: 0.1em;
+  color: var(--muted); background: repeating-linear-gradient(-45deg, rgba(15,34,64,0.045) 0 6px, transparent 6px 12px);
+  border: 1px solid var(--lx-line); border-radius: 12px; padding: 0.75rem 1rem; line-height: 1.9; }
+.lx-note a { color: var(--lx-teal); }
+.lx-result { padding: 0.85rem 0.2rem; border-bottom: 1px solid rgba(15,34,64,0.07); }
+.lx-result:last-child { border-bottom: 0; }
+.lx-result__t { display: flex; align-items: center; gap: 0.7rem; flex-wrap: wrap; }
+.lx-result__t a.title { font-weight: 600; font-size: 0.9rem; color: var(--lx-ink); text-decoration: none; }
+.lx-result__t a.title:hover { color: var(--lx-teal); }
+.lx-domain { font-family: 'Space Mono', ui-monospace, monospace; font-size: 0.56rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--lx-teal); border: 1px solid rgba(63,124,146,0.35);
+  border-radius: 999px; padding: 0.18rem 0.55rem; }
+.lx-snippet { font-size: 0.8rem; color: var(--muted); margin-top: 0.25rem; line-height: 1.55; }
+@media (max-width: 640px) { .lx-ledger { padding: 1.1rem 1.1rem; } .lx-card { padding: 1.05rem 1.1rem; } }
 </style>
 </head>
 <body>
@@ -326,6 +417,7 @@ small.mut { color: var(--muted); }
       <a data-r="pipeline">Projects</a>
       <a data-r="deliveries">Deliveries</a>
       <a data-r="proposals">Proposals</a>
+      <a data-r="licensing">Licensing</a>
       <a data-r="clients">Clients</a>
       <a data-r="portfolio">Portfolio</a>
       <a data-r="settings">Settings</a>
@@ -350,8 +442,9 @@ small.mut { color: var(--muted); }
   function net(b){ return (Number(b.price) || 0) - (Number(b.discount_value) || 0); }
   function dstr(d){ if(!d) return '—'; var t=new Date(d); return isNaN(t)?'—':t.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
 
-  var state = { clients: [], bookings: [], requests: [], discounts: [], siteProjects: [], proposals: [], sp: null, reqTab: 'pending', loaded: false,
-              view: localStorage.getItem('adm-view') || 'pipeline', q: '', clientFilter: '', collapsed: {} };
+  var state = { clients: [], bookings: [], requests: [], discounts: [], siteProjects: [], proposals: [], licenseLeads: [], sp: null, reqTab: 'pending', loaded: false,
+              view: localStorage.getItem('adm-view') || 'pipeline', q: '', clientFilter: '', collapsed: {},
+              licTab: 'all', licProp: '', licResults: null, licSearching: false };
 var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', delivered:'#7a5fb8', completed:'#3f7a4f', paid:'#1d4d2a' };
   var TYPES = ['Architectural Photography','Film / Videography','Aerial & Drone','Full Campaign (Stills + Film)','Other'];
   var ADDONS = {
@@ -412,10 +505,11 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     render();
   }
   async function reload() {
-    var c = await api('clients'), b = await api('bookings'), r = await api('requests'), d = await api('discounts'), st = await api('settings'), sp = await api('siteprojects'), pr = await api('proposals');
+    var c = await api('clients'), b = await api('bookings'), r = await api('requests'), d = await api('discounts'), st = await api('settings'), sp = await api('siteprojects'), pr = await api('proposals'), lic = await api('licensing');
     state.clients = c.clients; state.bookings = b.bookings; state.requests = r.requests; state.discounts = d.discounts;
     state.siteProjects = sp.projects || [];
     state.proposals = pr.proposals || [];
+    state.licenseLeads = lic.leads || [];
     state.settings = st.settings || {}; state.loaded = true;
     var pending = state.requests.filter(function (x) { return x.status === 'pending'; }).length;
     var badge = $('req-badge');
@@ -1333,6 +1427,153 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       '</div>';
   }
 
+  // ================= licensing =================
+  var LIC_ROLES = { architect:'Architect', builder:'Builder', developer:'Developer', interior:'Interior Design',
+                    landscape:'Landscape', pool:'Pool & Outdoor', brokerage:'Brokerage', other:'Other' };
+  var LIC_STATUS = { found:'Found', contacted:'Contacted', replied:'Replied', offer_sent:'Offer sent',
+                     licensed:'Licensed', declined:'Declined' };
+  var LIC_BADGE = { found:'pending', contacted:'accepted', replied:'accepted', offer_sent:'accepted',
+                    licensed:'paid', declined:'declined' };
+
+  function licDue(l) {
+    if (!l.follow_up || ['licensed','declined'].indexOf(l.status) > -1) return false;
+    return new Date(l.follow_up) <= new Date(new Date().toDateString());
+  }
+  // Suggested license fee from the JCS rate card (tunable defaults).
+  function licSuggest(role, media, print, ads, size) {
+    var base = media === 'film' ? 500 : 350;
+    var mult = { developer:1.6, builder:1.4, architect:1.2, interior:1.0, brokerage:1.0, landscape:0.8, pool:0.8, other:1.0 }[role] || 1;
+    var v = base * mult * (print ? 1.3 : 1) * (ads ? 1.5 : 1) * (size === 'small' ? 0.8 : size === 'full' ? 1.25 : 1);
+    var round = function (n) { return Math.round(n / 25) * 25; };
+    return { low: round(v * 0.75), rec: round(v), high: round(v * 1.25) };
+  }
+
+  function vLicensing() {
+    var leads = state.licenseLeads;
+    var props = []; leads.forEach(function (l) { if (props.indexOf(l.property) === -1) props.push(l.property); });
+    var licensedSum = leads.filter(function (l) { return l.status === 'licensed'; })
+      .reduce(function (t, l) { return t + (Number(l.fee) || 0); }, 0);
+    var dueCount = leads.filter(licDue).length;
+    var contactedCount = leads.filter(function (l) { return l.emailed_at; }).length;
+
+    var list = leads.filter(function (l) {
+      if (state.licProp && l.property !== state.licProp) return false;
+      if (state.licTab === 'all') return true;
+      if (state.licTab === 'due') return licDue(l);
+      return l.status === state.licTab;
+    });
+
+    var tabs = ['all'].concat(Object.keys(LIC_STATUS)).concat(['due']);
+    var seg = '<div class="lx-tabs">' + tabs.map(function (t) {
+      var label = t === 'all' ? 'All' : t === 'due' ? 'Follow-ups' + (dueCount ? ' · ' + dueCount : '') : LIC_STATUS[t];
+      return '<button class="lx-tab' + (state.licTab === t ? ' on' : '') + '" onclick="ADM.licTab(\'' + t + '\')">' + label + '</button>';
+    }).join('') + '</div>';
+
+    var datalist = '<datalist id="lic-props">' + state.bookings.map(function (b) {
+      return '<option value="' + esc(b.title) + '">' + esc(b.location || '') + '</option>';
+    }).join('') + '</datalist>';
+    var roleOpts = Object.keys(LIC_ROLES).map(function (r) {
+      return '<option value="' + r + '">' + LIC_ROLES[r] + '</option>';
+    }).join('');
+
+    var results = '';
+    if (state.licSearching) {
+      results = '<div class="lx-note" style="margin-top:0.9rem">Running research<span class="lx-cursor"></span></div>';
+    } else if (state.licResults) {
+      if (state.licResults.needsKey) {
+        results = '<div class="lx-note" style="margin-top:0.9rem">NO SEARCH KEY — add a Google Programmable Search key + engine ID in ' +
+          '<a href="#settings">SETTINGS</a> for in-admin research (100/day free). Quick links: ' +
+          Object.keys(LIC_ROLES).slice(0, 7).map(function (r) {
+            return '<a href="https://www.google.com/search?q=' + encodeURIComponent('"' + (state.licQ || '') + '" ' + LIC_ROLES[r]) + '" target="_blank" rel="noopener">' + LIC_ROLES[r] + ' &nearr;</a>';
+          }).join(' &nbsp;·&nbsp; ') + '</div>';
+      } else if (state.licResults.searchError) {
+        results = '<div class="lx-note" style="margin-top:0.9rem">SEARCH FAILED — ' + esc(state.licResults.searchError) + '</div>';
+      } else if (!state.licResults.results.length) {
+        results = '<div class="lx-note" style="margin-top:0.9rem">0 RESULTS for ' + esc(state.licResults.q || '') + ' — try another role or a broader address.</div>';
+      } else {
+        results = '<div style="margin-top:0.6rem">' +
+          '<div class="lx-marker" style="margin:0.7rem 0 0.2rem"><span class="dot"></span>OUTPUT: ' + state.licResults.results.length + ' PARTIES<span class="dim">// CLICK + LEAD TO TRACK</span></div>' +
+          state.licResults.results.map(function (r, i) {
+            return '<div class="lx-result">' +
+              '<div class="lx-result__t">' +
+                '<a class="title" href="' + esc(r.link) + '" target="_blank" rel="noopener">' + esc(r.title) + '</a>' +
+                '<span class="lx-domain">' + esc(r.domain) + '</span>' +
+                '<span style="flex:1"></span>' +
+                '<button class="lx-btn lx-btn--teal lx-btn--sm" onclick="ADM.licAddFromResult(' + i + ')">+ Lead</button>' +
+              '</div>' +
+              '<div class="lx-snippet">' + esc(r.snippet) + '</div>' +
+            '</div>';
+          }).join('') + '</div>';
+      }
+    }
+
+    var rows = list.map(function (l) {
+      var due = licDue(l);
+      return '<div class="lx-row">' +
+        '<div class="lx-row__top">' +
+          '<span class="lx-row__co">' + esc(l.company) + '</span>' +
+          '<span class="lx-chip lx-chip--role">' + (LIC_ROLES[l.role] || 'Other') + '</span>' +
+          '<span class="lx-chip lx-chip--' + esc(l.status) + '"><span class="d"></span>' + (LIC_STATUS[l.status] || l.status) + '</span>' +
+          (due ? '<span class="lx-chip lx-chip--due"><span class="d"></span>Follow up</span>' : '') +
+          '<span style="flex:1"></span>' +
+          (l.fee ? '<span class="lx-fee' + (l.status === 'licensed' ? ' lx-fee--paid' : '') + '">' + money(l.fee) + '</span>' : '') +
+        '</div>' +
+        '<div class="lx-row__meta">' + esc(l.property) + (l.location ? ' · ' + esc(l.location) : '') + '</div>' +
+        '<div class="lx-row__meta" style="margin-top:0.1rem">' +
+          (l.contact_name ? esc(l.contact_name) + ' · ' : '') + (l.email ? esc(l.email) : '<i>no email yet</i>') +
+          (l.website ? ' · <a href="' + esc(l.website) + '" target="_blank" rel="noopener">site &nearr;</a>' : '') +
+          (l.emailed_at ? ' · emailed ' + dstr(l.emailed_at) + (l.sends > 1 ? ' ×' + l.sends : '') : '') +
+          (l.follow_up ? ' · follow up ' + dstr(l.follow_up) : '') +
+        '</div>' +
+        (l.notes ? '<div class="adm-notes" style="margin-top:0.5rem">' + esc(l.notes) + '</div>' : '') +
+        '<div class="lx-row__acts">' +
+          '<button class="lx-btn lx-btn--sm" onclick="ADM.licDraft(' + l.id + ')">' + (l.emailed_at ? 'Send again' : 'Outreach') + '</button>' +
+          (l.proposal_id
+            ? '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.go(\'proposal/' + l.proposal_id + '\')">Open offer</button>'
+            : '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licOffer(' + l.id + ')">Create offer</button>') +
+          '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licEdit(' + l.id + ')">Edit</button>' +
+          (l.status !== 'licensed' ? '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licMark(' + l.id + ',\'licensed\')">Mark licensed</button>' : '') +
+          '<button class="lx-btn lx-btn--danger lx-btn--sm" onclick="ADM.licDelete(' + l.id + ')">Delete</button>' +
+        '</div></div>';
+    }).join('');
+
+    return '<div class="lx-marker" style="margin-top:0.3rem"><span class="dot"></span>(JCS &mdash; 01)<span class="dim">// MEDIA LICENSING</span></div>' +
+      '<div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">' +
+        '<div><h1 class="lx-h1">License <span class="t">everything.</span></h1>' +
+        '<div class="lx-sub">One shoot &middot; every rightful buyer<span class="lx-cursor"></span></div></div>' +
+        '<span style="flex:1"></span>' +
+        '<button class="lx-btn" onclick="ADM.licNew()">+ Add lead</button>' +
+      '</div>' +
+      '<div class="lx-ledger">' +
+        '<div class="cell teal"><b>' + money(licensedSum) + '</b><span>Licensed to date</span></div>' +
+        '<div class="cell"><b>' + leads.length + '</b><span>Leads</span></div>' +
+        '<div class="cell"><b>' + contactedCount + '</b><span>Outreach sent</span></div>' +
+        '<div class="cell' + (dueCount ? ' click" onclick="ADM.licTab(\'due\')"' : '"') + '><b>' + dueCount + '</b><span>Follow-ups due</span></div>' +
+      '</div>' +
+      '<div class="lx-card">' +
+        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>001<span class="dim">// RESEARCH A PROPERTY</span></div></div>' +
+        '<p class="mut" style="font-size:0.82rem;margin:0 0 0.9rem">Everyone who designed, built, landscaped, or sold the home is a rightful buyer of the media. Search by role — results become leads with one click.</p>' +
+        '<div style="display:flex;gap:0.55rem;flex-wrap:wrap;align-items:center">' +
+          '<input id="lic-q" list="lic-props" class="lx-input" placeholder="8225 Lahontan Drive, Truckee" style="flex:2;min-width:230px" value="' + esc(state.licQ || state.licProp || '') + '">' + datalist +
+          '<select id="lic-role" class="lx-input" style="flex:1;min-width:150px">' + roleOpts + '</select>' +
+          '<button class="lx-btn" onclick="ADM.licSearch()">Run research</button>' +
+        '</div>' +
+        '<div id="lic-results">' + results + '</div>' +
+      '</div>' +
+      '<div class="lx-card">' +
+        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>002<span class="dim">// PIPELINE</span></div>' +
+          '<span class="grow"></span>' +
+          '<select class="lx-input" style="padding:0.45rem 1rem;font-size:0.78rem" onchange="ADM.licProp(this.value)"><option value="">All properties</option>' +
+            props.map(function (p) { return '<option' + (state.licProp === p ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>' +
+        '</div>' + seg +
+        '<div style="margin-top:0.9rem">' +
+        (rows || '<div class="lx-note">' + (state.licTab === 'all' && !state.licProp
+            ? 'NO LEADS YET — run research above. The architect, builder, designer, landscaper, and brokerage on every shoot already want this work.'
+            : 'NOTHING FOR THIS FILTER.') + '</div>') +
+        '</div>' +
+      '</div>';
+  }
+
   function vSettings() {
     var list = state.discounts;
     var sub = (state.settings || {}).pixieset_subdomain || '';
@@ -1344,6 +1585,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       '<form class="adm-form" onsubmit="ADM.settingsSave(event)">' +
         fld('s-pixieset', 'Pixieset subdomain', '<input id="s-pixieset" placeholder="yourstudio" value="' + esc(sub) + '">') +
         fld('s-gplaces', 'Google Places API key <small style="text-transform:none;letter-spacing:0">(address autocomplete)</small>', '<input id="s-gplaces" placeholder="AIza\u2026" value="' + esc((state.settings || {}).google_places_key || '') + '">') +
+        fld('s-cse-key', 'Programmable Search key <small style="text-transform:none;letter-spacing:0">(Licensing research \u2014 free at developers.google.com/custom-search)</small>', '<input id="s-cse-key" placeholder="AIza\u2026" value="' + esc((state.settings || {}).google_cse_key || '') + '">') +
+        fld('s-cse-cx', 'Search engine ID <small style="text-transform:none;letter-spacing:0">(cx \u2014 create one for &ldquo;entire web&rdquo; at programmablesearchengine.google.com)</small>', '<input id="s-cse-cx" placeholder="a1b2c3&hellip;" value="' + esc((state.settings || {}).google_cse_cx || '') + '">') +
         '<div class="adm-field"><label>&nbsp;</label><button class="adm-btn" type="submit">Save</button></div>' +
       '</form>' +
       (sub ? '<div class="adm-confnote ok">&#10003; Predicted links use ' + esc(sub) + '.pixieset.com &mdash; <a href="https://' + esc(sub) + '.pixieset.com" target="_blank" rel="noopener" style="color:inherit">open your gallery home &rarr;</a></div>' : '') +
@@ -1595,7 +1838,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     var r = route(), m = $('main');
     var section = r.split('/')[0];
     var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline', deliveries:'deliveries', delivery:'deliveries',
-                 proposals:'proposals', proposal:'proposals',
+                 proposals:'proposals', proposal:'proposals', licensing:'licensing',
                  clients:'clients', client:'clients', portfolio:'portfolio', siteproject:'portfolio', settings:'settings' }[section] || 'dash';
     document.querySelectorAll('#nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.r === owns); });
     if (section === 'requests') m.innerHTML = vRequests();
@@ -1605,6 +1848,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     else if (section === 'delivery') m.innerHTML = vDeliveryEdit(r.split('/')[1]);
     else if (section === 'proposals') m.innerHTML = vProposals();
     else if (section === 'proposal') m.innerHTML = vProposalEdit(r.split('/')[1]);
+    else if (section === 'licensing') m.innerHTML = vLicensing();
     else if (section === 'clients') m.innerHTML = vClients();
     else if (section === 'client') m.innerHTML = vClientDetail(r.split('/')[1]);
     else if (section === 'portfolio') { state.sp = null; m.innerHTML = vPortfolio(); }
@@ -1741,6 +1985,144 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       } catch (e) {
         toast(String(e.message) === 'no-client-email' ? 'Add a valid client email first.' : friendly(e), 'err');
       }
+    },
+
+    // ---- licensing ----
+    licTab: function (t) { state.licTab = t; render(); },
+    licProp: function (p) { state.licProp = p; render(); },
+    licSearch: async function () {
+      var q = ($('lic-q') ? $('lic-q').value : '').trim();
+      var role = $('lic-role') ? $('lic-role').value : 'architect';
+      if (!q) { toast('Type a property address first.', 'err'); return; }
+      state.licQ = q; state.licLastRole = role; state.licSearching = true; render();
+      try {
+        var j = await api('licensing', 'POST', { action: 'search', q: q, role: role });
+        state.licResults = j;
+      } catch (e) { state.licResults = { results: [], searchError: 'request failed' }; }
+      state.licSearching = false; render();
+    },
+    licAddFromResult: function (i) {
+      var r = (state.licResults && state.licResults.results || [])[i]; if (!r) return;
+      ADM.licNew({
+        property: state.licQ || '', role: state.licLastRole || 'other',
+        company: (r.title || '').split(/[|\-–—:•·]/)[0].trim().slice(0, 80),
+        website: r.link, source_url: r.link
+      });
+    },
+    licSuggestPaint: function () {
+      var g = function (id) { var el = $(id); return el ? el.value : ''; };
+      var on = function (id) { var el = $(id); return !!(el && el.checked); };
+      var sug = licSuggest(g('f-lic-role'), g('f-lic-media'), on('f-lic-print'), on('f-lic-ads'), g('f-lic-size'));
+      var el = $('f-lic-sug');
+      if (el) el.innerHTML = 'Suggested: <b style="font-family:var(--serif);font-size:1.05rem;color:var(--navy)">' + money(sug.rec) + '</b>' +
+        ' <span style="color:var(--muted)">(' + money(sug.low) + ' – ' + money(sug.high) + ')</span>' +
+        ' &nbsp;<button type="button" class="adm-btn adm-btn--ghost" style="padding:0.25rem 0.6rem" onclick="document.getElementById(\'f-lic-fee\').value=' + sug.rec + '">Use</button>';
+    },
+    licNew: function (prefill) { ADM.licModal(null, prefill || {}); },
+    licEdit: function (id) {
+      var l = state.licenseLeads.find(function (x) { return x.id == id; }); if (!l) return;
+      ADM.licModal(l, {});
+    },
+    licModal: function (l, pre) {
+      var v = l || pre;
+      var roleOpts = Object.keys(LIC_ROLES).map(function (r) {
+        return '<option value="' + r + '"' + ((v.role || 'architect') === r ? ' selected' : '') + '>' + LIC_ROLES[r] + '</option>';
+      }).join('');
+      openModal(l ? 'Edit lead' : 'New licensing lead',
+        fld('f-lic-property', 'Property *', '<input id="f-lic-property" required value="' + esc(v.property || '') + '" placeholder="8225 Lahontan Drive">') +
+        fld('f-lic-location', 'Location', '<input id="f-lic-location" value="' + esc(v.location || '') + '" placeholder="Truckee, California">') +
+        fld('f-lic-company', 'Company *', '<input id="f-lic-company" required value="' + esc(v.company || '') + '">') +
+        fld('f-lic-role', 'Role', '<select id="f-lic-role" onchange="ADM.licSuggestPaint()">' + roleOpts + '</select>') +
+        fld('f-lic-contact', 'Contact name', '<input id="f-lic-contact" value="' + esc(v.contact_name || '') + '">') +
+        fld('f-lic-email', 'Email', '<input id="f-lic-email" type="email" value="' + esc(v.email || '') + '" placeholder="studio@firm.com">') +
+        fld('f-lic-phone', 'Phone', '<input id="f-lic-phone" value="' + esc(v.phone || '') + '">') +
+        fld('f-lic-website', 'Website', '<input id="f-lic-website" value="' + esc(v.website || '') + '">') +
+        fld('f-lic-follow', 'Follow up on', '<input id="f-lic-follow" type="date" value="' + esc((v.follow_up || '').toString().slice(0, 10)) + '">') +
+        fld('f-lic-fee', 'License fee ($)', '<input id="f-lic-fee" type="number" min="0" step="25" value="' + (v.fee == null ? '' : esc(v.fee)) + '">') +
+        '<div class="adm-field full"><label>Fee helper <small style="text-transform:none;letter-spacing:0">(media &middot; usage &middot; set size &rarr; suggestion from your rate card)</small></label>' +
+          '<div style="display:flex;gap:0.7rem;flex-wrap:wrap;align-items:center;font-size:0.85rem">' +
+          '<select id="f-lic-media" onchange="ADM.licSuggestPaint()" style="width:auto"><option value="photo">Photo set</option><option value="film">Film</option></select>' +
+          '<label style="display:flex;gap:0.3rem;align-items:center;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink)"><input type="checkbox" id="f-lic-print" onchange="ADM.licSuggestPaint()" style="width:auto"> print</label>' +
+          '<label style="display:flex;gap:0.3rem;align-items:center;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink)"><input type="checkbox" id="f-lic-ads" onchange="ADM.licSuggestPaint()" style="width:auto"> paid ads</label>' +
+          '<select id="f-lic-size" onchange="ADM.licSuggestPaint()" style="width:auto"><option value="small">&le;10 images</option><option value="set" selected>Full set</option><option value="full">Set + film stills</option></select>' +
+          '<span id="f-lic-sug" style="flex:1"></span></div></div>' +
+        '<div class="adm-field full"><label for="f-lic-notes">Notes</label><textarea id="f-lic-notes">' + esc(v.notes || '') + '</textarea></div>',
+        async function () {
+          var body = {
+            property: $('f-lic-property').value, location: $('f-lic-location').value,
+            company: $('f-lic-company').value, role: $('f-lic-role').value,
+            contact_name: $('f-lic-contact').value, email: $('f-lic-email').value,
+            phone: $('f-lic-phone').value, website: $('f-lic-website').value,
+            follow_up: $('f-lic-follow').value, fee: $('f-lic-fee').value,
+            notes: $('f-lic-notes').value, source_url: v.source_url || ''
+          };
+          if (l) { body.id = l.id; await api('licensing', 'PUT', body); }
+          else await api('licensing', 'POST', body);
+          await reload(); render();
+        });
+      ADM.licSuggestPaint();
+    },
+    licDraft: async function (id) {
+      try {
+        var j = await api('licensing', 'POST', { action: 'draft', id: id });
+        $('modal-root').innerHTML =
+          '<div class="adm-modal" id="modal-bg"><div class="adm-modal__card">' +
+          '<h2>Outreach preview</h2>' +
+          '<p class="mut" style="font-size:0.8rem;margin:0.3rem 0 0.8rem">To: <b>' + esc(j.to || '(no email on lead)') + '</b> &middot; Subject: <b>' + esc(j.subject) + '</b></p>' +
+          '<textarea readonly style="width:100%;box-sizing:border-box;min-height:260px;font-family:var(--sans);font-size:0.85rem;line-height:1.6;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.9rem">' + esc(j.text) + '</textarea>' +
+          '<p class="mut" style="font-size:0.75rem;margin-top:0.5rem">Sends as a branded JCS email from enquiry@ — replies go straight to your gmail.</p>' +
+          '<div style="margin-top:1rem;display:flex;gap:0.8rem">' +
+            '<button class="adm-btn" onclick="ADM.licSend(' + id + ')">Send outreach</button>' +
+            '<button class="adm-btn adm-btn--ghost" onclick="document.getElementById(\'modal-root\').innerHTML=\'\'">Cancel</button>' +
+          '</div></div></div>';
+        $('modal-bg').addEventListener('mousedown', function (e) { if (e.target === this) $('modal-root').innerHTML = ''; });
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
+    licSend: async function (id) {
+      try {
+        await api('licensing', 'POST', { action: 'send', id: id });
+        $('modal-root').innerHTML = '';
+        await reload(); render();
+        toast('Outreach sent.');
+      } catch (e) {
+        toast(String(e.message) === 'no-email' ? 'Add an email to this lead first (Edit).' : friendly(e), 'err');
+      }
+    },
+    licOffer: async function (id) {
+      var l = state.licenseLeads.find(function (x) { return x.id == id; }); if (!l) return;
+      var sug = licSuggest(l.role, 'photo', false, false, 'set');
+      try {
+        var j = await api('proposals', 'POST', {
+          title: l.property, location: l.location, client_name: l.company, client_email: l.email,
+          intro: 'A private media-licensing offer for ' + l.company + '.',
+          note: 'Licensed for ' + l.company + '’s own marketing — portfolio, web, social, and print.',
+          items: [
+            { group: 'Media License', name: 'Digital license — web, social & portfolio',
+              desc: 'The delivered editorial set of ' + l.property + ', licensed for ' + l.company + '’s own channels.', price: sug.rec },
+            { group: '', name: 'Print & collateral use', desc: 'Brochures, signage, and printed portfolio.', price: Math.round(sug.rec * 0.3 / 25) * 25 },
+            { group: '', name: 'Paid advertising use', desc: 'Digital and print ad placements.', price: Math.round(sug.rec * 0.5 / 25) * 25 }
+          ]
+        });
+        await api('licensing', 'PUT', { id: id, proposal_id: j.proposal.id, status: l.status === 'found' ? 'offer_sent' : l.status });
+        await reload();
+        toast('Offer page created — review it, then Send to client.');
+        go('proposal/' + j.proposal.id);
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
+    licMark: async function (id, status) {
+      var l = state.licenseLeads.find(function (x) { return x.id == id; }); if (!l) return;
+      var body = { id: id, status: status };
+      if (status === 'licensed' && !l.fee) {
+        var fee = prompt('License fee for ' + l.company + '? ($)');
+        if (fee) body.fee = fee;
+      }
+      try { await api('licensing', 'PUT', body); await reload(); render(); toast(l.company + ' → ' + (LIC_STATUS[status] || status) + '.'); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    licDelete: async function (id) {
+      if (!confirm('Delete this lead?')) return;
+      try { await api('licensing', 'DELETE', { id: id }); await reload(); render(); }
+      catch (e) { toast(friendly(e), 'err'); }
     },
     cliAddEmail: async function (id) {
       var c = state.clients.find(function (x) { return x.id == id; }); if (!c) return;
@@ -2057,7 +2439,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     settingsSave: async function (e) {
       e.preventDefault();
       try {
-        var j = await api('settings', 'PUT', { pixieset_subdomain: $('s-pixieset').value, google_places_key: $('s-gplaces').value });
+        var j = await api('settings', 'PUT', { pixieset_subdomain: $('s-pixieset').value, google_places_key: $('s-gplaces').value,
+          google_cse_key: $('s-cse-key').value, google_cse_cx: $('s-cse-cx').value });
         state.settings = j.settings || {}; render();
       } catch (err) { toast(friendly(err), 'err'); }
     },

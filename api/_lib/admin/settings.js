@@ -6,11 +6,13 @@
 //    pixieset_subdomain — "jacobschrader" → predicted gallery links
 //    google_places_key  — Google Places API key for the address
 //                         autocomplete in the project form
+//    google_cse_key/_cx — Google Programmable Search key + engine id,
+//                         powers the Licensing section's web research
 // =====================================================================
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 
-const KEYS = ["pixieset_subdomain", "google_places_key"];
+const KEYS = ["pixieset_subdomain", "google_places_key", "google_cse_key", "google_cse_cx"];
 const field = (v, max = 200) => String(v == null ? "" : v).trim().slice(0, max);
 
 module.exports = async function handler(req, res) {

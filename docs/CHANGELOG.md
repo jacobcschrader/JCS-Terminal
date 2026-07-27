@@ -963,3 +963,31 @@ title, else a navy JCS monogram tile.
   room — matched from Jacob's pasted photo) with a navy gradient overlay
   (rgba(9,22,39) .68→.34 left-to-right) replacing the brightness filter,
   per Jacob: dark overlay for text legibility.
+
+## 2026-07-26 — Media Licensing (Resid-style, in-house)
+- Deep-dived getresid.com (licensing engine for architecture/RE
+  photographers: research parties on a property → priced licenses →
+  role-aware outreach → gallery/pay → ledger; app IA: Properties,
+  Licenses, Renewals, Follow-ups, Revenue, People, Companies, Outbox).
+- Built the JCS version inside /admin (no new Vercel function — router
+  action `licensing`): license_leads table (idempotent in db.js);
+  research panel (Google Programmable Search via settings
+  google_cse_key/_cx, Google-link fallback); one-click result→lead;
+  role-aware outreach drafts w/ preview-before-send (Resend, reply-to
+  Jacob); fee helper rate card (role/usage/set-size multipliers);
+  "Create offer page" reuses the proposals engine with license tiers;
+  statuses + follow-up dates + licensed-$ ledger stats; Settings gained
+  the two Programmable Search fields.
+
+### Licensing section redesigned (Resid-grade)
+- Measured getresid.com's actual design (Space Mono microlabels w/ 0.12em
+  tracking, teal #3f7c92 accent + dots, warm-gray/ink palette, 999px pill
+  buttons/chips, dark ledger surfaces, hatched terminal notes, blinking
+  cursor, "(RSD — 01) //" section markers, "OUTPUT: N PARTIES" result
+  headers) and rebuilt vLicensing with a scoped .lx-* system: mono marker
+  header + "License everything." hero, dark ledger band (mono numerals,
+  teal licensed-total), 001/002 numbered cards, pill inputs + Run
+  research, result rows w/ teal domain pills + "+ Lead" pills, mono tab
+  pills, lead rows w/ status-dot chips (per-status colors), role chips,
+  Space Mono fee chips (dark when licensed), pill action buttons.
+  Rest of the admin untouched; Space Mono loaded in admin only.

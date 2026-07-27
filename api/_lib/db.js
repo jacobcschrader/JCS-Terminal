@@ -183,6 +183,32 @@ function ensureSchema() {
         updated_at   timestamptz NOT NULL DEFAULT now()
       )`;
       await s`CREATE UNIQUE INDEX IF NOT EXISTS proposals_slug ON proposals (slug)`;
+      // Media licensing leads (admin Licensing section) — companies that
+      // worked on a shot property (architect, builder, designer…) who can
+      // license the media for their own marketing.
+      await s`CREATE TABLE IF NOT EXISTS license_leads (
+        id           serial PRIMARY KEY,
+        booking_id   integer,
+        property     text NOT NULL,
+        location     text DEFAULT '',
+        company      text NOT NULL,
+        role         text DEFAULT 'other',
+        contact_name text DEFAULT '',
+        email        text DEFAULT '',
+        phone        text DEFAULT '',
+        website      text DEFAULT '',
+        source_url   text DEFAULT '',
+        status       text NOT NULL DEFAULT 'found',
+        fee          numeric,
+        notes        text DEFAULT '',
+        proposal_id  integer,
+        follow_up    date,
+        emailed_at   timestamptz,
+        sends        integer DEFAULT 0,
+        created_at   timestamptz NOT NULL DEFAULT now(),
+        updated_at   timestamptz NOT NULL DEFAULT now()
+      )`;
+      await s`CREATE INDEX IF NOT EXISTS license_leads_booking ON license_leads (booking_id)`;
     })();
   }
   return _ready;

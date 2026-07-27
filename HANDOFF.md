@@ -144,6 +144,16 @@ toggle, delete (cleans Blob media).
 - **Requests:** /contact submissions; accept → creates client+project.
 - **Toasts** replaced all alert() popups (navy success, red error).
 
+- **Licensing (Resid-style):** Admin → Licensing. Research a property
+  (in-admin Google Programmable Search when settings google_cse_key +
+  google_cse_cx are set — free 100/day; Google quick-links otherwise) →
+  one-click results→leads (license_leads table: company, role, contact,
+  status found→contacted→replied→offer_sent→licensed/declined, fee,
+  follow_up date). Per lead: role-aware outreach email (preview modal →
+  send via Resend, "the home you built/designed…", reply-to Jacob),
+  "Create offer page" auto-builds a proposal with license tiers priced
+  from the licSuggest() rate card (base photo 350/film 500 × role ×
+  print 1.3 × ads 1.5 × set size), Mark licensed → ledger stat.
 - **Proposals:** create in Admin → Proposals (+ New proposal). Editor:
   property/slug/client, intro, grouped line items (blank price renders
   "Included"), note, live campaign total. Buttons: Preview (opens
@@ -168,7 +178,7 @@ toggle, delete (cleans Blob media).
 ```
 api/admin/[action].js   Router → api/_lib/admin/*: login logout me clients
                         bookings confirm requests discounts deliver invoice
-                        settings portallink proposals covers siteprojects upload
+                        settings portallink proposals licensing covers siteprojects upload
 api/book.js             Public booking wizard → request + 2 emails (now also
                         addons, estimated_total, details JSON, e-signature)
 api/calendar.js         .ics feed (signed); exports sigFor
