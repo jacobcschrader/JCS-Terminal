@@ -991,3 +991,18 @@ title, else a navy JCS monogram tile.
   pills, lead rows w/ status-dot chips (per-status colors), role chips,
   Space Mono fee chips (dark when licensed), pill action buttons.
   Rest of the admin untouched; Space Mono loaded in admin only.
+
+### Whole admin restyled to the Resid system
+- Extended the Licensing section's Resid design to the entire admin by
+  restyling the shared adm-* layer (structure untouched): near-black
+  sidebar w/ teal active dots + mono STUDIO ADMIN/SIGN OUT; "● JCS
+  STUDIO // {VIEW}" mono breadcrumb markers over Inter-800 titles
+  (head() emits .adm-headmark); dark ledger stat bands (Space Mono
+  numerals, first stat teal); white rounded-18 hairline cards w/
+  teal-dot mono card headers; dot-chip badges (status hues preserved);
+  pill buttons/inputs/segments/toasts; mono table headers, kv labels,
+  money values (Space Mono via --rx-mono var), rounded modals. Fixed
+  Space Mono @import (was mid-stylesheet where CSS ignores it → moved
+  to top; lx block aliases). Wordmarks stay Cormorant italic per brand.
+- Gotcha fixed: injecting quoted font names into single-quoted JS
+  strings broke the app — inline styles must use var(--rx-mono).
