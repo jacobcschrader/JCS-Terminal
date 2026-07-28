@@ -9,7 +9,7 @@
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
-const { buildIcs, fmtTime, gcalLink } = require("../ics.js");
+const { buildIcs, fmtTime, gcalLink, ymd } = require("../ics.js");
 const gcal = require("../gcal.js");
 const { recipientsOf } = require("../links.js");
 const { sigFor } = require("../../calendar.js");
@@ -84,12 +84,12 @@ module.exports = async function handler(req, res) {
     const addToCalUrl = `https://www.jacobcschrader.com/api/calendar?id=${b.id}&sig=${sigFor(b.id)}`;
 
     // ---- shared email fragments --------------------------------------
-    const whenMain = `${new Date(String(b.shoot_date).slice(0, 10) + "T12:00:00")
+    const whenMain = `${new Date(ymd(b.shoot_date) + "T12:00:00")
       .toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}` +
       (b.shoot_time ? ` · ${fmtTime(b.shoot_time)}` : "");
     const twiDate = b.twilight_date || b.shoot_date;
     const whenTwi = (b.twilight_date || b.twilight_time)
-      ? `${new Date(String(twiDate).slice(0, 10) + "T12:00:00")
+      ? `${new Date(ymd(twiDate) + "T12:00:00")
           .toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" })}` +
         (b.twilight_time ? ` · ${fmtTime(b.twilight_time)}` : "")
       : null;

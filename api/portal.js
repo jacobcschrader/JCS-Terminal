@@ -18,6 +18,7 @@
 // =====================================================================
 const crypto = require("node:crypto");
 const { db } = require("./_lib/db.js");
+const { ymd } = require("./_lib/ics.js");
 const { linksOf } = require("./_lib/links.js");
 const { sendEmail, jcsEmail, SENDERS } = require("./_lib/email.js");
 const { COOKIE, DAY, makeToken, verifyToken, readCookie, loginUrl } = require("./_lib/portal-auth.js");
@@ -30,7 +31,7 @@ function stageOf(b) {
   if (b.delivery_sent_at || ["delivered", "completed"].includes(b.status)) return "Delivered";
   if (["editing", "revisions"].includes(b.status)) return "In production";
   const todayLA = new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" });
-  if (b.shoot_date && String(b.shoot_date).slice(0, 10) <= todayLA) return "In production";
+  if (b.shoot_date && ymd(b.shoot_date) <= todayLA) return "In production";
   return "Upcoming";
 }
 

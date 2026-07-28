@@ -32,15 +32,26 @@ const escText = (s) =>
 
 const pad = (n) => String(n).padStart(2, "0");
 
+// Normalize any date value to "YYYY-MM-DD". The Neon driver returns
+// Postgres `date` columns as JS Date objects — String() on those gives
+// "Thu Aug 07 2026 …", which is what produced "Invalid Date" emails and
+// broken .ics files. Date objects are read in LOCAL fields (Vercel = UTC,
+// matching how node-postgres constructs them), strings pass through.
+function ymd(v) {
+  if (v == null || v === "") return "";
+  if (v instanceof Date) return `${v.getFullYear()}-${pad(v.getMonth() + 1)}-${pad(v.getDate())}`;
+  return String(v).slice(0, 10);
+}
+
 function dtLocal(dateStr, timeStr) {
-  // dateStr YYYY-MM-DD (may arrive as full ISO), timeStr HH:MM
-  const d = String(dateStr).slice(0, 10).replace(/-/g, "");
+  // dateStr YYYY-MM-DD / ISO / JS Date, timeStr HH:MM
+  const d = ymd(dateStr).replace(/-/g, "");
   const t = /^\d{2}:\d{2}/.test(String(timeStr || "")) ? timeStr.slice(0, 5).replace(":", "") + "00" : null;
   return { d, t };
 }
 
 function addMinutes(dateStr, timeStr, mins) {
-  const dt = new Date(`${String(dateStr).slice(0, 10)}T${timeStr.slice(0, 5)}:00`);
+  const dt = new Date(`${ymd(dateStr)}T${timeStr.slice(0, 5)}:00`);
   dt.setMinutes(dt.getMinutes() + mins);
   return `${dt.getFullYear()}${pad(dt.getMonth() + 1)}${pad(dt.getDate())}T${pad(dt.getHours())}${pad(dt.getMinutes())}00`;
 }
@@ -92,4 +103,4 @@ function gcalLink(e) {
   return `https://calendar.google.com/calendar/render?${q}`;
 }
 
-module.exports = { buildIcs, fmtTime, gcalLink, TZID };
+module.exports = { buildIcs, fmtTime, gcalLink, TZID, ymd };

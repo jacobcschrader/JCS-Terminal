@@ -8,6 +8,7 @@
 // =====================================================================
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
+const { ymd } = require("../ics.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
 
 const escHtml = (s) =>
@@ -63,7 +64,7 @@ module.exports = async function handler(req, res) {
         const lines = Object.keys(L).filter((k) => d[k]).map((k) => `${L[k]}: ${d[k]}`);
         if (lines.length) noteBits.push(lines.join(" · "));
       } catch (e) { /* optional */ }
-      if (r.launch_date) noteBits.push("Launch date: " + String(r.launch_date).slice(0, 10));
+      if (r.launch_date) noteBits.push("Launch date: " + ymd(r.launch_date));
       if (r.signature) noteBits.push("Terms signed by " + r.signature);
       const [project] = await s`
         INSERT INTO bookings (client_id, title, location, city, state, zip, sqft, shoot_date, deliverables, notes, status, price)

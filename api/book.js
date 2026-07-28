@@ -107,7 +107,9 @@ module.exports = async function handler(req, res) {
         replyTo: OWNER,
         subject: `${f.title} | Application Received`,
         text: `Hi ${f.name},\n\nThank you — your application for ${f.title} has been received. ` +
-          "I review every request personally and will reply within 24 hours.\n\n— Jacob Schrader · jacobcschrader.com",
+          "I review every request personally and will reply within 24 hours.\n\n" +
+          "Once your shoot is confirmed, everything lives in your client portal: https://www.jacobcschrader.com/portal\n\n" +
+          "— Jacob Schrader · jacobcschrader.com",
         html: jcsEmail({
           eyebrow: "Application Received",
           headline: "Thank you — I have your request.",
@@ -121,7 +123,7 @@ module.exports = async function handler(req, res) {
             ["Shoot date", f.target_date ? escHtml(f.target_date) : ""],
             ["Launch date", f.launch_date ? escHtml(f.launch_date) : ""],
           ],
-          cta: { label: "View the Work", url: "https://www.jacobcschrader.com/projects" },
+          cta: { label: "Go to Your Portal", url: "https://www.jacobcschrader.com/portal" },
           audience: "client",
         }),
       });

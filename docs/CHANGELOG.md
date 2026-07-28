@@ -1015,3 +1015,13 @@ title, else a navy JCS monogram tile.
   Brave Search API → Google CSE, auto-detected from whichever key is in
   Settings (new keys: serper_key, brave_search_key). Settings UI + the
   Licensing no-key note updated to point at Serper first.
+
+### "Invalid Date" fix (confirmation emails, .ics, GCal, portal)
+- Root cause: the Neon driver returns Postgres `date` columns as JS Date
+  objects; String(date).slice(0,10) yields "Thu Aug 07" → "Invalid Date"
+  in confirm emails, malformed DTSTART in .ics attachments, broken
+  Google-Calendar links, and a portal stage comparison that could never
+  match. New exported ymd() in api/_lib/ics.js normalizes Date|string →
+  "YYYY-MM-DD"; applied in ics.js (dtLocal/addMinutes), confirm.js
+  (email display), gcal.js, portal.js (In-production check), requests.js
+  (launch-date note). Confirmation flow should be re-tested after deploy.

@@ -72,7 +72,7 @@ async function upsertEvents(events) {
 
   for (const e of events) {
     const gid = e.uid.toLowerCase().replace(/[^a-v0-9]/g, ""); // Google id charset (base32hex)
-    const dateOnly = String(e.date).slice(0, 10);
+    const dateOnly = ymd(e.date);
     const hasTime = /^\d{2}:\d{2}/.test(String(e.time || ""));
     let start, end;
     if (hasTime) {

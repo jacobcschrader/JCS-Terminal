@@ -582,8 +582,9 @@ body { background: var(--paper-warm); }
       $('fw-main').innerHTML =
         '<div class="fw-done"><span class="eyebrow">Request received</span>' +
         '<h1>Thank you.</h1>' +
-        '<p>I review every request personally &mdash; you&rsquo;ll hear from me within 24 hours with availability and your confirmed quote. A confirmation is on its way to your inbox.</p>' +
-        '<a class="btn btn--solid" href="/projects">View Recent Work</a></div>';
+        '<p>I review every request personally &mdash; you&rsquo;ll hear from me within 24 hours with availability and your confirmed quote. A confirmation is on its way to your inbox, and once your shoot is confirmed everything lives in your client portal.</p>' +
+        '<a class="btn btn--solid" href="/portal">Go to Your Portal</a>' +
+        '<p style="margin-top:1.2rem;font-size:0.8rem"><a href="/projects" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px">or view recent work</a></p></div>';
       $('fw-foot').remove();
       window.scrollTo({ top: 0 });
     } catch (e) {
