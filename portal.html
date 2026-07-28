@@ -217,18 +217,42 @@
       $('pt-form').hidden = true;
       $('pt-sent').hidden = false;
     });
+    // Arriving from the booking form (?email=…): prefill and request the
+    // sign-in link automatically — one click from "Thank you" to inbox.
+    var pre = qs.get('email');
+    if (pre && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(pre)) {
+      $('pt-email').value = pre;
+      history.replaceState(null, '', '/portal');
+      var guard = 'pt-auto-' + pre.toLowerCase();
+      if (!sessionStorage.getItem(guard)) {
+        sessionStorage.setItem(guard, '1');
+        if ($('pt-form').requestSubmit) $('pt-form').requestSubmit();
+      }
+    }
   }
   try {
     var r = await fetch('/api/portal');
     if (r.status === 401) { $('pt-login').hidden = false; wireLogin(); return; }
     if (!r.ok) { missing(); return; }
     var d = await r.json();
-    $('pt-head').innerHTML = 'Welcome back, <em>' + esc(d.client_first || d.client_name) + '</em>.';
+    var firstVisit = !d.projects.length;
+    $('pt-head').innerHTML = (firstVisit ? 'Welcome, <em>' : 'Welcome back, <em>') + esc(d.client_first || d.client_name) + '</em>.';
     document.title = d.client_name + ' — Client Portal — Jacob Schrader';
     $('pt-up').textContent = d.stats.upcoming;
     $('pt-prod').textContent = d.stats.production;
     $('pt-done').textContent = d.stats.delivered;
     $('pt-due').textContent = money(d.stats.outstanding);
+
+    // Applications still in review — the landing state right after booking.
+    if (d.pending && d.pending.length) {
+      $('pt-hero').innerHTML = d.pending.map(function (rq) {
+        return '<div class="pt-hero"><span class="eyebrow">Application In Review</span>' +
+          '<h2>' + esc(rq.title) + '</h2>' +
+          (rq.location ? '<div class="loc">' + esc(rq.location) + '</div>' : '') +
+          '<div class="loc" style="margin-top:0.8rem;text-transform:none;letter-spacing:0.02em;font-size:0.85rem">' +
+          'Received ' + dstr(rq.created_at) + ' &mdash; I reply within 24 hours with availability and your confirmed quote.</div></div>';
+      }).join('');
+    }
 
     // hero: the delivery this link came from (?p=), if it's out
     var hero = focus ? d.projects.find(function (p) { return String(p.id) === String(focus) && p.delivery; }) : null;

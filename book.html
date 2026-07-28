@@ -579,11 +579,16 @@ body { background: var(--paper-warm); }
         })
       });
       if (!r.ok) throw new Error();
+      var j = await r.json().catch(function () { return {}; });
+      // j.portal = short-lived signed sign-in URL (new clients) → lands
+      // in the portal already logged in; otherwise the portal page sends
+      // their secure sign-in link automatically.
+      var portalHref = j.portal || ('/portal?email=' + encodeURIComponent(st.email));
       $('fw-main').innerHTML =
         '<div class="fw-done"><span class="eyebrow">Request received</span>' +
         '<h1>Thank you.</h1>' +
-        '<p>I review every request personally &mdash; you&rsquo;ll hear from me within 24 hours with availability and your confirmed quote. A confirmation is on its way to your inbox, and once your shoot is confirmed everything lives in your client portal.</p>' +
-        '<a class="btn btn--solid" href="/portal">Go to Your Portal</a>' +
+        '<p>I review every request personally &mdash; you&rsquo;ll hear from me within 24 hours with availability and your confirmed quote. A confirmation is on its way to your inbox, and your application is already waiting in your client portal.</p>' +
+        '<a class="btn btn--solid" href="' + portalHref + '">Go to Your Portal</a>' +
         '<p style="margin-top:1.2rem;font-size:0.8rem"><a href="/projects" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px">or view recent work</a></p></div>';
       $('fw-foot').remove();
       window.scrollTo({ top: 0 });

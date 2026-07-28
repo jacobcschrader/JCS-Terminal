@@ -108,8 +108,15 @@ module.exports = async function handler(req, res) {
     if (!cid) { res.status(401).json({ error: "unauthorized" }); return; }
 
     const s = await db();
-    const [c] = await s`SELECT id, name FROM clients WHERE id = ${cid} LIMIT 1`;
+    const [c] = await s`SELECT id, name, email FROM clients WHERE id = ${cid} LIMIT 1`;
     if (!c) { res.status(401).json({ error: "unauthorized" }); return; }
+
+    // Applications still in review — shown in the portal so a client who
+    // just booked lands on something real, not an empty dashboard.
+    const pendingRows = c.email ? await s`
+      SELECT title, city, state, services, created_at FROM requests
+      WHERE lower(email) = ${String(c.email).toLowerCase()} AND status = 'pending'
+      ORDER BY created_at DESC` : [];
 
     const rows = await s`
       SELECT * FROM bookings
@@ -142,6 +149,12 @@ module.exports = async function handler(req, res) {
     res.status(200).json({
       client_first: (c.name || "").split(" ")[0] || "",
       client_name: c.name || "",
+      pending: pendingRows.map((r) => ({
+        title: r.title,
+        location: [r.city, r.state].filter(Boolean).join(", "),
+        services: r.services || "",
+        created_at: r.created_at,
+      })),
       stats: {
         upcoming: projects.filter((p) => p.stage === "Upcoming").length,
         production: projects.filter((p) => p.stage === "In production").length,

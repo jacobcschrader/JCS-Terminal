@@ -1025,3 +1025,24 @@ title, else a navy JCS monogram tile.
   "YYYY-MM-DD"; applied in ics.js (dtLocal/addMinutes), confirm.js
   (email display), gcal.js, portal.js (In-production check), requests.js
   (launch-date note). Confirmation flow should be re-tested after deploy.
+
+### One-click portal access from booking flow
+- Emails are the identity proof, so they now carry signed 30-day
+  loginUrl() links: booking-confirmation (confirm.js) adds an
+  auto-sign-in "your client portal" link; the applicant email (book.js)
+  uses loginUrl when the email matches an existing client, plain /portal
+  otherwise. The form's success button passes ?email= to /portal, which
+  prefills and auto-requests the magic link once (sessionStorage guard) —
+  browser stays magic-link-gated (typing an email must never open
+  someone's dashboard directly).
+
+### Seamless portal after booking
+- book.js now gets-or-creates the client at submission time. NEW clients:
+  the form response returns a 15-minute signed login URL — "Go to Your
+  Portal" lands them signed in, no email round-trip (safe: their fresh
+  portal contains only their own application). EXISTING clients: browser
+  stays magic-link-gated (auto-requested via /portal?email=), and their
+  emails carry 30-day loginUrl links. portal.js GET now returns pending
+  requests for the client's email; portal.html renders an "Application
+  In Review" hero (+ "Welcome," instead of "Welcome back," on first
+  visit) so the post-booking portal isn't an empty dashboard.

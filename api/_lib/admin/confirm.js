@@ -10,6 +10,7 @@ const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
 const { buildIcs, fmtTime, gcalLink, ymd } = require("../ics.js");
+const { loginUrl } = require("../portal-auth.js");
 const gcal = require("../gcal.js");
 const { recipientsOf } = require("../links.js");
 const { sigFor } = require("../../calendar.js");
@@ -109,6 +110,9 @@ module.exports = async function handler(req, res) {
     const clientTo = recipientsOf(b.client_email, b.client_extra_emails);
     let clientSent = false;
     if (clientTo.length && !b.skip_confirmation) {
+      // One-click, already-signed-in portal link — safe because this email
+      // itself is the ownership proof (same trust as the magic link).
+      const portalUrl = b.client_id ? loginUrl(b.client_id) : "https://www.jacobcschrader.com/portal";
       await sendEmail({
         from: SENDERS.enquiry,
         to: clientTo,
@@ -116,11 +120,15 @@ module.exports = async function handler(req, res) {
         subject: `${b.title} | Booking Confirmed`,
         text: `Your shoot is confirmed.\n\nProperty: ${b.title}\nShoot: ${whenMain}` +
           (whenTwi ? `\nTwilight: ${whenTwi}` : "") +
-          `\n\nAdd to calendar: ${addToCalUrl}\n\n— Jacob Schrader · jacobcschrader.com`,
+          `\n\nAdd to calendar: ${addToCalUrl}` +
+          `\nYour portal (schedule, delivery & invoices): ${portalUrl}` +
+          `\n\n— Jacob Schrader · jacobcschrader.com`,
         html: jcsEmail({
           eyebrow: "Booking Confirmed",
           headline,
-          note: "You're on the calendar. Questions before the shoot? Just reply.",
+          note: "You're on the calendar. Questions before the shoot? Just reply. " +
+            `Everything about your shoot — schedule, delivery, and invoices — lives in ` +
+            `<a href="${escHtml(portalUrl)}" style="color:#33507e;">your client portal</a> (signs you in automatically).`,
           rows: [
             ["Property", propertyVal],
             ["Service", b.type ? escHtml(b.type) : ""],

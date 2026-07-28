@@ -6,6 +6,7 @@
 // =====================================================================
 const { db } = require("./_lib/db.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("./_lib/email.js");
+const { loginUrl, makeToken } = require("./_lib/portal-auth.js");
 
 const field = (v, max = 300) => String(v == null ? "" : v).trim().slice(0, max);
 const escHtml = (s) =>
@@ -99,6 +100,29 @@ module.exports = async function handler(req, res) {
       }),
     });
 
+    // ---- portal access --------------------------------------------------
+    // Get-or-create the client at booking time so the portal exists
+    // immediately. A BRAND-NEW client's portal contains only their own
+    // just-submitted application, so the form response may hand the
+    // browser a short-lived sign-in URL (seamless "Go to Your Portal").
+    // For an EXISTING client the browser stays magic-link-gated — typing
+    // someone's email must never open their real dashboard — but the
+    // confirmation EMAIL (possession = proof) gets a signed login link.
+    let portalUrl = "https://www.jacobcschrader.com/portal";
+    let seamlessUrl = null;
+    try {
+      let [client] = await s`SELECT id FROM clients WHERE lower(email) = ${f.email.toLowerCase()} LIMIT 1`;
+      if (!client) {
+        [client] = await s`
+          INSERT INTO clients (name, email, phone, brokerage, notes)
+          VALUES (${f.name}, ${f.email}, ${f.phone}, ${f.brokerage}, ${"Created from /book application."})
+          RETURNING id`;
+        seamlessUrl = "https://www.jacobcschrader.com/api/portal?login=" +
+          makeToken(client.id, "portal-login", 15 * 60);
+      }
+      portalUrl = loginUrl(client.id);
+    } catch (e) { /* portal link falls back to the plain page */ }
+
     // ---- to applicant (best effort) ------------------------------------
     try {
       await sendEmail({
@@ -108,7 +132,7 @@ module.exports = async function handler(req, res) {
         subject: `${f.title} | Application Received`,
         text: `Hi ${f.name},\n\nThank you — your application for ${f.title} has been received. ` +
           "I review every request personally and will reply within 24 hours.\n\n" +
-          "Once your shoot is confirmed, everything lives in your client portal: https://www.jacobcschrader.com/portal\n\n" +
+          `Once your shoot is confirmed, everything lives in your client portal: ${portalUrl}\n\n` +
           "— Jacob Schrader · jacobcschrader.com",
         html: jcsEmail({
           eyebrow: "Application Received",
@@ -123,13 +147,13 @@ module.exports = async function handler(req, res) {
             ["Shoot date", f.target_date ? escHtml(f.target_date) : ""],
             ["Launch date", f.launch_date ? escHtml(f.launch_date) : ""],
           ],
-          cta: { label: "Go to Your Portal", url: "https://www.jacobcschrader.com/portal" },
+          cta: { label: "Go to Your Portal", url: portalUrl },
           audience: "client",
         }),
       });
     } catch (e) { /* applicant email is best-effort */ }
 
-    res.status(200).json({ ok: true, id: row.id });
+    res.status(200).json({ ok: true, id: row.id, portal: seamlessUrl });
   } catch (e) {
     const msg = /DATABASE_URL/.test(String(e)) ? "db-not-configured"
       : /RESEND_API_KEY|Resend error/.test(String(e)) ? "send-failed" : "error";
