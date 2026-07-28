@@ -27,7 +27,7 @@ async function ogImage(url) {
   }
 }
 
-module.exports = async function handler(req, res) {
+async function handler(req, res) {
   if (!requireAuth(req, res)) return;
   if (req.method !== "POST") { res.status(405).json({ error: "method-not-allowed" }); return; }
 
@@ -51,4 +51,7 @@ module.exports = async function handler(req, res) {
     const msg = /DATABASE_URL/.test(String(e)) ? "db-not-configured" : "error";
     res.status(500).json({ error: msg });
   }
-};
+}
+
+module.exports = handler;
+module.exports.ogImage = ogImage;   // reused by deliver.js at send time

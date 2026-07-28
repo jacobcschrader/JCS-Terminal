@@ -1046,3 +1046,12 @@ title, else a navy JCS monogram tile.
   requests for the client's email; portal.html renders an "Application
   In Review" hero (+ "Welcome," instead of "Welcome back," on first
   visit) so the post-booking portal isn't an empty dashboard.
+
+### Delivery page hero pulls the gallery cover
+- The og:image unfurl that fed the admin Deliveries cards now also feeds
+  the client page: /api/delivery returns cover_url (delivery_cover_url,
+  "-" misses filtered), delivery.html layers it behind a black scrim as
+  the hero (navy fallback). deliver.js re-unfurls at SEND time when the
+  cover is empty or a cached "-" miss — the Pixieset gallery usually
+  exists by then even if it didn't when the draft was created. covers.js
+  exports ogImage for that.

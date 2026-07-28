@@ -108,6 +108,7 @@ module.exports = async function handler(req, res) {
     res.status(200).json({
       title: b.title,
       location: b.location || "",
+      cover_url: (b.delivery_cover_url && b.delivery_cover_url !== "-") ? b.delivery_cover_url : "",
       deliverables: b.deliverables || "",
       links: linksOf(b),
       delivered_at: b.delivered_at || b.delivery_sent_at || null,

@@ -152,6 +152,15 @@
     document.title = d.title + ' — Delivery — Jacob Schrader';
     $('dv-title').textContent = d.title;
     $('dv-loc').textContent = d.location || '';
+    // Gallery cover as the hero backdrop (black scrim keeps text legible);
+    // falls back to the flat navy hero when no cover is cached.
+    if (d.cover_url) {
+      var hero = $('dv-hero');
+      hero.style.backgroundImage =
+        'linear-gradient(rgba(6,13,24,0.55), rgba(6,13,24,0.72)), url("' + d.cover_url.replace(/"/g, '%22') + '")';
+      hero.style.backgroundSize = 'cover';
+      hero.style.backgroundPosition = 'center';
+    }
     if (d.delivered_at) $('dv-date').textContent = 'Delivered ' + dstr(d.delivered_at);
     if (d.portal_url) { var pl = $('dv-portal-link'); pl.href = d.portal_url; pl.hidden = false; }
     var acts = $('dv-actions');

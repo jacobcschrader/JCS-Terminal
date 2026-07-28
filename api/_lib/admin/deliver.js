@@ -14,6 +14,7 @@ const { db } = require("../db.js");
 const { linksOf, recipientsOf } = require("../links.js");
 const { loginUrl } = require("../portal-auth.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
+const { ogImage } = require("./covers.js");
 
 const escHtml = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
@@ -40,6 +41,13 @@ module.exports = async function handler(req, res) {
     if (!clientTo.length) { res.status(400).json({ error: "no-client-email" }); return; }
 
     const token = b.delivery_token || crypto.randomBytes(12).toString("base64url");
+    // Make sure the gallery cover is cached before the client ever opens
+    // the page (retries earlier misses — the gallery may exist by now).
+    let coverUrl = b.delivery_cover_url;
+    if (!coverUrl || coverUrl === "-") {
+      coverUrl = (await ogImage(links[0].url)) || "-";
+      await s`UPDATE bookings SET delivery_cover_url = ${coverUrl} WHERE id = ${id}`;
+    }
     // the email button signs the client in and lands on their portal
     // with this delivery front and center
     const pageUrl = loginUrl(b.client_id, b.id);
