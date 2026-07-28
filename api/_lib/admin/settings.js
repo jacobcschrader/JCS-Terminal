@@ -12,7 +12,8 @@
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 
-const KEYS = ["pixieset_subdomain", "google_places_key", "google_cse_key", "google_cse_cx"];
+const KEYS = ["pixieset_subdomain", "google_places_key", "google_cse_key", "google_cse_cx",
+              "serper_key", "brave_search_key"];
 const field = (v, max = 200) => String(v == null ? "" : v).trim().slice(0, max);
 
 module.exports = async function handler(req, res) {

@@ -145,8 +145,10 @@ toggle, delete (cleans Blob media).
 - **Toasts** replaced all alert() popups (navy success, red error).
 
 - **Licensing (Resid-style):** Admin → Licensing. Research a property
-  (in-admin Google Programmable Search when settings google_cse_key +
-  google_cse_cx are set — free 100/day; Google quick-links otherwise) →
+  (in-admin web search; provider auto-detected from Settings keys:
+  serper_key preferred → brave_search_key → google_cse_key+_cx; Google
+  quick-links when none set. NOTE: Custom Search is hard-blocked on
+  Jacob's Maps-provisioned Google project — use Serper) →
   one-click results→leads (license_leads table: company, role, contact,
   status found→contacted→replied→offer_sent→licensed/declined, fee,
   follow_up date). Per lead: role-aware outreach email (preview modal →

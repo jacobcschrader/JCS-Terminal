@@ -1494,8 +1494,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       results = '<div class="lx-note" style="margin-top:0.9rem">Running research<span class="lx-cursor"></span></div>';
     } else if (state.licResults) {
       if (state.licResults.needsKey) {
-        results = '<div class="lx-note" style="margin-top:0.9rem">NO SEARCH KEY — add a Google Programmable Search key + engine ID in ' +
-          '<a href="#settings">SETTINGS</a> for in-admin research (100/day free). Quick links: ' +
+        results = '<div class="lx-note" style="margin-top:0.9rem">NO SEARCH KEY — grab a free key at <a href="https://serper.dev" target="_blank" rel="noopener">SERPER.DEV</a> ' +
+          '(2,500 searches, no card) and paste it in <a href="#settings">SETTINGS</a>. Quick links meanwhile: ' +
           Object.keys(LIC_ROLES).slice(0, 7).map(function (r) {
             return '<a href="https://www.google.com/search?q=' + encodeURIComponent('"' + (state.licQ || '') + '" ' + LIC_ROLES[r]) + '" target="_blank" rel="noopener">' + LIC_ROLES[r] + ' &nearr;</a>';
           }).join(' &nbsp;·&nbsp; ') + '</div>';
@@ -1598,8 +1598,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       '<form class="adm-form" onsubmit="ADM.settingsSave(event)">' +
         fld('s-pixieset', 'Pixieset subdomain', '<input id="s-pixieset" placeholder="yourstudio" value="' + esc(sub) + '">') +
         fld('s-gplaces', 'Google Places API key <small style="text-transform:none;letter-spacing:0">(address autocomplete)</small>', '<input id="s-gplaces" placeholder="AIza\u2026" value="' + esc((state.settings || {}).google_places_key || '') + '">') +
-        fld('s-cse-key', 'Programmable Search key <small style="text-transform:none;letter-spacing:0">(Licensing research \u2014 free at developers.google.com/custom-search)</small>', '<input id="s-cse-key" placeholder="AIza\u2026" value="' + esc((state.settings || {}).google_cse_key || '') + '">') +
-        fld('s-cse-cx', 'Search engine ID <small style="text-transform:none;letter-spacing:0">(cx \u2014 create one for &ldquo;entire web&rdquo; at programmablesearchengine.google.com)</small>', '<input id="s-cse-cx" placeholder="a1b2c3&hellip;" value="' + esc((state.settings || {}).google_cse_cx || '') + '">') +
+        fld('s-serper', 'Serper API key <small style="text-transform:none;letter-spacing:0">(Licensing research, recommended \u2014 free 2,500 searches at serper.dev)</small>', '<input id="s-serper" placeholder="paste key from serper.dev" value="' + esc((state.settings || {}).serper_key || '') + '">') +
+        fld('s-brave', 'Brave Search key <small style="text-transform:none;letter-spacing:0">(alternative \u2014 api-dashboard.search.brave.com)</small>', '<input id="s-brave" placeholder="optional" value="' + esc((state.settings || {}).brave_search_key || '') + '">') +
+        fld('s-cse-key', 'Google Search key <small style="text-transform:none;letter-spacing:0">(alternative \u2014 needs Programmable Search)</small>', '<input id="s-cse-key" placeholder="optional" value="' + esc((state.settings || {}).google_cse_key || '') + '">') +
+        fld('s-cse-cx', 'Google engine ID <small style="text-transform:none;letter-spacing:0">(cx \u2014 pairs with the Google key)</small>', '<input id="s-cse-cx" placeholder="optional" value="' + esc((state.settings || {}).google_cse_cx || '') + '">') +
         '<div class="adm-field"><label>&nbsp;</label><button class="adm-btn" type="submit">Save</button></div>' +
       '</form>' +
       (sub ? '<div class="adm-confnote ok">&#10003; Predicted links use ' + esc(sub) + '.pixieset.com &mdash; <a href="https://' + esc(sub) + '.pixieset.com" target="_blank" rel="noopener" style="color:inherit">open your gallery home &rarr;</a></div>' : '') +
@@ -2453,7 +2455,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       e.preventDefault();
       try {
         var j = await api('settings', 'PUT', { pixieset_subdomain: $('s-pixieset').value, google_places_key: $('s-gplaces').value,
-          google_cse_key: $('s-cse-key').value, google_cse_cx: $('s-cse-cx').value });
+          google_cse_key: $('s-cse-key').value, google_cse_cx: $('s-cse-cx').value,
+          serper_key: $('s-serper').value, brave_search_key: $('s-brave').value });
         state.settings = j.settings || {}; render();
       } catch (err) { toast(friendly(err), 'err'); }
     },

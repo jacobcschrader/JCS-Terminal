@@ -140,25 +140,61 @@ module.exports = async function handler(req, res) {
 
     if (req.method !== "POST") { res.status(405).json({ error: "method-not-allowed" }); return; }
 
-    // ---- web research: Google Programmable Search --------------------
+    // ---- web research: Serper (preferred) / Brave / Google CSE --------
+    // Provider is auto-detected from whichever key is saved in Settings.
     if (b.action === "search") {
-      const key = await getSetting(s, "google_cse_key");
-      const cx = await getSetting(s, "google_cse_cx");
-      if (!key || !cx) { res.status(200).json({ results: null, needsKey: true }); return; }
       const role = field(b.role, 30);
       const q = `"${field(b.q, 200)}" ${ROLE_SEARCH[role] || field(b.roleQuery, 60) || ""}`.trim();
-      const url = "https://www.googleapis.com/customsearch/v1?key=" + encodeURIComponent(key) +
-        "&cx=" + encodeURIComponent(cx) + "&num=8&q=" + encodeURIComponent(q);
-      const r = await fetch(url);
-      const j = await r.json();
-      if (j.error) { res.status(200).json({ results: [], searchError: j.error.message || "search-failed", q }); return; }
-      const results = (j.items || []).map((it) => ({
-        title: String(it.title || "").slice(0, 160),
-        link: String(it.link || "").slice(0, 500),
-        domain: String(it.displayLink || "").slice(0, 120),
-        snippet: String(it.snippet || "").slice(0, 260),
-      }));
-      res.status(200).json({ results, q });
+      const norm = (title, link, snippet) => ({
+        title: String(title || "").slice(0, 160),
+        link: String(link || "").slice(0, 500),
+        domain: String(link || "").replace(/^https?:\/\/(www\.)?/i, "").split("/")[0].slice(0, 120),
+        snippet: String(snippet || "").slice(0, 260),
+      });
+
+      try {
+        const serperKey = await getSetting(s, "serper_key");
+        if (serperKey) {
+          const r = await fetch("https://google.serper.dev/search", {
+            method: "POST",
+            headers: { "X-API-KEY": serperKey, "Content-Type": "application/json" },
+            body: JSON.stringify({ q, num: 8 }),
+          });
+          const j = await r.json();
+          if (!r.ok) { res.status(200).json({ results: [], searchError: `Serper: ${j.message || r.status}`, q }); return; }
+          res.status(200).json({ results: (j.organic || []).slice(0, 8).map((it) => norm(it.title, it.link, it.snippet)), q, provider: "serper" });
+          return;
+        }
+
+        const braveKey = await getSetting(s, "brave_search_key");
+        if (braveKey) {
+          const r = await fetch("https://api.search.brave.com/res/v1/web/search?count=8&q=" + encodeURIComponent(q), {
+            headers: { "X-Subscription-Token": braveKey, "Accept": "application/json" },
+          });
+          const j = await r.json();
+          if (!r.ok) { res.status(200).json({ results: [], searchError: `Brave: ${(j.error && j.error.detail) || r.status}`, q }); return; }
+          const items = (j.web && j.web.results) || [];
+          res.status(200).json({ results: items.slice(0, 8).map((it) => norm(it.title, it.url, it.description)), q, provider: "brave" });
+          return;
+        }
+
+        const key = await getSetting(s, "google_cse_key");
+        const cx = await getSetting(s, "google_cse_cx");
+        if (key && cx) {
+          const url = "https://www.googleapis.com/customsearch/v1?key=" + encodeURIComponent(key) +
+            "&cx=" + encodeURIComponent(cx) + "&num=8&q=" + encodeURIComponent(q);
+          const r = await fetch(url);
+          const j = await r.json();
+          if (j.error) { res.status(200).json({ results: [], searchError: j.error.message || "search-failed", q }); return; }
+          res.status(200).json({ results: (j.items || []).map((it) => norm(it.title, it.link, it.snippet)), q, provider: "google" });
+          return;
+        }
+      } catch (e) {
+        res.status(200).json({ results: [], searchError: "request failed — try again", q });
+        return;
+      }
+
+      res.status(200).json({ results: null, needsKey: true });
       return;
     }
 

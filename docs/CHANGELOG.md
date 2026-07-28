@@ -1006,3 +1006,12 @@ title, else a navy JCS monogram tile.
   to top; lx block aliases). Wordmarks stay Cormorant italic per brand.
 - Gotcha fixed: injecting quoted font names into single-quoted JS
   strings broke the app — inline styles must use var(--rx-mono).
+
+### Licensing research: multi-provider search
+- Google Cloud blocked Custom Search on Jacob's Maps-provisioned,
+  org-attached project (project-level 403 regardless of key/API/billing
+  state — verified by direct API calls). Search is now provider-flexible:
+  Serper.dev (preferred; free 2,500 Google-quality searches, no card) →
+  Brave Search API → Google CSE, auto-detected from whichever key is in
+  Settings (new keys: serper_key, brave_search_key). Settings UI + the
+  Licensing no-key note updated to point at Serper first.
