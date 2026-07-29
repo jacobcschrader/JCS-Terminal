@@ -239,23 +239,29 @@ body { background: var(--paper-warm); }
   var STEPS = ['Services', 'Add-ons', 'Property', 'Details', 'Timing', 'Review', 'Agreement'];
 
   // ------------------------------------------------------------ pricing
+  function fromPrice(tiers) {
+    for (var i = 0; i < tiers.length; i++) if (tiers[i] != null) return tiers[i];
+    return null;
+  }
   function svcPrice(svc) {
     if (svc.quote) return null;
-    if (svc.tiers && !st.sqft) return { label: 'From ' + money(svc.tiers[0]), value: null };
+    if (svc.tiers && !st.sqft) return { label: 'From ' + money(fromPrice(svc.tiers)), value: null };
     var p = P.priceAt(svc, st.sqft);
+    if (p == null) return { label: 'Inquire', value: null, inquire: true };
     return { label: money(p), value: p };
   }
   function extraPrice(x) {
-    if (x.tiers && !st.sqft) return { label: 'From ' + money(x.tiers[0]), value: null };
+    if (x.tiers && !st.sqft) return { label: 'From ' + money(fromPrice(x.tiers)), value: null };
     var p = P.priceAt(x, st.sqft);
+    if (p == null) return { label: 'Inquire', value: null, inquire: true };
     return { label: money(p), value: p };
   }
   function total() {
-    var sum = 0, any = false, perUnit = false, pending = false;
+    var sum = 0, any = false, perUnit = false, pending = false, inquire = false;
     P.services.forEach(function (svc) {
       if (!st.services[svc.key] || svc.quote) return;
       var p = svcPrice(svc); any = true;
-      if (p.value == null) { pending = true; return; }
+      if (p.value == null) { if (p.inquire) inquire = true; else pending = true; return; }
       sum += p.value;
       svc.addons.forEach(function (a) {
         if (!st.addons[svc.key + '|' + a.name]) return;
@@ -266,16 +272,18 @@ body { background: var(--paper-warm); }
     P.extras.forEach(function (x) {
       if (!st.extras[x.name]) return;
       var p = extraPrice(x); any = true;
-      if (p.value == null) { pending = true; return; }
+      if (p.value == null) { if (p.inquire) inquire = true; else pending = true; return; }
       sum += p.value;
     });
-    return { sum: sum, any: any, perUnit: perUnit, pending: pending };
+    return { sum: sum, any: any, perUnit: perUnit, pending: pending, inquire: inquire };
   }
   function paintTotal() {
     var t = total();
-    $('fw-total').textContent = (!t.any || (!t.sum && t.pending)) ? '—' : money(t.sum) + (t.pending ? ' +' : '');
+    $('fw-total').textContent = (!t.any || (!t.sum && (t.pending || t.inquire)))
+      ? '—' : money(t.sum) + ((t.pending || t.inquire) ? ' +' : '');
     var note = $('fw-total-note');
-    if (t.pending) { note.textContent = 'Enter the square footage for the full total.'; note.hidden = false; }
+    if (t.inquire) { note.textContent = 'Over ' + P.inquireOver.toLocaleString() + ' sqft — I’ll confirm your exact quote personally.'; note.hidden = false; }
+    else if (t.pending) { note.textContent = 'Enter the square footage for the full total.'; note.hidden = false; }
     else if (t.perUnit) { note.textContent = 'Per-image services quoted after the shoot.'; note.hidden = false; }
     else note.hidden = true;
   }
@@ -397,7 +405,7 @@ body { background: var(--paper-warm); }
     if (st.shoot_date) rows += '<div class="fw-sumrow"><b>Shoot date</b><span>' + esc(st.shoot_date) + '</span></div>';
     if (st.launch_date) rows += '<div class="fw-sumrow"><b>Launch date</b><span>' + esc(st.launch_date) + '</span></div>';
     var t = total();
-    rows += '<div class="fw-sumrow total"><b>Estimated total</b><span>' + ((!t.any || (!t.sum && t.pending)) ? 'Custom quote' : money(t.sum) + (t.pending ? ' +' : '')) + '</span></div>';
+    rows += '<div class="fw-sumrow total"><b>Estimated total</b><span>' + ((!t.any || (!t.sum && (t.pending || t.inquire))) ? 'Custom quote' : money(t.sum) + ((t.pending || t.inquire) ? ' +' : '')) + '</span></div>';
     return rows;
   }
 
@@ -569,7 +577,7 @@ body { background: var(--paper-warm); }
           address: st.address, city: st.city, state: st.state, zip: st.zip,
           sqft: st.sqft, target_date: st.shoot_date, launch_date: st.launch_date,
           services: svcs.join(' · '), addons: adds.join(' · '),
-          estimated_total: (t.any && t.sum && !t.pending) ? t.sum : null,
+          estimated_total: (t.any && t.sum && !t.pending && !t.inquire) ? t.sum : null,
           details: JSON.stringify({
             status: st.status, listing_type: st.listing, faces: st.faces,
             view_home: st.view, access: st.access, homeowner_home: st.homeowner

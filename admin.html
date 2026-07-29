@@ -458,11 +458,12 @@ select.lx-input { border-radius: 999px; padding-right: 2rem; }
               view: localStorage.getItem('adm-view') || 'pipeline', q: '', clientFilter: '', collapsed: {},
               licTab: 'all', licProp: '', licResults: null, licSearching: false };
 var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', delivered:'#7a5fb8', completed:'#3f7a4f', paid:'#1d4d2a' };
-  var TYPES = ['Architectural Photography','Film / Videography','Aerial & Drone','Full Campaign (Stills + Film)','Other'];
+  // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
+  var TYPES = ['Flash / Ambient Photography','Cinematic Listing Film','Luxury Social Reel','Basic Property Video','Basic Social Reel','Full Campaign (Stills + Film)','Other'];
   var ADDONS = {
-    'Photography': ['Flash / Ambient Photography','Aerial Photography','Vertical / Vignette Images','Twilight Coverage'],
-    'Film':        ['Cinematic Film','Social Reel'],
-    'Beyond':      ['Floor Plan Schematics','Property Website']
+    'Photography': ['Flash / Ambient Photography','Aerial Photography','Vertical / Vignette Images','Twilight Photography','Virtual Staging','Virtual Twilight'],
+    'Film':        ['Cinematic Listing Film','Luxury Social Reel','Basic Property Video','Basic Social Reel','Twilight Videography','Teaser Video'],
+    'Beyond':      ['Zillow 3D Tour','2D Floor Plan','Property Website']
   };
   var STAGES = ['upcoming','editing','revisions','delivered','completed','paid'];   // pipeline order
   var STAGE_LABEL = { upcoming:'Upcoming', editing:'Editing', revisions:'Revisions', delivered:'Delivered', completed:'Completed', paid:'Paid' };
@@ -612,7 +613,11 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     try { checkedAddons = JSON.parse(v.addons || '[]'); } catch (e) {}
     var selClientId = v.client_id || presetClient || '';
     var selClient = state.clients.find(function (c) { return c.id == selClientId; });
-    var typeOpts = TYPES.map(function (t) { return '<option' + (v.type === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
+    // Legacy service names (pre-2026-07-29 lineup) stay selectable on
+    // existing projects so editing never silently rewrites the type.
+    var typeOpts = (v.type && TYPES.indexOf(v.type) === -1
+        ? '<option selected>' + esc(v.type) + '</option>' : '') +
+      TYPES.map(function (t) { return '<option' + (v.type === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
     var statusOpts = STATUSES.map(function (s) { return '<option value="' + s + '"' + (v.status === s ? ' selected' : '') + '>' + (STAGE_LABEL[s] || 'Canceled') + '</option>'; }).join('');
     function addonLabel(label, on) {
       return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
@@ -1452,9 +1457,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     if (!l.follow_up || ['licensed','declined'].indexOf(l.status) > -1) return false;
     return new Date(l.follow_up) <= new Date(new Date().toDateString());
   }
-  // Suggested license fee from the JCS rate card (tunable defaults).
+  // Suggested license fee from the JCS rate card (tunable defaults —
+  // film base reflects the 2026-07-29 film pricing).
   function licSuggest(role, media, print, ads, size) {
-    var base = media === 'film' ? 500 : 350;
+    var base = media === 'film' ? 600 : 350;
     var mult = { developer:1.6, builder:1.4, architect:1.2, interior:1.0, brokerage:1.0, landscape:0.8, pool:0.8, other:1.0 }[role] || 1;
     var v = base * mult * (print ? 1.3 : 1) * (ads ? 1.5 : 1) * (size === 'small' ? 0.8 : size === 'full' ? 1.25 : 1);
     var round = function (n) { return Math.round(n / 25) * 25; };

@@ -2,23 +2,28 @@
 //  JCS PRICING — the single source of truth for public pricing.
 //  Powers BOTH the booking form (/book) and the pricing page (/pricing).
 //
-//  Rates confirmed by Jacob 2026-07-22 (JCS-Pricing sheet). To change a
-//  price, edit the number here — never in the pages.
+//  Rates from Jacob's FINAL JCS-Pricing sheet (2026-07-29): all five
+//  media services priced by property size through 5–6k, 6,000+ =
+//  Inquire. Film family $1,250→$1,650; Basics $700→$1,100.
 //
 //  HOW PRICING WORKS
-//  - `tiers`: 5 prices for 0–2,000 / 2,000–3,000 / 3,000–4,000 /
-//    4,000–5,000 / 5,000+ sqft (top bracket is open-ended).
-//  - Flat services/add-ons use `price`. `unit` add-ons (per image) are
-//    shown but excluded from the estimated total.
-//  - `quote: true` shows "Let's talk" instead of a price.
+//  - Default brackets: 0–2,000 / 2,000–3,000 / 3,000–4,000 / 4,000–5,000
+//    / 5,000–6,000 / 6,000+. A `null` tier renders "Inquire".
+//  - A service/extra may carry its own `steps` + `labels` (Zillow keeps
+//    the older 5-bracket table ending at 5,000+).
+//  - Flat things use `price`. `unit` add-ons (per image) are shown but
+//    excluded from the estimated total. `quote: true` → "Let's talk".
 // =====================================================================
 
 (function () {
-  var TIER_STEPS = [2000, 3000, 4000, 5000, Infinity];
+  var TIER_STEPS = [2000, 3000, 4000, 5000, 6000, Infinity];
   var TIER_LABELS = [
     "0 – 2,000 sqft", "2,000 – 3,000 sqft", "3,000 – 4,000 sqft",
-    "4,000 – 5,000 sqft", "5,000+ sqft"
+    "4,000 – 5,000 sqft", "5,000 – 6,000 sqft", "6,000+ sqft"
   ];
+
+  var TWILIGHT_VIDEO = { name: "Twilight Videography", price: 250, note: "Golden-hour / dusk session" };
+  var TEASER = { name: "Teaser Video", price: 350, note: "Coming-soon cut from the original video" };
 
   var SERVICES = [
     {
@@ -26,10 +31,10 @@
       name: "Flash / Ambient Photography",
       desc: "Editorial, magazine-quality stills — flash-and-ambient frames hand-blended for a true luxury look. Priced by property size.",
       includes: "Edited high-res images · Web & print-ready",
-      tiers: [500, 750, 1000, 1250, 1500],
+      tiers: [500, 750, 1000, 1250, 1500, null],
       addons: [
         { name: "Aerial Photography", price: 150, note: "Drone stills" },
-        { name: "Vertical / Vignette Images", price: 200, note: "Social-crop set" },
+        { name: "Vertical / Vignette Images", price: 200, note: "Composition set for social" },
         { name: "Twilight Photography", price: 250, note: "Golden-hour / dusk session" },
         { name: "Virtual Staging", price: 25, unit: "image" },
         { name: "Virtual Twilight", price: 25, unit: "image" }
@@ -37,23 +42,35 @@
     },
     {
       key: "film",
-      name: "Cinematic Film",
-      desc: "A horizontal listing film that tells the property's story — drone coverage, licensed music, and world-class editing.",
+      name: "Cinematic Listing Film",
+      desc: "A horizontal listing film that tells the property's story — cut for the MLS, websites, and YouTube.",
       includes: "Aerial drone · Licensed music · Branded + unbranded cuts",
-      price: 950,
-      addons: [
-        { name: "Twilight Videography", price: 250, note: "Dusk film add-on" }
-      ]
+      tiers: [1250, 1350, 1450, 1550, 1650, null],
+      addons: [TWILIGHT_VIDEO, TEASER]
     },
     {
-      key: "reel",
-      name: "Social Reel",
-      desc: "A vertical 9:16 reel of the listing, cut for Instagram and social-first marketing.",
+      key: "reel-luxury",
+      name: "Luxury Social Reel",
+      desc: "A vertical listing reel with cinematic pacing — cut for Instagram and social-first marketing.",
       includes: "Vertical 60–90s edit · Social-ready",
-      price: 950,
-      addons: [
-        { name: "Twilight Videography", price: 250, note: "Dusk film add-on" }
-      ]
+      tiers: [1250, 1350, 1450, 1550, 1650, null],
+      addons: [TWILIGHT_VIDEO, TEASER]
+    },
+    {
+      key: "basic-video",
+      name: "Basic Property Video",
+      desc: "A straightforward walkthrough film covering the property practically.",
+      includes: "Licensed music · Clean edit",
+      tiers: [700, 800, 900, 1000, 1100, null],
+      addons: [TWILIGHT_VIDEO, TEASER]
+    },
+    {
+      key: "basic-reel",
+      name: "Basic Social Reel",
+      desc: "A vertical walkthrough reel, social-ready — no lifestyle elements.",
+      includes: "Vertical 60s edit · Social-ready",
+      tiers: [700, 800, 900, 1000, 1100, null],
+      addons: [TWILIGHT_VIDEO]
     },
     {
       key: "custom",
@@ -66,46 +83,55 @@
   ];
 
   // Extras — offered on every shoot regardless of the services chosen.
+  var ZILLOW_STEPS = [2000, 3000, 4000, 5000, Infinity];
+  var ZILLOW_LABELS = ["0 – 2,000 sqft", "2,000 – 3,000 sqft", "3,000 – 4,000 sqft", "4,000 – 5,000 sqft", "5,000+ sqft"];
   var EXTRAS = [
-    { name: "Zillow 3D Tour", tiers: [250, 300, 350, 400, 500] },
-    { name: "2D Floor Plan", price: 50, note: "Branded schematic" },
+    { name: "Zillow 3D Tour", tiers: [250, 300, 350, 400, 500], steps: ZILLOW_STEPS, labels: ZILLOW_LABELS },
+    { name: "2D Floor Plan", price: 100, note: "Branded schematic" },
     { name: "Property Website", price: 350, note: "Single-listing site" }
   ];
 
   // Stand-alone / à la carte (pricing page only).
   var ALACARTE = [
-    { name: "2D Floor Plan", price: 50 },
+    { name: "2D Floor Plan", price: 100 },
     { name: "Virtual Staging (per image)", price: 25 },
     { name: "Virtual Twilight (per image)", price: 25 },
+    { name: "Teaser Video (from your film)", price: 350 },
     { name: "Property Website", price: 350 }
   ];
 
-  // sqft → tier index (0–4). The top bracket is open-ended, so every
-  // square footage resolves to a price (no "inquire" cap).
-  function tierIndex(sqft) {
+  // sqft → tier index against a thing's own steps (or the default).
+  function tierIndex(sqft, steps) {
+    var st = steps || TIER_STEPS;
     var n = Number(sqft) || 0;
-    for (var i = 0; i < TIER_STEPS.length; i++) if (n <= TIER_STEPS[i]) return i;
-    return TIER_STEPS.length - 1;
+    for (var i = 0; i < st.length; i++) if (n <= st[i]) return i;
+    return st.length - 1;
   }
 
-  // Price of a service/extra at a given sqft — flat `price` wins,
-  // otherwise the sqft tier. null → quote.
+  // Price at a given sqft — flat `price` wins, then the sqft tier.
+  // null → Inquire (tiered) or quote (no pricing at all).
   function priceAt(thing, sqft) {
     if (thing == null) return null;
     if (typeof thing.price === "number") return thing.price;
-    var tiers = thing.tiers || thing;
+    var tiers = thing.tiers || (Array.isArray(thing) ? thing : null);
     if (!tiers || !tiers.length) return null;
-    return tiers[tierIndex(sqft)];
+    return tiers[tierIndex(sqft, thing.steps)];
+  }
+
+  function labelsOf(thing) {
+    return (thing && thing.labels) || TIER_LABELS;
   }
 
   window.JCS_PRICING = {
     year: "2026",
     turnaround: "2–4 days",
+    inquireOver: 6000,
     tierLabels: TIER_LABELS,
     services: SERVICES,
     extras: EXTRAS,
     alacarte: ALACARTE,
     tierIndex: tierIndex,
-    priceAt: priceAt
+    priceAt: priceAt,
+    labelsOf: labelsOf
   };
 })();

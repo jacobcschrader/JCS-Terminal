@@ -207,10 +207,9 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
     </div>
   </div>
 
-  <p class="pz-finetext rv">Photography pricing scales with square footage; homes over 5,000 sqft use the top
-    bracket. The figures above are starting points &mdash; your exact quote is based on the home&rsquo;s size and
-    the add-ons you choose, and unusual properties are always welcome to inquire. Your date is reserved on
-    confirmation.</p>
+  <p class="pz-finetext rv">Photography &amp; film pricing scales with square footage. For homes larger than
+    6,000 sqft, please inquire directly &mdash; the figures above are starting points, and your exact quote is
+    based on the home&rsquo;s size and the add-ons you choose. Your date is reserved on confirmation.</p>
 </div>
 
 <section class="pz-cta rv">
@@ -259,7 +258,9 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
   };
 
   var trow = function (label, price) {
-    return '<div class="pz-trow"><span>' + esc(label) + '</span><b>' + money(price) + '</b></div>';
+    return '<div class="pz-trow"><span>' + esc(label) + '</span><b>' +
+      (price == null ? '<span style="font-family:var(--sans);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted)">Inquire</span>' : money(price)) +
+      '</b></div>';
   };
 
   document.getElementById('pz-services').innerHTML =
@@ -269,8 +270,9 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
         ? '<a class="pz-card__media" href="' + m.url + '"><img loading="lazy" src="' + m.img + '" alt="' + esc(svc.name) + '">' +
           '<span class="pz-card__ov"><span class="ring">' + m.icon + '</span><span>' + esc(m.label) + '</span></span></a>'
         : '';
+      var firstTier = svc.tiers ? svc.tiers.filter(function (v) { return v != null; })[0] : null;
       var fromrow = svc.tiers
-        ? '<div class="fromrow"><span class="from">From ' + money(svc.tiers[0]) + '</span><span class="fromnote">By square footage</span></div>'
+        ? '<div class="fromrow"><span class="from">From ' + money(firstTier) + '</span><span class="fromnote">By square footage</span></div>'
         : '<div class="fromrow"><span class="from">' + money(svc.price) + '</span><span class="fromnote">Flat rate</span></div>';
       var addons = svc.addons.length
         ? '<div class="pz-addons"><span class="pz-caps">Additional services</span><p>' +
@@ -280,7 +282,7 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
         : '';
       var table = svc.tiers
         ? '<details class="pz-details"><summary>View full pricing <span class="pm">+</span></summary>' +
-          svc.tiers.map(function (p, ti) { return trow(P.tierLabels[ti], p); }).join('') + '</details>'
+          svc.tiers.map(function (p, ti) { return trow(P.labelsOf(svc)[ti], p); }).join('') + '</details>'
         : '';
       return '<article class="pz-card rv">' + media +
         '<div class="pz-card__body">' +
@@ -297,7 +299,7 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
     P.alacarte.map(function (x) { return trow(x.name, x.price); }).join('');
   var z = P.extras.find(function (x) { return x.tiers; });
   if (z) document.getElementById('pz-zillow').innerHTML =
-    z.tiers.map(function (p, ti) { return trow(P.tierLabels[ti], p); }).join('');
+    z.tiers.map(function (p, ti) { return trow(P.labelsOf(z)[ti], p); }).join('');
 
   // Scroll reveals
   var io = new IntersectionObserver(function (es) {

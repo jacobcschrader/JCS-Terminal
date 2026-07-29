@@ -1055,3 +1055,21 @@ title, else a navy JCS monogram tile.
   cover is empty or a cached "-" miss — the Pixieset gallery usually
   exists by then even if it didn't when the draft was created. covers.js
   exports ogImage for that.
+
+## 2026-07-29 — Video sqft pricing synced from the final sheet
+- Workflow: video tier structure was first built INTO Jacob's
+  JCS-Pricing.numbers via AppleScript (add row below; four by-property-
+  size blocks prefilled), Jacob tuned it (film family 1250→1650 +$100
+  steps, Basics 700→1100, "Signature"→"Luxury Social Reel"), then the
+  site synced FROM the sheet's CSV export.
+- pricing-data.js: 6-bracket engine (0–2k…5–6k, 6,000+ = Inquire; null
+  tier = Inquire; per-thing steps/labels so Zillow keeps its 5-bracket
+  table). Five sized services: Photography 500–1500, Cinematic Listing
+  Film + Luxury Social Reel 1250–1650, Basic Property Video + Basic
+  Social Reel 700–1100. Add-ons per sheet (Teaser Video $350 new; Floor
+  Plan $100). book.html: Inquire states (cards, note, custom-quote
+  total, estimated_total withheld). pricing.html: per-service labels,
+  INQUIRE rows, 6k copy.
+- Admin: TYPES + project-form ADDONS updated to the new lineup (legacy
+  type values preserved as selectable on old projects); licensing fee
+  helper film base 500→600.
