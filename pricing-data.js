@@ -87,13 +87,17 @@
   var ZILLOW_LABELS = ["0 – 2,000 sqft", "2,000 – 3,000 sqft", "3,000 – 4,000 sqft", "4,000 – 5,000 sqft", "5,000+ sqft"];
   var EXTRAS = [
     { name: "Zillow 3D Tour", tiers: [250, 300, 350, 400, 500], steps: ZILLOW_STEPS, labels: ZILLOW_LABELS },
-    { name: "2D Floor Plan", price: 100, note: "Branded schematic" },
+    // $100, stepping to $200 above 5,000 sqft (reuses the tier engine).
+    { name: "2D Floor Plan", tiers: [100, 100, 100, 100, 200, 200], note: "Branded schematic" },
     { name: "Property Website", price: 350, note: "Single-listing site" }
   ];
 
-  // Stand-alone / à la carte (pricing page only).
+  // Stand-alone / à la carte (pricing page only) — Guthrie-style list.
   var ALACARTE = [
+    { name: "Exterior Photography only", price: 350 },
+    { name: "Aerial Drone Photography only", price: 250 },
     { name: "2D Floor Plan", price: 100 },
+    { name: "2D Floor Plan (5,000 sqft +)", price: 200 },
     { name: "Virtual Staging (per image)", price: 25 },
     { name: "Virtual Twilight (per image)", price: 25 },
     { name: "Teaser Video (from your film)", price: 350 },

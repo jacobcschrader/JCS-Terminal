@@ -1073,3 +1073,18 @@ title, else a navy JCS monogram tile.
 - Admin: TYPES + project-form ADDONS updated to the new lineup (legacy
   type values preserved as selectable on old projects); licensing fee
   helper film base 500→600.
+
+### À la carte formatted like the reference + JCS admin typography
+- Pricing page à-la-carte now mirrors pricing.jacobguthrie.com's list
+  minus Site Plan: Exterior Photography only $350 + Aerial Drone
+  Photography only $250 (prices borrowed from the reference — sheet has
+  no entries yet), 2D Floor Plan $100 with a $200 (5,000 sqft +) line,
+  then the JCS extras. Floor Plan is now size-aware in the form too
+  (tiers 100×4/200×2 — reuses the bracket engine).
+- Admin typography re-branded per the kit while keeping the Resid
+  structure: Space Mono removed (the --rx-mono var now resolves to
+  Inter, converting every tracked-caps microlabel to the site's eyebrow
+  style at 600), display headings back to Cormorant italic (view titles,
+  modal titles, project heads, "License everything."), money/numerals in
+  Cormorant 500 with lining figures (font-feature "lnum" — the portal
+  gotcha), avatar serif italic. Colors/layout untouched.
