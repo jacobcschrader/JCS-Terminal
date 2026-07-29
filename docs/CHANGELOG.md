@@ -1088,3 +1088,8 @@ title, else a navy JCS monogram tile.
   modal titles, project heads, "License everything."), money/numerals in
   Cormorant 500 with lining figures (font-feature "lnum" — the portal
   gotcha), avatar serif italic. Colors/layout untouched.
+
+### À-la-carte section layout matched to the reference
+- Restructured from one wide stacked card to the reference's two
+  side-by-side white cards (À LA CARTE | ZILLOW 3D TOUR · BY SQUARE
+  FOOTAGE), accent-colored caps labels, equal-height grid.
