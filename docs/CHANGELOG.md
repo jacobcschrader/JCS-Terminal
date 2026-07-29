@@ -1093,3 +1093,32 @@ title, else a navy JCS monogram tile.
 - Restructured from one wide stacked card to the reference's two
   side-by-side white cards (À LA CARTE | ZILLOW 3D TOUR · BY SQUARE
   FOOTAGE), accent-colored caps labels, equal-height grid.
+
+### Pricing card media fixed after the service rename + new film stills
+- pricing.html MEDIA map: `reel` → `reel-luxury` (the Luxury Social Reel
+  card had silently lost its cover after the key rename); added
+  `basic-video` / `basic-reel` entries; a capture-phase img-error
+  listener hides a card's media block until its still exists, so
+  nothing renders broken.
+- New card covers from Jacob's film stills (recovered from chat pastes,
+  re-encoded JPEG q80, 2000px): `images/svc/film-still.jpg` (Tahoe deck)
+  now backs the Cinematic Listing Film card — `images/svc/film.jpg`
+  left untouched because the homepage service card shares it — and
+  `images/svc/basic-video.jpg` (craftsman + pool) backs Basic Property
+  Video. (The Basic Social Reel card was folded into Social Reels in
+  the next entry, so it no longer needs its own still.)
+
+### Social Reels merged into one card (reference parity)
+- pricing.jacobguthrie.com puts Basic + Luxury reels under a single
+  "Social Reels" card, with each variant a named group inside the
+  "View full pricing" accordion (uppercase tracked name + italic note
+  + its own sqft table). Matched that: the pricing page now renders 4
+  cards instead of 5, "From $700" spans both, and the accordion holds
+  BASIC SOCIAL REEL then LUXURY SOCIAL REEL with their own six-bracket
+  tables. Group names/notes/prices all still come from pricing-data.js
+  — the merge is presentation-only and lives in pricing.html.
+- Teaser Video is a Luxury-only add-on in the sheet, so the merged
+  add-on line labels it "LUXURY ONLY" rather than implying it's
+  available on the basic cut.
+- book.html is deliberately unchanged: the wizard still offers Basic
+  Social Reel and Luxury Social Reel as separate selectable services.

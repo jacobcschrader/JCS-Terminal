@@ -108,6 +108,9 @@ body { background: var(--paper-warm); color: var(--ink); }
 .pz-addons .pz-caps { display: block; margin-bottom: 0.35rem; }
 .pz-addons p { font-size: 0.84rem; color: var(--muted); line-height: 1.85; margin: 0; }
 .pz-addons p i { font-style: normal; color: var(--ink); font-weight: 500; }
+/* Marks an add-on offered on only one variant of a grouped card. */
+.pz-addons p u { text-decoration: none; font-size: 0.66rem; letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--muted); }
 
 details.pz-details { border-top: 1px solid var(--hairline); }
 details.pz-details summary { list-style: none; cursor: pointer; display: flex; align-items: center;
@@ -121,6 +124,14 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
   border-top: 1px solid rgba(15, 34, 64, 0.07); font-size: 0.86rem; }
 .pz-trow span { color: var(--muted); }
 .pz-trow b { font-family: var(--serif); font-weight: 500; font-size: 1.02rem; color: var(--accent); }
+/* Variant groups inside one card's pricing table (Social Reels card:
+   Basic + Luxury under one roof, like the reference). */
+.pz-group { padding-top: 0.55rem; }
+.pz-group + .pz-group { margin-top: 1rem; }
+.pz-gname { font-family: var(--sans); font-size: 0.68rem; letter-spacing: 0.14em;
+  text-transform: uppercase; font-weight: 600; color: var(--ink); margin: 0 0 0.2rem; }
+.pz-gnote { font-family: var(--serif); font-style: italic; font-size: 0.95rem;
+  color: var(--muted); line-height: 1.5; margin: 0 0 0.4rem; }
 .pz-examples { display: inline-block; margin-top: 1.2rem; background: var(--navy); color: var(--paper-warm);
   font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase;
   font-weight: 500; padding: 0.75rem 1.25rem; transition: opacity 0.3s var(--ease); }
@@ -259,9 +270,16 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
   var PLAY = '<svg width="15" height="15" viewBox="0 0 24 24" fill="#fff"><polygon points="7,4 20,12 7,20"/></svg>';
   var MEDIA = {
     photography: { img: '/images/svc/photography.jpg', icon: CAMERA, label: 'View Photography', url: 'https://www.jacobcschrader.com/projects' },
-    film: { img: '/images/svc/film.jpg', icon: PLAY, label: 'Watch Sample Films', url: 'https://www.jacobcschrader.com/services#films' },
-    reel: { img: '/images/svc/reels.jpg', icon: PLAY, label: 'Watch Sample Reels', url: 'https://www.jacobcschrader.com/services#reels' }
+    film: { img: '/images/svc/film-still.jpg', icon: PLAY, label: 'Watch Sample Films', url: 'https://www.jacobcschrader.com/services#films' },
+    reels: { img: '/images/svc/reels.jpg', icon: PLAY, label: 'Watch Sample Reels', url: 'https://www.jacobcschrader.com/services#reels' },
+    'basic-video': { img: '/images/svc/basic-video.jpg', icon: PLAY, label: 'Watch Sample Films', url: 'https://www.jacobcschrader.com/services#films' }
   };
+  // Cards whose image file doesn't exist yet render without media until
+  // the still is added — hide the block on load error.
+  window.addEventListener('error', function (e) {
+    var t = e.target;
+    if (t && t.tagName === 'IMG' && t.closest && t.closest('.pz-card__media')) t.closest('.pz-card__media').style.display = 'none';
+  }, true);
 
   var trow = function (label, price) {
     return '<div class="pz-trow"><span>' + esc(label) + '</span><b>' +
@@ -269,24 +287,70 @@ details.pz-details[open] summary .pm { transform: rotate(45deg); }
       '</b></div>';
   };
 
+  // Both reels render as ONE "Social Reels" card (like the reference):
+  // Basic + Luxury become named groups inside the pricing accordion.
+  // The booking form still offers them separately; every price and
+  // variant note still comes from pricing-data.js.
+  var byKey = {};
+  P.services.forEach(function (s) { byKey[s.key] = s; });
+  var reelMembers = ['basic-reel', 'reel-luxury'].map(function (k) { return byKey[k]; }).filter(Boolean);
+  var reelsCard = reelMembers.length === 2 ? {
+    grouped: true,
+    key: 'reels',
+    name: 'Social Reels',
+    desc: 'Vertical listing reels — from a clean walkthrough cut to a cinematic lifestyle edit, made for Instagram and TikTok.',
+    includes: 'Vertical 60–90s edit · Social-ready',
+    tiers: reelMembers[0].tiers,
+    members: reelMembers,
+    // Merged add-on line. Teaser Video is a Luxury-only extra in the
+    // sheet, so anything not offered on every variant is labelled.
+    addons: reelMembers.reduce(function (out, mm) {
+      mm.addons.forEach(function (a) {
+        if (out.some(function (b) { return b.name === a.name; })) return;
+        var onAll = reelMembers.every(function (x) {
+          return x.addons.some(function (b) { return b.name === a.name; });
+        });
+        out.push(onAll ? a : { name: a.name, price: a.price, unit: a.unit, only: mm.name.replace(/ Social Reel$/, '') });
+      });
+      return out;
+    }, [])
+  } : null;
+
+  var cards = [];
+  P.services.filter(function (s) { return !s.quote; }).forEach(function (svc) {
+    if (reelsCard && svc.key === 'reel-luxury') { cards.push(reelsCard); return; }
+    if (reelsCard && svc.key === 'basic-reel') return;
+    cards.push(svc);
+  });
+
   document.getElementById('pz-services').innerHTML =
-    P.services.filter(function (s) { return !s.quote; }).map(function (svc) {
+    cards.map(function (svc) {
       var m = MEDIA[svc.key];
       var media = m
         ? '<a class="pz-card__media" href="' + m.url + '"><img loading="lazy" src="' + m.img + '" alt="' + esc(svc.name) + '">' +
           '<span class="pz-card__ov"><span class="ring">' + m.icon + '</span><span>' + esc(m.label) + '</span></span></a>'
         : '';
-      var firstTier = svc.tiers ? svc.tiers.filter(function (v) { return v != null; })[0] : null;
+      var firstTier = svc.grouped
+        ? Math.min.apply(null, svc.members.map(function (mm) { return mm.tiers.filter(function (v) { return v != null; })[0]; }))
+        : (svc.tiers ? svc.tiers.filter(function (v) { return v != null; })[0] : null);
       var fromrow = svc.tiers
         ? '<div class="fromrow"><span class="from">From ' + money(firstTier) + '</span><span class="fromnote">By square footage</span></div>'
         : '<div class="fromrow"><span class="from">' + money(svc.price) + '</span><span class="fromnote">Flat rate</span></div>';
       var addons = svc.addons.length
         ? '<div class="pz-addons"><span class="pz-caps">Additional services</span><p>' +
           svc.addons.map(function (a) {
-            return esc(a.name) + ' <i>+' + money(a.price) + (a.unit ? '/' + a.unit : '') + '</i>';
+            return esc(a.name) + ' <i>+' + money(a.price) + (a.unit ? '/' + a.unit : '') + '</i>' +
+              (a.only ? ' <u>' + esc(a.only) + ' only</u>' : '');
           }).join(' &nbsp;&middot;&nbsp; ') + '</p></div>'
         : '';
-      var table = svc.tiers
+      var table = svc.grouped
+        ? '<details class="pz-details"><summary>View full pricing <span class="pm">+</span></summary>' +
+          svc.members.map(function (mm) {
+            return '<div class="pz-group"><div class="pz-gname">' + esc(mm.name) + '</div>' +
+              '<div class="pz-gnote">' + esc(mm.desc) + '</div>' +
+              mm.tiers.map(function (p, ti) { return trow(P.labelsOf(mm)[ti], p); }).join('') + '</div>';
+          }).join('') + '</details>'
+        : svc.tiers
         ? '<details class="pz-details"><summary>View full pricing <span class="pm">+</span></summary>' +
           svc.tiers.map(function (p, ti) { return trow(P.labelsOf(svc)[ti], p); }).join('') + '</details>'
         : '';

@@ -37,7 +37,10 @@ book.html                  7-step booking wizard (Guthrie-style, live sqft
                            pricing) — /book + form.jacobcschrader.com.
                            Replaced contact.html (301 /contact → /book).
 pricing.html               Shareable pricing page — /pricing +
-                           pricing.jacobcschrader.com (noindex)
+                           pricing.jacobcschrader.com (noindex). Renders 4
+                           cards: the two reels merge into one "Social
+                           Reels" card whose accordion holds both as named
+                           groups (the form still sells them separately).
 pricing-data.js            THE pricing source of truth (services, sqft
                            tiers, add-ons) — powers book.html + pricing.html
 proposal.html              Private client proposal page — /proposals/<slug>
