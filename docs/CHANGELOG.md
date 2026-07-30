@@ -1312,3 +1312,14 @@ title, else a navy JCS monogram tile.
   prices and creation blocks until every checked 6,000+ line has one.
   Zillow/floor-plan keep auto-pricing at any size (their tables never
   hit Inquire).
+
+### Pricing sync from the sheet (2026-07-30) + Basic Property Film
+- Cinematic Property Film and Luxury Social Reel re-priced per Jacob's
+  updated sheet: $1,000 / $1,150 / $1,300 / $1,450 / $1,600 across the
+  six brackets (was $1,250→$1,650), 6,000+ still Inquire. Flows
+  everywhere from pricing-data.js: /pricing tables, /book, and admin
+  auto-quoting.
+- "Basic Property Video" renamed to "Basic Property Film" (Jacob had
+  already renamed it in the sheet): pricing-data.js name + the admin
+  Film services list. The internal key stays 'basic-video' and the
+  card still uses images/svc/basic-video.jpg.

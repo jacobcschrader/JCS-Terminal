@@ -2,9 +2,9 @@
 //  JCS PRICING — the single source of truth for public pricing.
 //  Powers BOTH the booking form (/book) and the pricing page (/pricing).
 //
-//  Rates from Jacob's FINAL JCS-Pricing sheet (2026-07-29): all five
+//  Rates from Jacob's JCS-Pricing sheet (updated 2026-07-30): all five
 //  media services priced by property size through 5–6k, 6,000+ =
-//  Inquire. Film family $1,250→$1,650; Basics $700→$1,100.
+//  Inquire. Film + Luxury Reel $1,000→$1,600; Basics $700→$1,100.
 //
 //  HOW PRICING WORKS
 //  - Default brackets: 0–2,000 / 2,000–3,000 / 3,000–4,000 / 4,000–5,000
@@ -45,7 +45,7 @@
       name: "Cinematic Property Film",
       desc: "A cinematic horizontal film that tells the property's story — cut for the MLS, websites, and YouTube.",
       includes: "Aerial drone · Licensed music · Branded + unbranded cuts",
-      tiers: [1250, 1350, 1450, 1550, 1650, null],
+      tiers: [1000, 1150, 1300, 1450, 1600, null],
       addons: [TWILIGHT_VIDEO, TEASER]
     },
     {
@@ -53,12 +53,12 @@
       name: "Luxury Social Reel",
       desc: "A vertical listing reel with cinematic pacing — cut for Instagram and social-first marketing.",
       includes: "Vertical 60–90s edit · Social-ready",
-      tiers: [1250, 1350, 1450, 1550, 1650, null],
+      tiers: [1000, 1150, 1300, 1450, 1600, null],
       addons: [TWILIGHT_VIDEO, TEASER]
     },
     {
       key: "basic-video",
-      name: "Basic Property Video",
+      name: "Basic Property Film",
       desc: "A straightforward walkthrough film covering the property practically.",
       includes: "Licensed music · Clean edit",
       tiers: [700, 800, 900, 1000, 1100, null],
