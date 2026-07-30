@@ -180,7 +180,7 @@ module.exports = async function handler(req, res) {
       awaiting: awaiting.map((p) => ({
         title: p.title,
         location: p.location || "",
-        url: "https://www.jacobcschrader.com/proposals/" + p.slug,
+        url: "https://proposal.jacobcschrader.com/" + p.slug,
         sent_at: p.sent_at,
       })),
       stats: {

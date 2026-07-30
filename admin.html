@@ -1446,7 +1446,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     try { JSON.parse(p.items || '[]').forEach(function (it) { if (typeof it.price === 'number') t += it.price; }); } catch (e) {}
     return t;
   }
-  function propUrl(p) { return 'https://www.jacobcschrader.com/proposals/' + p.slug; }
+  function propUrl(p) { return 'https://proposal.jacobcschrader.com/' + p.slug; }
   function propBadge(p) {
     if (p.accepted_at) return '<span class="adm-badge adm-badge--paid">Accepted</span>';
     if (p.sent_at) return '<span class="adm-badge adm-badge--accepted">Sent</span>';

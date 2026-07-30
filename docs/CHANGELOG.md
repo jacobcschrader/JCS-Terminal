@@ -1183,3 +1183,26 @@ title, else a navy JCS monogram tile.
   proposal is SENT the portal shows a "Your Proposal Is Ready" band with
   Review & Accept. Between "Send Proposal" and actually sending, the
   original application still reads "In Review" — no blank gap.
+
+### Proposal page rebuilt to match the reference exactly
+- Measured jgwebsite.vercel.app/proposals/campanildrive with computed
+  styles and rebuilt /proposal to match: 1420px wrap (51px gutters),
+  centered hero (JCS serif-italic monogram standing in for the JG mark,
+  11px/0.26em kicker, 70px Cormorant 300 title, italic "prepared for"
+  lede, tracked date line) over the first hairline; left-aligned scope
+  ledger (11px/0.22em group headers over 0.24 hairlines, 24px serif
+  items with accent badges, 14.5px sans descriptions capped at 58ch,
+  15px tabular sans prices, rows py22 on 0.12 hairlines); total row
+  serif 28/34 with the price in navy (lining numerals); films stacked
+  full-width 16:9 (gap 26); photography as three natural-height columns
+  (gap 14) filled round-robin from the portfolio; testimonials as two
+  white hairline cards (44px accent quote mark, 17px serif, 48px navy
+  initial avatar); centered LIGHT "Next Step" CTA (ink→navy button,
+  15×26 pad, 11px/0.2em) — no more navy band.
+- The accept-and-sign contract flow survives the redesign restyled for
+  the light theme: white card, warm-paper inputs, scrollable terms,
+  serif-italic signature line.
+- Canonical proposal links now print as proposal.jacobcschrader.com/
+  <slug> everywhere (send email, portal "Proposal Ready" band, admin
+  list) — the middleware rewrite already served it; only the printed
+  URLs changed.

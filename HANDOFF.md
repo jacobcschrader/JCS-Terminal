@@ -58,11 +58,17 @@ pricing.html               Shareable pricing page — /pricing +
                            groups (the form still sells them separately).
 pricing-data.js            THE pricing source of truth (services, sqft
                            tiers, add-ons) — powers book.html + pricing.html
-proposal.html              Private client proposal page — /proposals/<slug>
-                           + proposal.jacobcschrader.com/<slug> (noindex).
-                           Acceptance = the contract: phone, access,
-                           notes, terms + typed e-signature; flips a
-                           linked 'pending' project to Upcoming.
+proposal.html              Private client proposal page — canonical link
+                           proposal.jacobcschrader.com/<slug> (also
+                           /proposals/<slug>; noindex). Layout measured
+                           off jgwebsite.vercel.app/proposals/* (1420px
+                           wrap, centered hero over hairline, grouped
+                           scope ledger w/ badges, stacked films, 3-col
+                           gallery, white quote cards, light centered
+                           CTA), JCS type/palette. Acceptance = the
+                           contract: phone, access, notes, terms + typed
+                           e-signature; flips a linked 'pending' project
+                           to Upcoming.
 project.html               Dynamic project page (renders ?slug=…)
 project/<slug>.html        Static share pages (generated — see §4)
 portal.html delivery.html invoice.html   Client pages (minimal .mnav chrome).

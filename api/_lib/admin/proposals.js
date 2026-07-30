@@ -46,7 +46,9 @@ async function uniqueSlug(s, base, ownId) {
   return `${slug}-${Date.now().toString(36)}`;
 }
 
-const PUBLIC_URL = (slug) => `https://www.jacobcschrader.com/proposals/${slug}`;
+// Canonical share link — every proposal lives at the subdomain
+// (middleware rewrites proposal.jacobcschrader.com/<slug> → /proposal).
+const PUBLIC_URL = (slug) => `https://proposal.jacobcschrader.com/${slug}`;
 
 module.exports = async function handler(req, res) {
   if (!requireAuth(req, res)) return;

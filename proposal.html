@@ -11,96 +11,142 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/styles.css">
 <style>
-/* ================= Private proposal ================= */
-body { background: var(--paper-warm); }
+/* ============ Private proposal — jgwebsite.vercel.app/proposals/*
+   measured and matched (wrap 1420/51px, centered hero over a hairline,
+   left-aligned scope ledger, stacked films, 3-column gallery, white
+   quote cards, centered light CTA), JCS palette + type. ============= */
+:root {
+  --pp-line: rgba(15, 34, 64, 0.12);
+  --pp-line-strong: rgba(15, 34, 64, 0.24);
+  --pp-faint: #9aa3b1;
+}
+body { background: var(--paper-warm); color: var(--ink); }
 .pp-reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
 .pp-reveal.in { opacity: 1; transform: none; }
 
-.pp-hero { text-align: center; padding: clamp(6rem, 16vh, 10rem) clamp(1.25rem, 5vw, 2rem) clamp(3.4rem, 8vw, 5.5rem);
-  border-bottom: 1px solid var(--line); }
-.pp-hero .eyebrow { display: inline-flex; }
-.pp-hero h1 { font-size: clamp(2.8rem, 7vw, 5rem); margin: 1.6rem 0 1.3rem; }
-.pp-hero .for { font-family: var(--serif); font-size: clamp(1.05rem, 1.8vw, 1.3rem); color: var(--muted); }
-.pp-hero .date { margin-top: 2.2rem; font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase;
-  font-weight: 600; color: var(--accent); }
+.pp-wrap { max-width: 1420px; margin: 0 auto; padding: 0 clamp(1.25rem, 4vw, 3.2rem); }
+.pp-section { border-top: 1px solid var(--pp-line); }
+.pp-kicker { font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: 0.26em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 18px; }
+.pp-h2 { font-family: var(--serif); font-weight: 300; color: var(--ink); margin: 0;
+  font-size: clamp(2.1rem, 4vw, 3.25rem); line-height: 1.08; }
+.pp-lede { font-family: var(--serif); font-weight: 300; color: var(--muted); margin: 16px 0 0;
+  font-size: clamp(1.15rem, 1.9vw, 1.5rem); line-height: 1.4; }
 
-.pp-wrap { max-width: 760px; margin: 0 auto; padding: 0 clamp(1.25rem, 5vw, 2rem); }
-.pp-section { padding: clamp(3.4rem, 8vw, 5.5rem) 0; }
-.pp-section + .pp-section { border-top: 1px solid var(--line); }
-.pp-head { text-align: center; margin-bottom: clamp(2.2rem, 5vw, 3.4rem); }
-.pp-head h2 { font-size: clamp(1.9rem, 4vw, 2.8rem); margin-top: 1rem; }
-.pp-head p { font-family: var(--serif); font-size: 1.08rem; color: var(--muted); max-width: 52ch; margin: 0.8rem auto 0; }
+/* ---- hero: centered over the first hairline ------------------------ */
+.pp-hero { text-align: center; padding: clamp(3.4rem, 8vh, 5rem) 0 44px; }
+.pp-hero .mono { font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 2.4rem; color: var(--ink); line-height: 1; margin-bottom: 26px; }
+.pp-hero .pp-kicker { margin-bottom: 18px; }
+.pp-hero h1 { font-family: var(--serif); font-weight: 300; color: var(--ink); margin: 0;
+  font-size: clamp(2.5rem, 5.5vw, 4.4rem); line-height: 1.04; letter-spacing: -0.01em; }
+.pp-hero .for { font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: clamp(1.1rem, 1.8vw, 1.375rem); color: var(--muted); margin: 18px 0 0; }
+.pp-hero .for b { font-style: italic; font-weight: 500; color: var(--ink); }
+.pp-hero .date { font-family: var(--sans); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--pp-faint); margin-top: 26px; }
 
-.pp-group { font-size: 0.62rem; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 600;
-  color: var(--accent); margin: 2.6rem 0 0.4rem; }
-.pp-group:first-child { margin-top: 0; }
-.pp-item { display: flex; justify-content: space-between; align-items: baseline; gap: 2rem;
-  padding: 1.3rem 0; border-bottom: 1px solid var(--line-soft); }
-.pp-item__t b { font-family: var(--serif); font-weight: 500; font-size: 1.3rem; color: var(--navy); }
-.pp-item__t .badge { display: inline-block; margin-left: 0.7rem; font-size: 0.54rem; letter-spacing: 0.18em;
-  text-transform: uppercase; font-weight: 600; color: var(--accent); border: 1px solid var(--line);
-  padding: 0.25rem 0.55rem; vertical-align: 0.15em; }
-.pp-item__t p { font-size: 0.86rem; color: var(--muted); line-height: 1.65; margin: 0.35rem 0 0; max-width: 46ch; }
-.pp-item .pr { font-family: var(--serif); font-size: 1.2rem; color: var(--navy); white-space: nowrap; }
-.pp-total { display: flex; justify-content: space-between; align-items: baseline; gap: 2rem;
-  padding: 1.7rem 0 0.4rem; }
-.pp-total b { font-family: var(--serif); font-weight: 500; font-size: 1.45rem; color: var(--navy); }
-.pp-total .pr { font-family: var(--serif); font-size: 2rem; color: var(--navy); }
-.pp-note { text-align: center; font-family: var(--serif); font-size: 1.05rem; color: var(--muted);
-  margin-top: 1.6rem; }
+/* ---- scope & investment -------------------------------------------- */
+.pp-scope { padding: 72px 0 84px; }
+.pp-items { margin-top: 44px; }
+.pp-group { margin-bottom: 40px; }
+.pp-group:last-child { margin-bottom: 0; }
+.pp-ghead { font-family: var(--sans); font-size: 11px; font-weight: 500; letter-spacing: 0.22em;
+  text-transform: uppercase; color: var(--pp-faint); padding-bottom: 14px;
+  border-bottom: 1px solid var(--pp-line-strong); }
+.pp-item { display: flex; align-items: baseline; justify-content: space-between; gap: 28px;
+  padding: 22px 0; border-bottom: 1px solid var(--pp-line); }
+.pp-item__t { max-width: 58ch; }
+.pp-item__t b { font-family: var(--serif); font-weight: 300; font-size: clamp(1.25rem, 1.9vw, 1.5rem);
+  line-height: 1.2; color: var(--ink); }
+.pp-item__t .badge { font-family: var(--sans); font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent);
+  margin-left: 14px; position: relative; top: -3px; white-space: nowrap; }
+.pp-item__t p { margin: 7px 0 0; font-family: var(--sans); font-size: 14.5px; line-height: 1.6;
+  color: var(--muted); }
+.pp-item .pr { font-family: var(--sans); font-size: 15px; font-weight: 500; color: var(--ink);
+  font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pp-item .pr.inc { font-size: 11px; font-weight: 500; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--pp-faint); }
+.pp-total { display: flex; align-items: baseline; justify-content: space-between; gap: 28px;
+  padding: 26px 0 6px; }
+.pp-total b { font-family: var(--serif); font-weight: 300; font-size: clamp(1.4rem, 2.2vw, 1.75rem);
+  color: var(--ink); }
+.pp-total .pr { font-family: var(--serif); font-weight: 300; font-size: clamp(1.7rem, 2.7vw, 2.125rem);
+  color: var(--navy); white-space: nowrap;
+  font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; }
+.pp-total-note { margin: 10px 0 0; font-family: var(--sans); font-size: 13.5px; color: var(--pp-faint); }
 
-.pp-films { display: grid; gap: 1.6rem; }
-.pp-films video { width: 100%; display: block; background: #0a1526; aspect-ratio: 16 / 9; }
-.pp-films .cap { font-size: 0.78rem; color: var(--muted); margin-top: 0.6rem; }
-.pp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; }
-.pp-grid img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; }
-.pp-grid img:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
-@media (max-width: 560px) { .pp-grid { grid-template-columns: repeat(2, 1fr); } }
+/* ---- films ----------------------------------------------------------- */
+.pp-filmsec { padding: 90px 0 70px; }
+.pp-films { display: flex; flex-direction: column; gap: 26px; margin-top: 44px; }
+.pp-films video { width: 100%; display: block; background: var(--navy-deep, #091627); aspect-ratio: 16 / 9; }
+.pp-films .cap { font-family: var(--sans); font-size: 11px; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--pp-faint); margin-top: 12px; }
 
-.pp-quote { text-align: center; padding: 0.6rem 0 1.8rem; }
-.pp-quote .mark { font-family: var(--serif); font-size: 3.4rem; line-height: 0.6; color: var(--line); }
-.pp-quote blockquote { font-family: var(--serif); font-size: clamp(1.05rem, 1.9vw, 1.25rem); line-height: 1.7;
-  color: var(--ink); max-width: 58ch; margin: 1rem auto 1.3rem; }
-.pp-quote .who { font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; color: var(--navy); }
-.pp-quote .firm { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 0.25rem; }
+/* ---- photography: three natural-height columns ---------------------- */
+.pp-photosec { padding: 90px 0 80px; }
+.pp-gallery { display: flex; gap: 14px; margin-top: 44px; }
+.pp-gallery .col { flex: 1; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.pp-gallery img { width: 100%; display: block; }
 
-.pp-cta { background: var(--navy); color: #fff; text-align: center; margin-top: clamp(2rem, 5vw, 3rem);
-  padding: clamp(4.5rem, 10vw, 7rem) clamp(1.25rem, 5vw, 2rem); }
-.pp-cta .eyebrow { color: rgba(255,255,255,0.6); }
-.pp-cta h2 { color: #fff; font-size: clamp(2.2rem, 4.8vw, 3.4rem); margin: 1.2rem 0 1rem; }
-.pp-cta p { font-family: var(--serif); font-size: 1.1rem; color: rgba(255,255,255,0.8);
-  max-width: 46ch; margin: 0 auto 2.4rem; line-height: 1.65; }
-.pp-cta .act { display: inline-block; background: #fff; color: var(--navy); font-size: 0.68rem;
-  letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; padding: 1.1rem 2.4rem;
-  border: 0; cursor: pointer; font-family: var(--sans); transition: opacity 0.3s var(--ease); }
-.pp-cta .act:hover { opacity: 0.88; }
-.pp-cta .contact { margin-top: 2.2rem; font-size: 0.76rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); }
-.pp-cta .contact a { color: rgba(255,255,255,0.8); }
-/* Acceptance = the contract: deeper info + terms + typed e-signature. */
-#pp-accept-form { max-width: 520px; margin: 0 auto; text-align: left; }
-#pp-accept-form .lbl { display: block; text-align: left; font-size: 0.6rem; letter-spacing: 0.2em;
-  text-transform: uppercase; font-weight: 600; color: rgba(255,255,255,0.6); margin: 1.15rem 0 0.45rem; }
+/* ---- what they say: white cards -------------------------------------- */
+.pp-quotesec { padding: 90px 0; }
+.pp-quotes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 980px; margin-top: 44px; }
+.pp-quote { background: #fff; border: 1px solid var(--pp-line); padding: clamp(24px, 2.4vw, 36px);
+  display: flex; flex-direction: column; }
+.pp-quote .mark { font-family: var(--serif); font-size: 44px; line-height: 22px; color: var(--accent); }
+.pp-quote blockquote { font-family: var(--serif); font-weight: 300; font-size: 17px; line-height: 1.55;
+  color: var(--ink); margin: 14px 0 0; flex: 1 0 auto; }
+.pp-quote figcaption { display: flex; align-items: center; gap: 14px; margin-top: 26px; }
+.pp-quote .avatar { width: 48px; height: 48px; border-radius: 50%; background: var(--navy);
+  border: 1px solid var(--pp-line); display: flex; align-items: center; justify-content: center;
+  font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 1.15rem;
+  color: rgba(255,255,255,0.9); flex: none; }
+.pp-quote .who { display: flex; flex-direction: column; gap: 3px; }
+.pp-quote .who b { font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--ink); }
+.pp-quote .who span { font-family: var(--sans); font-size: 11.5px; color: var(--pp-faint); }
+
+/* ---- next step: centered, light -------------------------------------- */
+.pp-cta { text-align: center; padding: 76px 0 96px; }
+.pp-cta .pp-lede { font-style: italic; max-width: 52ch; margin-left: auto; margin-right: auto; }
+.pp-cta .actrow { margin-top: 34px; }
+.pp-cta .act { display: inline-block; background: var(--navy); color: var(--paper-warm);
+  font-family: var(--sans); font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  font-weight: 500; padding: 15px 26px; border: 0; cursor: pointer; transition: background 0.25s var(--ease); }
+.pp-cta .act:hover { background: var(--navy-soft, #1c3252); }
+.pp-cta .contact { margin-top: 30px; font-family: var(--sans); font-size: 11px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--pp-faint); }
+.pp-cta .contact a { color: var(--muted); }
+
+/* acceptance = the contract (light theme) */
+#pp-accept-form { max-width: 560px; margin: 34px auto 0; text-align: left;
+  background: #fff; border: 1px solid var(--pp-line); padding: clamp(1.5rem, 3vw, 2.2rem); }
+#pp-accept-form .lbl { display: block; font-family: var(--sans); font-size: 0.62rem;
+  letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--muted);
+  margin: 1.15rem 0 0.45rem; }
 #pp-accept-form .lbl:first-child { margin-top: 0; }
 #pp-accept-form input, #pp-accept-form textarea { width: 100%; box-sizing: border-box;
-  font-family: var(--sans); font-size: 0.95rem; color: #fff; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.35); padding: 0.85rem 1rem; outline: none; }
+  font-family: var(--sans); font-size: 0.95rem; color: var(--ink); background: var(--paper-warm);
+  border: 1px solid var(--pp-line-strong); padding: 0.85rem 1rem; outline: none;
+  transition: border-color 0.3s var(--ease), background 0.3s var(--ease); }
+#pp-accept-form input:focus, #pp-accept-form textarea:focus { border-color: var(--navy); background: #fff; }
 #pp-accept-form textarea { min-height: 84px; resize: vertical; line-height: 1.6; }
-#pp-accept-form input::placeholder, #pp-accept-form textarea::placeholder { color: rgba(255,255,255,0.4); }
-#pp-accept-form input:focus, #pp-accept-form textarea:focus { border-color: #fff; }
 #pp-accept-form input.sig { text-align: center; font-family: var(--serif); font-style: italic;
   font-size: 1.3rem; }
-#pp-accept-form small { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.5);
-  margin: 1rem 0 1.2rem; text-align: center; line-height: 1.6; }
+#pp-accept-form small { display: block; font-family: var(--sans); font-size: 0.7rem;
+  color: var(--muted); margin: 1rem 0 1.2rem; text-align: center; line-height: 1.6; }
 #pp-accept-form .act { display: block; width: 100%; }
-.pp-terms { max-height: 230px; overflow-y: auto; text-align: left; background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.25); padding: 1.1rem 1.2rem; margin-top: 0.2rem; }
-.pp-terms h4 { font-family: var(--sans); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
-  font-weight: 600; color: rgba(255,255,255,0.85); margin: 1rem 0 0.3rem; }
+.pp-terms { max-height: 230px; overflow-y: auto; background: var(--paper-warm);
+  border: 1px solid var(--pp-line); padding: 1.1rem 1.2rem; margin-top: 0.2rem; }
+.pp-terms h4 { font-family: var(--sans); font-size: 0.6rem; letter-spacing: 0.18em;
+  text-transform: uppercase; font-weight: 600; color: var(--navy); margin: 1rem 0 0.3rem; }
 .pp-terms h4:first-child { margin-top: 0; }
-.pp-terms p { font-size: 0.76rem; color: rgba(255,255,255,0.6); line-height: 1.65; margin: 0 0 0.5rem; }
-.pp-accepted { display: inline-flex; align-items: center; gap: 0.7rem; background: rgba(223,238,226,0.14);
-  border: 1px solid rgba(223,238,226,0.4); color: #dfeee2; font-size: 0.68rem; letter-spacing: 0.18em;
-  text-transform: uppercase; font-weight: 600; padding: 0.9rem 1.6rem; }
+.pp-terms p { font-family: var(--sans); font-size: 0.76rem; color: var(--muted); line-height: 1.65;
+  margin: 0 0 0.5rem; }
+.pp-accepted { display: inline-flex; align-items: center; gap: 0.7rem; background: #dfeee2;
+  border: 1px solid rgba(29,77,42,0.25); color: #1d4d2a; font-size: 0.68rem; letter-spacing: 0.18em;
+  text-transform: uppercase; font-weight: 600; padding: 0.9rem 1.6rem; font-family: var(--sans); }
 
 .pp-missing { text-align: center; padding: 11rem 1.5rem 6rem; }
 .pp-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.8rem;
@@ -108,106 +154,142 @@ body { background: var(--paper-warm); }
 .pp-missing p { font-size: 0.88rem; color: var(--muted); }
 .pp-missing a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 
-.pp-foot { text-align: center; font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: var(--muted); padding: 2.4rem 1rem 3rem; }
+.pp-foot { text-align: center; font-family: var(--sans); font-size: 0.66rem; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--pp-faint); padding: 2.4rem 1rem 3rem;
+  border-top: 1px solid var(--pp-line); }
+
+@media (max-width: 900px) {
+  .pp-quotes { grid-template-columns: 1fr; max-width: 560px; }
+}
+@media (max-width: 700px) {
+  .pp-scope { padding: 52px 0 60px; }
+  .pp-filmsec, .pp-photosec { padding: 60px 0 50px; }
+  .pp-quotesec { padding: 60px 0; }
+  .pp-gallery { gap: 10px; }
+  .pp-gallery .col { gap: 10px; }
+  .pp-gallery .col:nth-child(3) { display: none; }
+  .pp-item { gap: 16px; }
+  .pp-item__t .badge { display: block; width: fit-content; margin-left: 0; top: 0; margin-top: 6px; }
+  .pp-cta { padding: 60px 0 72px; }
+}
 </style>
 </head>
 <body>
 
 <div id="pp-page" hidden>
   <header class="pp-hero">
-    <span class="eyebrow" id="pp-eyebrow">Private Proposal</span>
-    <h1 id="pp-title"></h1>
-    <p class="for" id="pp-for"></p>
-    <div class="date" id="pp-date"></div>
+    <div class="pp-wrap">
+      <div class="mono">JCS</div>
+      <div class="pp-kicker" id="pp-eyebrow">Private Proposal</div>
+      <h1 id="pp-title"></h1>
+      <p class="for" id="pp-for"></p>
+      <div class="date" id="pp-date"></div>
+    </div>
   </header>
 
-  <div class="pp-wrap">
-    <section class="pp-section">
-      <div class="pp-head pp-reveal">
-        <span class="eyebrow">Scope &amp; Investment</span>
-        <h2 id="pp-intro-h">A full marketing suite.</h2>
-        <p id="pp-intro" hidden></p>
+  <section class="pp-section pp-scope">
+    <div class="pp-wrap">
+      <div class="pp-reveal">
+        <div class="pp-kicker">Scope &amp; Investment</div>
+        <h2 class="pp-h2">A full marketing suite.</h2>
       </div>
-      <div id="pp-items" class="pp-reveal"></div>
-      <div class="pp-total pp-reveal"><b>The complete campaign</b><span class="pr" id="pp-total"></span></div>
-      <p class="pp-note pp-reveal" id="pp-note" hidden></p>
-    </section>
+      <div class="pp-items pp-reveal" id="pp-items"></div>
+      <div class="pp-reveal">
+        <div class="pp-total"><b>The complete campaign</b><span class="pr" id="pp-total"></span></div>
+        <p class="pp-total-note" id="pp-note" hidden></p>
+      </div>
+    </div>
+  </section>
 
-    <section class="pp-section" id="pp-film-sec" hidden>
-      <div class="pp-head pp-reveal">
-        <span class="eyebrow">The Film</span>
-        <h2>Films that tell a story.</h2>
-        <p>Recent listing films &mdash; slow, editorial, and built to convey the feeling of arriving.</p>
+  <section class="pp-section pp-filmsec" id="pp-film-sec" hidden>
+    <div class="pp-wrap">
+      <div class="pp-reveal">
+        <div class="pp-kicker">The Film</div>
+        <h2 class="pp-h2">Films that tell a story.</h2>
+        <p class="pp-lede">Recent listing films &mdash; slow, editorial, and built to convey the feeling of arriving.</p>
       </div>
       <div class="pp-films pp-reveal" id="pp-films"></div>
-    </section>
-
-    <section class="pp-section" id="pp-photo-sec" hidden>
-      <div class="pp-head pp-reveal">
-        <span class="eyebrow">The Photography</span>
-        <h2 id="pp-photo-h">Recent work.</h2>
-        <p id="pp-photo-sub"></p>
-      </div>
-      <div class="pp-grid pp-reveal" id="pp-photos"></div>
-    </section>
-
-    <section class="pp-section">
-      <div class="pp-head pp-reveal"><span class="eyebrow">What They Say</span></div>
-      <div class="pp-quote pp-reveal">
-        <div class="mark">&ldquo;</div>
-        <blockquote>The quality belongs in a design magazine. Precise, professional, and a pleasure to have in our clients&rsquo; homes.</blockquote>
-        <div class="who">Dan Malloy</div><div class="firm">Serhant</div>
-      </div>
-      <div class="pp-quote pp-reveal">
-        <div class="mark">&ldquo;</div>
-        <blockquote>Every frame is considered. From walkthrough to delivery, working with Jacob feels like working with a partner, not a vendor.</blockquote>
-        <div class="who">Erin Lail</div><div class="firm">Sotheby&rsquo;s International Realty</div>
-      </div>
-    </section>
-  </div>
-
-  <section class="pp-cta">
-    <span class="eyebrow">Next Step</span>
-    <h2>I&rsquo;d love to work with you.</h2>
-    <p id="pp-cta-copy">Accepting below signs the agreement and reserves the dates &mdash; I&rsquo;ll take it from there, capture to final delivery.</p>
-    <div id="pp-cta-open">
-      <button class="act" id="pp-reserve">Accept the Proposal &rarr;</button>
     </div>
-    <form id="pp-accept-form" hidden>
-      <span class="lbl">Best phone number *</span>
-      <input id="pp-phone" type="tel" required autocomplete="tel" placeholder="(408) 555-0123">
-      <span class="lbl">Property access</span>
-      <input id="pp-access" placeholder="e.g. Lockbox on the front door, agent meets on site, gate code&hellip;">
-      <span class="lbl">Anything else? <i style="font-style:normal;text-transform:none;letter-spacing:0;font-weight:400">(optional)</i></span>
-      <textarea id="pp-notes" placeholder="The listing story, timing constraints, special requests&hellip;"></textarea>
-      <span class="lbl">Terms</span>
-      <div class="pp-terms">
-        <h4>Usage Rights &amp; Ownership</h4>
-        <p>All photos, films, and related media (&ldquo;Content&rdquo;) remain the sole property and copyright of JCS LLC. You are granted a non-transferable license to use the Content for the marketing and sale of the specific property captured. Redistribution, resale, or repurposing for other properties or third parties requires written consent. The Content may not be altered in ways that misrepresent the original work, including AI-driven alteration or virtual staging without disclosure. JCS reserves the right to use Content for portfolio, promotional, and social purposes unless requested otherwise in writing.</p>
-        <h4>Advertising Standards &amp; Disclosure</h4>
-        <p>Some jurisdictions and MLS bodies have rules on disclosing digitally altered media (including virtual staging and virtual twilight). Determining whether disclosure is required is the client&rsquo;s responsibility, and the client assumes liability for the proper representation of the property in published media.</p>
-        <h4>Shoot Day</h4>
-        <p>Properties are shot as-is &mdash; cleaning, de-cluttering, and staging are not included. It is strongly encouraged that the homeowner be away for the duration of the visit. If no client representative is present during the shoot, creative choices (angles, compositions, lighting, staging adjustments, music, and the volume of media delivered) are final. Cancellations within 24 hours of the shoot may incur a fee.</p>
-        <h4>Revisions</h4>
-        <p>The first round of revisions is included with every delivery. Extensive additional revision requests may incur further fees, discussed before any work begins.</p>
-        <h4>Liability</h4>
-        <p>JCS LLC is not liable for injuries, damages, or losses incurred on site. The client is responsible for the property being accessible and ready at the scheduled time.</p>
-        <h4>Payment</h4>
-        <p>Your dates are reserved on acceptance. Unless otherwise arranged, payment is due upon receipt of the final invoice, delivered with your media.</p>
+  </section>
+
+  <section class="pp-section pp-photosec" id="pp-photo-sec" hidden>
+    <div class="pp-wrap">
+      <div class="pp-reveal">
+        <div class="pp-kicker">The Photography</div>
+        <h2 class="pp-h2" id="pp-photo-h">Recent work.</h2>
+        <p class="pp-lede" id="pp-photo-sub"></p>
       </div>
-      <span class="lbl">Sign &mdash; type your full legal name *</span>
-      <input id="pp-name" class="sig" required autocomplete="name" placeholder="Your full name">
-      <small>Typing your name serves as your electronic signature &mdash; it accepts this proposal and the terms above, and reserves the dates.</small>
-      <button class="act" type="submit" id="pp-confirm">Accept, Sign &amp; Reserve</button>
-    </form>
-    <div id="pp-done" hidden>
-      <span class="pp-accepted">&#10003;&nbsp; Dates reserved<span id="pp-done-date" style="text-transform:none;letter-spacing:0.04em;font-weight:400"></span></span>
-      <p style="margin-top:1.6rem;margin-bottom:0">Thank you &mdash; I&rsquo;ll be in touch within 24 hours to lock in the schedule.</p>
+      <div class="pp-gallery pp-reveal" id="pp-photos"></div>
     </div>
-    <div class="contact">
-      <a href="tel:+14088248719">(408) 824-8719</a> &nbsp;&middot;&nbsp;
-      <a id="pp-mail" href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a>
+  </section>
+
+  <section class="pp-section pp-quotesec">
+    <div class="pp-wrap">
+      <div class="pp-reveal"><div class="pp-kicker">What They Say</div></div>
+      <div class="pp-quotes">
+        <figure class="pp-quote pp-reveal">
+          <div class="mark">&ldquo;</div>
+          <blockquote>The quality belongs in a design magazine. Precise, professional, and a pleasure to have in our clients&rsquo; homes.</blockquote>
+          <figcaption>
+            <span class="avatar">D</span>
+            <span class="who"><b>Dan Malloy</b><span>Serhant</span></span>
+          </figcaption>
+        </figure>
+        <figure class="pp-quote pp-reveal">
+          <div class="mark">&ldquo;</div>
+          <blockquote>Every frame is considered. From walkthrough to delivery, working with Jacob feels like working with a partner, not a vendor.</blockquote>
+          <figcaption>
+            <span class="avatar">E</span>
+            <span class="who"><b>Erin Lail</b><span>Sotheby&rsquo;s International Realty</span></span>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="pp-section pp-cta">
+    <div class="pp-wrap">
+      <div class="pp-kicker" style="margin-bottom:18px">Next Step</div>
+      <h2 class="pp-h2">I&rsquo;d love to work with you.</h2>
+      <p class="pp-lede" id="pp-cta-copy">Accepting below signs the agreement and reserves the dates &mdash; I&rsquo;ll take it from there, capture to final delivery.</p>
+      <div class="actrow" id="pp-cta-open">
+        <button class="act" id="pp-reserve">Accept the Proposal &rarr;</button>
+      </div>
+      <form id="pp-accept-form" hidden>
+        <span class="lbl">Best phone number *</span>
+        <input id="pp-phone" type="tel" required autocomplete="tel" placeholder="(408) 555-0123">
+        <span class="lbl">Property access</span>
+        <input id="pp-access" placeholder="e.g. Lockbox on the front door, agent meets on site, gate code&hellip;">
+        <span class="lbl">Anything else? <i style="font-style:normal;text-transform:none;letter-spacing:0;font-weight:400">(optional)</i></span>
+        <textarea id="pp-notes" placeholder="The listing story, timing constraints, special requests&hellip;"></textarea>
+        <span class="lbl">Terms</span>
+        <div class="pp-terms">
+          <h4>Usage Rights &amp; Ownership</h4>
+          <p>All photos, films, and related media (&ldquo;Content&rdquo;) remain the sole property and copyright of JCS LLC. You are granted a non-transferable license to use the Content for the marketing and sale of the specific property captured. Redistribution, resale, or repurposing for other properties or third parties requires written consent. The Content may not be altered in ways that misrepresent the original work, including AI-driven alteration or virtual staging without disclosure. JCS reserves the right to use Content for portfolio, promotional, and social purposes unless requested otherwise in writing.</p>
+          <h4>Advertising Standards &amp; Disclosure</h4>
+          <p>Some jurisdictions and MLS bodies have rules on disclosing digitally altered media (including virtual staging and virtual twilight). Determining whether disclosure is required is the client&rsquo;s responsibility, and the client assumes liability for the proper representation of the property in published media.</p>
+          <h4>Shoot Day</h4>
+          <p>Properties are shot as-is &mdash; cleaning, de-cluttering, and staging are not included. It is strongly encouraged that the homeowner be away for the duration of the visit. If no client representative is present during the shoot, creative choices (angles, compositions, lighting, staging adjustments, music, and the volume of media delivered) are final. Cancellations within 24 hours of the shoot may incur a fee.</p>
+          <h4>Revisions</h4>
+          <p>The first round of revisions is included with every delivery. Extensive additional revision requests may incur further fees, discussed before any work begins.</p>
+          <h4>Liability</h4>
+          <p>JCS LLC is not liable for injuries, damages, or losses incurred on site. The client is responsible for the property being accessible and ready at the scheduled time.</p>
+          <h4>Payment</h4>
+          <p>Your dates are reserved on acceptance. Unless otherwise arranged, payment is due upon receipt of the final invoice, delivered with your media.</p>
+        </div>
+        <span class="lbl">Sign &mdash; type your full legal name *</span>
+        <input id="pp-name" class="sig" required autocomplete="name" placeholder="Your full name">
+        <small>Typing your name serves as your electronic signature &mdash; it accepts this proposal and the terms above, and reserves the dates.</small>
+        <button class="act" type="submit" id="pp-confirm">Accept, Sign &amp; Reserve</button>
+      </form>
+      <div id="pp-done" hidden style="margin-top:34px">
+        <span class="pp-accepted">&#10003;&nbsp; Dates reserved<span id="pp-done-date" style="text-transform:none;letter-spacing:0.04em;font-weight:400"></span></span>
+        <p style="margin-top:1.6rem;margin-bottom:0;font-size:0.9rem;color:var(--muted)">Thank you &mdash; I&rsquo;ll be in touch within 24 hours to lock in the schedule.</p>
+      </div>
+      <div class="contact">
+        <a href="tel:+14088248719">(408) 824-8719</a> &nbsp;&middot;&nbsp;
+        <a id="pp-mail" href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a>
+      </div>
     </div>
   </section>
 
@@ -228,7 +310,7 @@ body { background: var(--paper-warm); }
     return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); };
   var money = function (n) { return '$' + Number(n).toLocaleString(); };
 
-  // Slug: /proposal?slug=x · proposals.jacobcschrader.com path · /proposals/x
+  // Slug: /proposal?slug=x · proposal.jacobcschrader.com path · /proposals/x
   function slug() {
     var q = new URLSearchParams(location.search).get('slug');
     if (q) return q;
@@ -252,26 +334,34 @@ body { background: var(--paper-warm); }
     document.title = p.title + ' — Project Proposal | JCS';
     $('pp-eyebrow').textContent = 'Private Proposal' + (p.location ? ' · ' + p.location : '');
     $('pp-title').textContent = p.title;
-    $('pp-for').innerHTML = 'A bespoke listing campaign' + (p.client_name ? ', prepared for <b style="font-weight:500;color:var(--navy)">' + esc(p.client_name) + '</b>.' : '.');
+    $('pp-for').innerHTML = 'A bespoke listing campaign' + (p.client_name ? ', prepared for <b>' + esc(p.client_name) + '</b>.' : '.');
     var d = p.sent_at || p.created_at;
     $('pp-date').textContent = 'JCS · ' + (d ? new Date(d).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : '');
-    if (p.intro) { $('pp-intro').textContent = p.intro; $('pp-intro').hidden = false; }
 
-    // Line items, grouped
-    var items = p.items || [], html = '', lastGroup = null, total = 0;
+    // Line items — grouped ledger: tracked group header, serif item +
+    // optional badge, sans description, tabular price on the baseline.
+    var items = p.items || [], groups = [], total = 0;
     items.forEach(function (it) {
-      var g = (it.group || '').toUpperCase();
-      if (g && g !== lastGroup) { html += '<div class="pp-group">' + esc(g) + '</div>'; lastGroup = g; }
-      var pr = (it.price === '' || it.price == null) ? 'Included' : money(it.price);
+      var g = (it.group || 'The Campaign').toUpperCase();
+      var cur = groups[groups.length - 1];
+      if (!cur || cur.name !== g) { cur = { name: g, items: [] }; groups.push(cur); }
+      cur.items.push(it);
       if (typeof it.price === 'number') total += it.price;
-      html += '<div class="pp-item"><div class="pp-item__t"><b>' + esc(it.name) + '</b>' +
-        (it.badge ? '<span class="badge">' + esc(it.badge) + '</span>' : '') +
-        (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') + '</div>' +
-        '<span class="pr">' + pr + '</span></div>';
     });
-    $('pp-items').innerHTML = html;
+    $('pp-items').innerHTML = groups.map(function (g) {
+      return '<div class="pp-group"><div class="pp-ghead">' + esc(g.name) + '</div>' +
+        g.items.map(function (it) {
+          var pr = (it.price === '' || it.price == null)
+            ? '<span class="pr inc">Included</span>'
+            : '<span class="pr">' + money(it.price) + '</span>';
+          return '<div class="pp-item"><div class="pp-item__t"><b>' + esc(it.name) + '</b>' +
+            (it.badge ? '<span class="badge">' + esc(it.badge) + '</span>' : '') +
+            (it.desc ? '<p>' + esc(it.desc) + '</p>' : '') + '</div>' + pr + '</div>';
+        }).join('') + '</div>';
+    }).join('');
     $('pp-total').textContent = money(total);
-    if (p.note) { $('pp-note').textContent = p.note; $('pp-note').hidden = false; }
+    var noteBits = [p.intro, p.note].filter(Boolean);
+    if (noteBits.length) { $('pp-note').textContent = noteBits.join(' — '); $('pp-note').hidden = false; }
 
     if (p.accepted_at) showAccepted(p.accepted_at);
 
@@ -306,13 +396,20 @@ body { background: var(--paper-warm); }
         }).join('');
         $('pp-film-sec').hidden = false;
       }
-      var ph = all.find(function (p) { return (p.gallery && p.gallery.length >= 5); });
+      var ph = all.find(function (p) { return (p.gallery && p.gallery.length >= 6); });
       if (ph) {
         var gallery = typeof ph.gallery === 'string' ? JSON.parse(ph.gallery || '[]') : ph.gallery;
-        var imgs = [ph.cover_url].concat(gallery).filter(Boolean).slice(0, 7);
+        var imgs = [ph.cover_url].concat(gallery).filter(Boolean).slice(0, 12);
         $('pp-photo-h').textContent = 'Recent work — ' + (ph.headline || ph.title) + '.';
         $('pp-photo-sub').textContent = ph.title + (ph.shot_for ? ' — shot for ' + ph.shot_for + (ph.brokerage ? ' · ' + ph.brokerage : '') : '') + '.';
-        $('pp-photos').innerHTML = imgs.map(function (u) { return '<img loading="lazy" src="' + esc(u) + '" alt="">'; }).join('');
+        // Three natural-height columns, filled round-robin (reference layout).
+        var cols = [[], [], []];
+        imgs.forEach(function (u, i) { cols[i % 3].push(u); });
+        $('pp-photos').innerHTML = cols.map(function (col) {
+          return '<div class="col">' + col.map(function (u) {
+            return '<img loading="lazy" src="' + esc(u) + '" alt="">';
+          }).join('') + '</div>';
+        }).join('');
         $('pp-photo-sec').hidden = false;
       }
       reveal();
@@ -320,7 +417,7 @@ body { background: var(--paper-warm); }
     (window.PROJECTS_READY || Promise.resolve()).then(go).catch(go);
   }
 
-  // Accept flow
+  // Accept flow — acceptance is the contract (deeper info + e-signature).
   $('pp-reserve').addEventListener('click', function () {
     $('pp-cta-open').hidden = true;
     $('pp-accept-form').hidden = false;
@@ -332,8 +429,8 @@ body { background: var(--paper-warm); }
     var name = $('pp-name').value.trim();
     var phone = $('pp-phone').value.trim();
     var bad = false;
-    if (name.length < 3) { $('pp-name').style.borderColor = '#e88'; bad = true; }
-    if (phone.length < 7) { $('pp-phone').style.borderColor = '#e88'; bad = true; }
+    if (name.length < 3) { $('pp-name').style.borderColor = '#c0392b'; bad = true; }
+    if (phone.length < 7) { $('pp-phone').style.borderColor = '#c0392b'; bad = true; }
     if (bad) return;
     var btn = $('pp-confirm'); btn.disabled = true; btn.textContent = 'Reserving…';
     try {
