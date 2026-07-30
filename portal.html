@@ -11,39 +11,71 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="styles.css">
 <style>
+/* ============ Client portal — photography-first revamp. Flat navy
+   hero (no photo backdrop) with the stats inside it; project rows
+   carry gallery-cover thumbs; sign-in is a split panel with site
+   photography. Navy/white only, hairlines. ======================== */
+
 /* Lining figures — Cormorant's old-style numerals read like letters */
-.pt-num { font-family: var(--serif); font-weight: 500; color: var(--navy);
+.pt-num { font-family: var(--serif); font-weight: 500;
   font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; }
 
-.pt-wrap { padding: clamp(2.6rem, 6vw, 4rem) 0 6rem; }
+/* Nav sits over the dark hero; flow mode for sign-in / invalid link */
+.pt-nav--flow { position: static; box-shadow: 0 1px 0 var(--line-soft); }
 
-/* stats — hairline strip, no cards */
-.pt-stats { display: grid; grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
-  margin-bottom: clamp(2.6rem, 6vw, 4rem); }
-.pt-stat { padding: 1.6rem 1rem 1.5rem; text-align: center; }
-.pt-stat + .pt-stat { border-left: 1px solid var(--line-soft, #eee); }
-.pt-stat b { display: block; font-size: 2rem; line-height: 1; margin-bottom: 0.55rem; }
-.pt-stat span { font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--muted); font-weight: 500; }
-
-/* hero — the delivery this link came from */
-.pt-hero { background: var(--navy); color: #fff; padding: clamp(2.2rem, 5vw, 3.4rem);
-  text-align: center; margin-bottom: clamp(2.6rem, 6vw, 4rem); }
-.pt-hero .eyebrow { color: rgba(255,255,255,0.65); display: inline-flex; }
-.pt-hero h2 { font-family: var(--serif); font-style: italic; font-weight: 400; color: #fff;
-  font-size: clamp(1.7rem, 4vw, 2.5rem); margin: 1.1rem 0 0.4rem; line-height: 1.12; }
-.pt-hero .loc { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase;
-  color: rgba(255,255,255,0.55); margin-bottom: 1.9rem; }
-.pt-hero .btns { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
-.pt-hero .btns a { display: inline-block; padding: 0.9rem 1.9rem; font-size: 0.66rem;
+/* ---- hero: the client's latest cover (or flat navy) ---------------- */
+/* Textured navy — same treatment as the site's .ph image placeholders
+   (about-page portrait): diagonal navy gradient, soft glow, pinstripes. */
+.pt-hero { position: relative; overflow: hidden; color: #fff;
+  background: linear-gradient(150deg, var(--navy) 0%, var(--navy-deep) 100%); }
+.pt-hero::before { content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(80% 60% at 70% 20%, rgba(150,180,220,0.22), transparent 65%),
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.05) 0 1px, transparent 1px 26px); }
+.pt-hero__in { position: relative; text-align: center;
+  padding: clamp(7rem, 13vh, 9.5rem) clamp(1.25rem, 5vw, 2rem) clamp(2.6rem, 5vw, 3.6rem); }
+.pt-hero .eyebrow { display: inline-flex; color: rgba(255,255,255,0.65); }
+.pt-hero h1 { font-family: var(--serif); font-weight: 400; color: #fff;
+  font-size: clamp(2rem, 5vw, 3.3rem); line-height: 1.08; margin: 1.15rem 0 0.75rem; }
+.pt-hero h1 em { font-style: italic; font-weight: 400; }
+.pt-hero .sub { font-size: 0.95rem; color: rgba(255,255,255,0.72); line-height: 1.65;
+  max-width: 46ch; margin: 0 auto; }
+.pt-hero .loc { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55); }
+.pt-hero .date { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin-top: 0.5rem; }
+.pt-hero .btns { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; margin-top: 2.2rem; }
+.pt-hero .btns a { display: inline-block; padding: 1rem 2.1rem; font-size: 0.66rem;
   letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; text-decoration: none;
   transition: opacity 0.3s var(--ease); }
 .pt-hero .btns a:hover { opacity: 0.85; }
 .pt-hero .btns a.solid { background: #fff; color: var(--navy); }
 .pt-hero .btns a.ghost { border: 1px solid rgba(255,255,255,0.4); color: #fff; }
 
-/* sections */
+.pt-hero__stats { position: relative; display: grid; grid-template-columns: repeat(4, 1fr);
+  max-width: 880px; margin: 0 auto; border-top: 1px solid rgba(255,255,255,0.18);
+  padding: 0 clamp(1.25rem, 5vw, 2rem); }
+.pt-stat { padding: 1.45rem 0.6rem 1.6rem; text-align: center; }
+.pt-stat + .pt-stat { border-left: 1px solid rgba(255,255,255,0.12); }
+.pt-stat b { display: block; font-size: 1.9rem; line-height: 1; margin-bottom: 0.5rem; color: #fff; }
+.pt-stat span { font-size: 0.58rem; letter-spacing: 0.22em; text-transform: uppercase;
+  color: rgba(255,255,255,0.55); font-weight: 500; }
+
+.pt-wrap { padding: clamp(2.6rem, 6vw, 4rem) 0 6rem; }
+
+/* ---- application in review — the landing state after booking ------- */
+.pt-pending { background: #fff; border: 1px solid var(--line); text-align: center;
+  padding: clamp(2rem, 5vw, 2.8rem) clamp(1.25rem, 4vw, 2.4rem);
+  margin-bottom: clamp(2.4rem, 5vw, 3.4rem); }
+.pt-pending + .pt-pending { margin-top: -1rem; }
+.pt-pending .eyebrow { display: inline-flex; }
+.pt-pending h2 { font-family: var(--serif); font-style: italic; font-weight: 400;
+  color: var(--navy); font-size: clamp(1.45rem, 3.4vw, 1.9rem); margin: 0.9rem 0 0.35rem;
+  line-height: 1.18; }
+.pt-pending .loc { font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--muted); }
+.pt-pending p { font-size: 0.85rem; color: var(--muted); margin: 1.1rem 0 0; line-height: 1.7; }
+
+/* ---- sections ------------------------------------------------------- */
 .pt-search { margin-bottom: clamp(1.8rem, 4vw, 2.6rem); }
 .pt-search input { width: 100%; box-sizing: border-box; font-family: var(--sans);
   font-size: 0.92rem; color: var(--ink); background: #fff; border: 1px solid var(--line);
@@ -57,13 +89,22 @@
 .pt-sec__head .eyebrow { display: inline-flex; }
 .pt-sec__head small { font-size: 0.68rem; letter-spacing: 0.14em; color: var(--muted); }
 
-.pt-row { display: flex; justify-content: space-between; align-items: center; gap: 1.4rem;
-  padding: 1.35rem 0.2rem; border-bottom: 1px solid var(--line-soft, #eee); flex-wrap: wrap;
+/* project row — cover thumb, serif title, actions right */
+.pt-row { display: flex; align-items: center; gap: 1.3rem;
+  padding: 1.05rem 0.2rem; border-bottom: 1px solid var(--line-soft, #eee); flex-wrap: wrap;
   transition: background 0.25s var(--ease); }
 .pt-row:hover { background: rgba(255,255,255,0.6); }
+.pt-row__ph { flex: 0 0 auto; width: 106px; aspect-ratio: 16 / 10; background: var(--navy);
+  overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.pt-row__ph img { width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform 0.5s var(--ease); }
+.pt-row:hover .pt-row__ph img { transform: scale(1.04); }
+.pt-row__ph i { font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 1.05rem; color: rgba(255,255,255,0.45); letter-spacing: 0.02em; }
+.pt-row__t { flex: 1 1 220px; min-width: 0; }
 .pt-row__t b { display: block; font-family: var(--serif); font-weight: 500;
   font-size: 1.18rem; color: var(--navy); line-height: 1.25; }
-.pt-row__t small { display: block; margin-top: 0.3rem; font-size: 0.68rem;
+.pt-row__t small { display: block; margin-top: 0.3rem; font-size: 0.66rem;
   letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
 .pt-row__r { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
 .pt-lnk { font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
@@ -76,7 +117,6 @@
   font-weight: 600; padding: 0.34rem 0.7rem; white-space: nowrap; }
 .pt-chip--prod { background: #f4ede0; color: #8a6d2f; }
 .pt-chip--up { background: #e8ecf3; color: #33507e; }
-.pt-chip--booked { background: #edeae3; color: #6b6455; }
 .pt-chip--done { background: #dfeee2; color: #1d4d2a; }
 .pt-chip--due { background: #f5e8e8; color: #a03a3a; }
 .pt-chip--paid { background: #dfeee2; color: #1d4d2a; }
@@ -86,48 +126,70 @@
   font-size: 0.85rem; color: var(--muted); }
 .pt-note a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 
-/* login */
-.pt-panel { max-width: 460px; margin: 0 auto; background: #fff;
-  padding: clamp(2rem, 5vw, 3rem); box-shadow: 0 16px 50px rgba(15,34,64,0.06); }
-.pt-panel label { display: block; font-size: 0.62rem; letter-spacing: 0.2em;
+/* ---- sign in — split panel with site photography -------------------- */
+.pt-auth { display: grid; grid-template-columns: 1.05fr 1fr; max-width: 960px;
+  margin: 0 auto; background: #fff; border: 1px solid var(--line); overflow: hidden; }
+.pt-auth__photo { position: relative; min-height: 520px; display: flex; align-items: flex-end;
+  background:
+    linear-gradient(180deg, rgba(6,13,24,0.12) 30%, rgba(6,13,24,0.66) 100%),
+    var(--navy) url('/images/svc/photography.jpg') center / cover no-repeat;
+  padding: clamp(1.8rem, 4vw, 2.6rem); }
+.pt-auth__photo > div { position: relative; color: #fff; }
+.pt-auth__photo .mono { font-family: var(--serif); font-style: italic; font-weight: 300;
+  font-size: 1.6rem; letter-spacing: 0.01em; display: block; margin-bottom: 0.9rem; }
+.pt-auth__photo h2 { font-family: var(--serif); font-style: italic; font-weight: 400;
+  color: #fff; font-size: clamp(1.5rem, 3vw, 1.9rem); line-height: 1.2; margin: 0 0 0.7rem; }
+.pt-auth__photo .caps { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase;
+  color: rgba(255,255,255,0.65); font-weight: 500; }
+.pt-auth__form { display: flex; flex-direction: column; justify-content: center;
+  padding: clamp(2.2rem, 5vw, 3.2rem); }
+.pt-auth__form label { display: block; font-size: 0.62rem; letter-spacing: 0.2em;
   text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 0.55rem; }
-.pt-panel input[type=email] { width: 100%; box-sizing: border-box; font-family: var(--sans);
+.pt-auth__form input[type=email] { width: 100%; box-sizing: border-box; font-family: var(--sans);
   font-size: 0.95rem; color: var(--ink); background: var(--paper-warm, #f6f4ef);
   border: 1px solid var(--line); padding: 0.9rem 0.95rem; outline: none;
   transition: border-color 0.3s var(--ease); }
-.pt-panel input[type=email]:focus { border-color: var(--navy); background: #fff; }
-.pt-panel .note { font-size: 0.78rem; color: var(--muted); margin: 1.1rem 0 0; line-height: 1.65; }
-.pt-missing { text-align: center; padding: 3rem 1rem 0; }
+.pt-auth__form input[type=email]:focus { border-color: var(--navy); background: #fff; }
+.pt-auth__form .note { font-size: 0.78rem; color: var(--muted); margin: 1.1rem 0 0; line-height: 1.65; }
+.pt-auth__form .sent h2 { font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 1.5rem; color: var(--navy); margin: 0 0 0.6rem; }
+
+.pt-missing { text-align: center; padding: 0 1rem clamp(2rem, 5vw, 3rem); }
 .pt-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400;
   font-size: 1.6rem; color: var(--navy); margin: 0 0 0.6rem; }
 .pt-missing p { font-size: 0.85rem; color: var(--muted); }
 .pt-missing a { color: var(--navy); }
 
+@media (max-width: 760px) {
+  .pt-auth { grid-template-columns: 1fr; }
+  .pt-auth__photo { min-height: 210px; }
+}
 @media (max-width: 700px) {
-  .pt-stats { grid-template-columns: 1fr 1fr; }
-  .pt-stat:nth-child(3), .pt-stat:nth-child(4) { border-top: 1px solid var(--line-soft, #eee); }
+  .pt-hero__stats { grid-template-columns: 1fr 1fr; }
+  .pt-stat:nth-child(3), .pt-stat:nth-child(4) { border-top: 1px solid rgba(255,255,255,0.12); }
   .pt-stat:nth-child(3) { border-left: 0; }
   .pt-row__r { width: 100%; justify-content: flex-start; }
 }
 @media (max-width: 520px) {
-  .pt-wrap { padding-top: 1.6rem; }
-  .pt-stat { padding: 1.1rem 0.4rem 1rem; }
+  .pt-wrap { padding-top: 1.8rem; }
+  .pt-hero__in { padding-top: 5.4rem; padding-bottom: 1.9rem; }
+  .pt-hero .btns { margin-top: 1.7rem; gap: 0.6rem; }
+  .pt-hero .btns a { padding: 0.7rem 1.2rem; font-size: 0.58rem; letter-spacing: 0.16em; }
+  .pt-stat { padding: 1.05rem 0.4rem 1.15rem; }
   .pt-stat b { font-size: 1.45rem; margin-bottom: 0.4rem; }
   .pt-stat span { font-size: 0.52rem; letter-spacing: 0.16em; }
-  .pt-hero { padding: 1.8rem 1.2rem; }
-  .pt-hero .btns { gap: 0.6rem; }
-  .pt-hero .btns a { padding: 0.7rem 1.2rem; font-size: 0.58rem; letter-spacing: 0.16em; }
-  .pt-row { padding: 1.1rem 0; }
+  .pt-row { padding: 0.95rem 0; gap: 0.9rem; }
+  .pt-row__ph { width: 84px; }
   .pt-row__t b { font-size: 1.05rem; }
   .pt-row__r { gap: 0.7rem 1rem; }
   .pt-sec__head { flex-wrap: wrap; gap: 0.4rem; }
-  .pt-panel { padding: 1.6rem 1.3rem; }
+  .pt-auth__form { padding: 1.7rem 1.3rem 2rem; }
 }
 </style>
 </head>
 <body>
 
-<nav class="mnav" style="position:static">
+<nav class="mnav mnav--light" id="pt-nav">
   <a class="mnav__brand" href="/">JCS</a>
   <span>
     <a class="mnav__link" href="/book">Book Again &rarr;</a>
@@ -135,22 +197,19 @@
   </span>
 </nav>
 
-<header class="page-head" style="padding-top:clamp(2.5rem,6vh,4rem)">
-  <div class="wrap hero-in">
-    <span class="eyebrow">Client Portal</span>
-    <h1 class="display" style="font-size:clamp(1.9rem,3.6vw,2.9rem)" id="pt-head">Welcome back.</h1>
+<header class="pt-hero" id="pt-hero" hidden>
+  <div class="pt-hero__in" id="pt-hero-in"></div>
+  <div class="pt-hero__stats">
+    <div class="pt-stat"><b class="pt-num" id="pt-up">0</b><span>Upcoming</span></div>
+    <div class="pt-stat"><b class="pt-num" id="pt-prod">0</b><span>In Production</span></div>
+    <div class="pt-stat"><b class="pt-num" id="pt-done">0</b><span>Delivered</span></div>
+    <div class="pt-stat"><b class="pt-num" id="pt-due">$0</b><span>Outstanding</span></div>
   </div>
 </header>
 
 <div class="wrap pt-wrap">
   <div id="pt-app" hidden>
-    <div class="pt-stats">
-      <div class="pt-stat"><b class="pt-num" id="pt-up">0</b><span>Upcoming</span></div>
-      <div class="pt-stat"><b class="pt-num" id="pt-prod">0</b><span>In Production</span></div>
-      <div class="pt-stat"><b class="pt-num" id="pt-done">0</b><span>Delivered</span></div>
-      <div class="pt-stat"><b class="pt-num" id="pt-due">$0</b><span>Outstanding</span></div>
-    </div>
-    <div id="pt-hero"></div>
+    <div id="pt-pending"></div>
     <div class="pt-search"><input id="pt-q" type="search" placeholder="Search your projects — address, city, service…" autocomplete="off"></div>
     <div id="pt-secs"></div>
     <p class="pt-note">Questions or requests? <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> &nbsp;·&nbsp; <a href="tel:+14088248719">(408) 824-8719</a></p>
@@ -161,17 +220,28 @@
     <p>Sign in below with your email, or <a href="mailto:jacxbschrader@gmail.com">get in touch</a>.</p>
   </div>
 
-  <div id="pt-login" hidden>
-    <form id="pt-form" class="pt-panel">
-      <label for="pt-email">Your email</label>
-      <input id="pt-email" type="email" required placeholder="you@brokerage.com" autocomplete="email">
-      <input id="pt-company" name="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
-      <button class="btn btn--solid" type="submit" id="pt-submit" style="width:100%;margin-top:1.2rem;border:0;cursor:pointer">Email Me My Portal Link</button>
-      <p class="note">No password needed — if your email is tied to any projects, a sign-in link is on its way.</p>
-    </form>
-    <div id="pt-sent" hidden class="pt-panel" style="text-align:center">
-      <h2 style="font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.5rem;color:var(--navy);margin:0 0 0.6rem">Check your inbox.</h2>
-      <p class="note" style="margin:0">If that email is tied to any projects, a sign-in link is on its way. It signs you in on this device — request a fresh one anytime.</p>
+  <div id="pt-login" hidden style="padding-top:clamp(3.5rem,8vh,5rem)">
+    <div class="pt-auth">
+      <div class="pt-auth__photo">
+        <div>
+          <span class="mono">JCS</span>
+          <h2>Your projects, one place.</h2>
+          <span class="caps">Projects &middot; Deliveries &middot; Invoices</span>
+        </div>
+      </div>
+      <div class="pt-auth__form">
+        <form id="pt-form">
+          <label for="pt-email">Your email</label>
+          <input id="pt-email" type="email" required placeholder="you@brokerage.com" autocomplete="email">
+          <input id="pt-company" name="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+          <button class="btn btn--solid" type="submit" id="pt-submit" style="width:100%;margin-top:1.2rem;border:0;cursor:pointer">Email Me My Portal Link</button>
+          <p class="note">No password needed — if your email is tied to any projects, a sign-in link is on its way.</p>
+        </form>
+        <div id="pt-sent" hidden class="sent" style="text-align:center">
+          <h2>Check your inbox.</h2>
+          <p class="note" style="margin:0">If that email is tied to any projects, a sign-in link is on its way. It signs you in on this device — request a fresh one anytime.</p>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -194,7 +264,8 @@
   var $ = function (id) { return document.getElementById(id); };
   var qs = new URLSearchParams(location.search);
   var focus = qs.get('p');
-  function missing() { $('pt-missing').hidden = false; $('pt-login').hidden = false; wireLogin(); }
+  function navFlow() { $('pt-nav').classList.remove('mnav--light'); $('pt-nav').classList.add('pt-nav--flow'); }
+  function missing() { navFlow(); $('pt-missing').hidden = false; $('pt-login').hidden = false; wireLogin(); }
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
   function money(n) { return '$' + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
   function dstr(s) {
@@ -232,39 +303,62 @@
   }
   try {
     var r = await fetch('/api/portal');
-    if (r.status === 401) { $('pt-login').hidden = false; wireLogin(); return; }
+    if (r.status === 401) { navFlow(); $('pt-login').hidden = false; wireLogin(); return; }
     if (!r.ok) { missing(); return; }
     var d = await r.json();
     var firstVisit = !d.projects.length;
-    $('pt-head').innerHTML = (firstVisit ? 'Welcome, <em>' : 'Welcome back, <em>') + esc(d.client_first || d.client_name) + '</em>.';
     document.title = d.client_name + ' — Client Portal — Jacob Schrader';
+
+    // ---- hero: flat navy. A focused delivery (?p=) takes it over
+    // entirely; otherwise the welcome + stats.
+    var heroProject = focus
+      ? d.projects.find(function (p) { return String(p.id) === String(focus) && p.delivery; })
+      : null;
+    if (heroProject) {
+      $('pt-hero-in').innerHTML = '<span class="eyebrow">Your Delivery Is Ready</span>' +
+        '<h1><em>' + esc(heroProject.title) + '</em></h1>' +
+        (heroProject.location ? '<div class="loc">' + esc(heroProject.location) + '</div>' : '') +
+        (heroProject.delivery.delivered_at ? '<div class="date">Delivered ' + dstr(heroProject.delivery.delivered_at) + '</div>' : '') +
+        '<div class="btns">' +
+        heroProject.delivery.links.map(function (l, i) {
+          return '<a class="' + (i === 0 ? 'solid' : 'ghost') + '" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
+        }).join('') + '</div>';
+    } else {
+      var sub = firstVisit
+        ? (d.pending && d.pending.length
+            ? 'Your application is in. Everything that follows will live here.'
+            : 'Everything we make together will live here.')
+        : 'Every project, delivery, and invoice — always current.';
+      $('pt-hero-in').innerHTML = '<span class="eyebrow">Client Portal</span>' +
+        '<h1>' + (firstVisit ? 'Welcome, <em>' : 'Welcome back, <em>') + esc(d.client_first || d.client_name) + '</em>.</h1>' +
+        '<p class="sub">' + sub + '</p>';
+    }
     $('pt-up').textContent = d.stats.upcoming;
     $('pt-prod').textContent = d.stats.production;
     $('pt-done').textContent = d.stats.delivered;
     $('pt-due').textContent = money(d.stats.outstanding);
 
-    // Applications still in review — the landing state right after booking.
-    if (d.pending && d.pending.length) {
-      $('pt-hero').innerHTML = d.pending.map(function (rq) {
-        return '<div class="pt-hero"><span class="eyebrow">Application In Review</span>' +
-          '<h2>' + esc(rq.title) + '</h2>' +
-          (rq.location ? '<div class="loc">' + esc(rq.location) + '</div>' : '') +
-          '<div class="loc" style="margin-top:0.8rem;text-transform:none;letter-spacing:0.02em;font-size:0.85rem">' +
-          'Received ' + dstr(rq.created_at) + ' &mdash; I reply within 24 hours with availability and your confirmed quote.</div></div>';
+    // Bands above the project list: a proposal awaiting review is the
+    // strongest call-to-action; applications still in review follow.
+    var bands = '';
+    if (d.awaiting && d.awaiting.length) {
+      bands += d.awaiting.map(function (pr) {
+        return '<div class="pt-pending"><span class="eyebrow">Your Proposal Is Ready</span>' +
+          '<h2>' + esc(pr.title) + '</h2>' +
+          (pr.location ? '<div class="loc">' + esc(pr.location) + '</div>' : '') +
+          '<p>Review the scope and reserve the dates &mdash; accepting signs the agreement and confirms your shoot.</p>' +
+          '<a class="btn btn--solid" style="margin-top:1.2rem" href="' + esc(pr.url) + '">Review &amp; Accept &rarr;</a></div>';
       }).join('');
     }
-
-    // hero: the delivery this link came from (?p=), if it's out
-    var hero = focus ? d.projects.find(function (p) { return String(p.id) === String(focus) && p.delivery; }) : null;
-    if (hero) {
-      $('pt-hero').innerHTML = '<div class="pt-hero"><span class="eyebrow">Your Delivery Is Ready</span>' +
-        '<h2>' + esc(hero.title) + '</h2>' +
-        (hero.location ? '<div class="loc">' + esc(hero.location) + '</div>' : '') +
-        '<div class="btns">' +
-        hero.delivery.links.map(function (l, i) {
-          return '<a class="' + (i === 0 ? 'solid' : 'ghost') + '" href="' + esc(l.url) + '" target="_blank" rel="noopener">' + esc(l.label) + '</a>';
-        }).join('') + '</div></div>';
+    if (d.pending && d.pending.length) {
+      bands += d.pending.map(function (rq) {
+        return '<div class="pt-pending"><span class="eyebrow">Application In Review</span>' +
+          '<h2>' + esc(rq.title) + '</h2>' +
+          (rq.location ? '<div class="loc">' + esc(rq.location) + '</div>' : '') +
+          '<p>Received ' + dstr(rq.created_at) + ' &mdash; I reply within 24 hours with availability and your personal proposal.</p></div>';
+      }).join('');
     }
+    $('pt-pending').innerHTML = bands;
 
     function chip(stage) {
       if (stage === 'Delivered') return '<span class="pt-chip pt-chip--due">Unpaid</span>';
@@ -273,13 +367,19 @@
       return '<span class="pt-chip pt-chip--' + cls + '">' + esc(stage) + '</span>';
     }
     function row(p) {
-      var sub = [p.location, p.shoot_date ? dstr(p.shoot_date) : '', p.service]
+      // Meta line: location + date only (service names stay off the
+      // cards — Jacob's call; search still matches them).
+      var sub = [p.location, p.shoot_date ? dstr(p.shoot_date) : '']
         .filter(Boolean).join(' · ');
+      var ph = p.cover
+        ? '<img loading="lazy" src="' + esc(p.cover) + '" alt="">'
+        : '<i>JCS</i>';
       var right = '';
       if (p.delivery) right += '<a class="pt-lnk" href="/delivery?t=' + esc(p.delivery.token) + '">View Delivery</a>';
       if (p.invoice) right += '<a class="pt-lnk" href="/invoice?t=' + esc(p.invoice.token) + '">View Invoice &rarr;</a>';
       right += chip(p.stage);
-      return '<div class="pt-row"><div class="pt-row__t"><b>' + esc(p.title) + '</b>' +
+      return '<div class="pt-row"><span class="pt-row__ph">' + ph + '</span>' +
+        '<div class="pt-row__t"><b>' + esc(p.title) + '</b>' +
         (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div><div class="pt-row__r">' + right + '</div></div>';
     }
     function renderSecs(q) {
@@ -294,20 +394,23 @@
       ].map(function (g) {
         return [g[0], list.filter(function (p) { return p.stage === g[1]; })];
       });
+      var empty = q ? 'Nothing matches &ldquo;' + esc(q) + '&rdquo;.'
+        : (d.pending && d.pending.length ? '' : 'No projects yet.');
       $('pt-secs').innerHTML = groups.map(function (g) {
         return g[1].length
           ? '<div class="pt-sec"><div class="pt-sec__head"><span class="eyebrow">' + g[0] + '</span>' +
             '<small>' + g[1].length + ' project' + (g[1].length === 1 ? '' : 's') + '</small></div>' +
             g[1].map(row).join('') + '</div>'
           : '';
-      }).join('') || '<p style="text-align:center;color:var(--muted);font-size:0.9rem">' +
-        (q ? 'Nothing matches &ldquo;' + esc(q) + '&rdquo;.' : 'No projects yet.') + '</p>';
+      }).join('') || (empty
+        ? '<p style="text-align:center;color:var(--muted);font-size:0.9rem">' + empty + '</p>' : '');
     }
     renderSecs('');
     $('pt-q').addEventListener('input', function () { renderSecs(this.value); });
     if (d.projects.length < 4) $('pt-q').parentNode.hidden = true;
 
     $('pt-signout').hidden = false;
+    $('pt-hero').hidden = false;
     $('pt-app').hidden = false;
   } catch (e) { missing(); }
 })();

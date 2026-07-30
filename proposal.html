@@ -76,13 +76,28 @@ body { background: var(--paper-warm); }
 .pp-cta .act:hover { opacity: 0.88; }
 .pp-cta .contact { margin-top: 2.2rem; font-size: 0.76rem; letter-spacing: 0.14em; color: rgba(255,255,255,0.55); }
 .pp-cta .contact a { color: rgba(255,255,255,0.8); }
-#pp-accept-form { max-width: 380px; margin: 0 auto; }
-#pp-accept-form input { width: 100%; box-sizing: border-box; text-align: center; font-family: var(--serif);
-  font-style: italic; font-size: 1.25rem; color: #fff; background: transparent;
-  border: 1px solid rgba(255,255,255,0.4); padding: 0.85rem 1rem; outline: none; margin-bottom: 1rem; }
-#pp-accept-form input::placeholder { color: rgba(255,255,255,0.45); }
-#pp-accept-form input:focus { border-color: #fff; }
-#pp-accept-form small { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-bottom: 1.2rem; }
+/* Acceptance = the contract: deeper info + terms + typed e-signature. */
+#pp-accept-form { max-width: 520px; margin: 0 auto; text-align: left; }
+#pp-accept-form .lbl { display: block; text-align: left; font-size: 0.6rem; letter-spacing: 0.2em;
+  text-transform: uppercase; font-weight: 600; color: rgba(255,255,255,0.6); margin: 1.15rem 0 0.45rem; }
+#pp-accept-form .lbl:first-child { margin-top: 0; }
+#pp-accept-form input, #pp-accept-form textarea { width: 100%; box-sizing: border-box;
+  font-family: var(--sans); font-size: 0.95rem; color: #fff; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.35); padding: 0.85rem 1rem; outline: none; }
+#pp-accept-form textarea { min-height: 84px; resize: vertical; line-height: 1.6; }
+#pp-accept-form input::placeholder, #pp-accept-form textarea::placeholder { color: rgba(255,255,255,0.4); }
+#pp-accept-form input:focus, #pp-accept-form textarea:focus { border-color: #fff; }
+#pp-accept-form input.sig { text-align: center; font-family: var(--serif); font-style: italic;
+  font-size: 1.3rem; }
+#pp-accept-form small { display: block; font-size: 0.7rem; color: rgba(255,255,255,0.5);
+  margin: 1rem 0 1.2rem; text-align: center; line-height: 1.6; }
+#pp-accept-form .act { display: block; width: 100%; }
+.pp-terms { max-height: 230px; overflow-y: auto; text-align: left; background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.25); padding: 1.1rem 1.2rem; margin-top: 0.2rem; }
+.pp-terms h4 { font-family: var(--sans); font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+  font-weight: 600; color: rgba(255,255,255,0.85); margin: 1rem 0 0.3rem; }
+.pp-terms h4:first-child { margin-top: 0; }
+.pp-terms p { font-size: 0.76rem; color: rgba(255,255,255,0.6); line-height: 1.65; margin: 0 0 0.5rem; }
 .pp-accepted { display: inline-flex; align-items: center; gap: 0.7rem; background: rgba(223,238,226,0.14);
   border: 1px solid rgba(223,238,226,0.4); color: #dfeee2; font-size: 0.68rem; letter-spacing: 0.18em;
   text-transform: uppercase; font-weight: 600; padding: 0.9rem 1.6rem; }
@@ -155,14 +170,36 @@ body { background: var(--paper-warm); }
   <section class="pp-cta">
     <span class="eyebrow">Next Step</span>
     <h2>I&rsquo;d love to work with you.</h2>
-    <p id="pp-cta-copy">Reserve the dates and I&rsquo;ll take it from there &mdash; capture to final delivery.</p>
+    <p id="pp-cta-copy">Accepting below signs the agreement and reserves the dates &mdash; I&rsquo;ll take it from there, capture to final delivery.</p>
     <div id="pp-cta-open">
-      <button class="act" id="pp-reserve">Reserve the Dates &rarr;</button>
+      <button class="act" id="pp-reserve">Accept the Proposal &rarr;</button>
     </div>
     <form id="pp-accept-form" hidden>
-      <input id="pp-name" required placeholder="Type your full name">
-      <small>Typing your name serves as your acceptance of this proposal.</small>
-      <button class="act" type="submit" id="pp-confirm">Confirm &amp; Reserve</button>
+      <span class="lbl">Best phone number *</span>
+      <input id="pp-phone" type="tel" required autocomplete="tel" placeholder="(408) 555-0123">
+      <span class="lbl">Property access</span>
+      <input id="pp-access" placeholder="e.g. Lockbox on the front door, agent meets on site, gate code&hellip;">
+      <span class="lbl">Anything else? <i style="font-style:normal;text-transform:none;letter-spacing:0;font-weight:400">(optional)</i></span>
+      <textarea id="pp-notes" placeholder="The listing story, timing constraints, special requests&hellip;"></textarea>
+      <span class="lbl">Terms</span>
+      <div class="pp-terms">
+        <h4>Usage Rights &amp; Ownership</h4>
+        <p>All photos, films, and related media (&ldquo;Content&rdquo;) remain the sole property and copyright of JCS LLC. You are granted a non-transferable license to use the Content for the marketing and sale of the specific property captured. Redistribution, resale, or repurposing for other properties or third parties requires written consent. The Content may not be altered in ways that misrepresent the original work, including AI-driven alteration or virtual staging without disclosure. JCS reserves the right to use Content for portfolio, promotional, and social purposes unless requested otherwise in writing.</p>
+        <h4>Advertising Standards &amp; Disclosure</h4>
+        <p>Some jurisdictions and MLS bodies have rules on disclosing digitally altered media (including virtual staging and virtual twilight). Determining whether disclosure is required is the client&rsquo;s responsibility, and the client assumes liability for the proper representation of the property in published media.</p>
+        <h4>Shoot Day</h4>
+        <p>Properties are shot as-is &mdash; cleaning, de-cluttering, and staging are not included. It is strongly encouraged that the homeowner be away for the duration of the visit. If no client representative is present during the shoot, creative choices (angles, compositions, lighting, staging adjustments, music, and the volume of media delivered) are final. Cancellations within 24 hours of the shoot may incur a fee.</p>
+        <h4>Revisions</h4>
+        <p>The first round of revisions is included with every delivery. Extensive additional revision requests may incur further fees, discussed before any work begins.</p>
+        <h4>Liability</h4>
+        <p>JCS LLC is not liable for injuries, damages, or losses incurred on site. The client is responsible for the property being accessible and ready at the scheduled time.</p>
+        <h4>Payment</h4>
+        <p>Your dates are reserved on acceptance. Unless otherwise arranged, payment is due upon receipt of the final invoice, delivered with your media.</p>
+      </div>
+      <span class="lbl">Sign &mdash; type your full legal name *</span>
+      <input id="pp-name" class="sig" required autocomplete="name" placeholder="Your full name">
+      <small>Typing your name serves as your electronic signature &mdash; it accepts this proposal and the terms above, and reserves the dates.</small>
+      <button class="act" type="submit" id="pp-confirm">Accept, Sign &amp; Reserve</button>
     </form>
     <div id="pp-done" hidden>
       <span class="pp-accepted">&#10003;&nbsp; Dates reserved<span id="pp-done-date" style="text-transform:none;letter-spacing:0.04em;font-weight:400"></span></span>
@@ -288,24 +325,31 @@ body { background: var(--paper-warm); }
     $('pp-cta-open').hidden = true;
     $('pp-accept-form').hidden = false;
     $('pp-name').value = (DATA && DATA.client_name) || '';
-    $('pp-name').focus();
+    $('pp-phone').focus();
   });
   $('pp-accept-form').addEventListener('submit', async function (e) {
     e.preventDefault();
     var name = $('pp-name').value.trim();
-    if (name.length < 3) { $('pp-name').style.borderColor = '#e88'; return; }
+    var phone = $('pp-phone').value.trim();
+    var bad = false;
+    if (name.length < 3) { $('pp-name').style.borderColor = '#e88'; bad = true; }
+    if (phone.length < 7) { $('pp-phone').style.borderColor = '#e88'; bad = true; }
+    if (bad) return;
     var btn = $('pp-confirm'); btn.disabled = true; btn.textContent = 'Reserving…';
     try {
       var r = await fetch('/api/proposal', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: SLUG, action: 'accept', name: name })
+        body: JSON.stringify({
+          slug: SLUG, action: 'accept', name: name, phone: phone,
+          access: $('pp-access').value.trim(), notes: $('pp-notes').value.trim()
+        })
       });
       if (!r.ok) throw new Error();
       var j = await r.json();
       showAccepted(j.accepted_at || Date.now());
     } catch (err) {
-      btn.disabled = false; btn.textContent = 'Confirm & Reserve';
+      btn.disabled = false; btn.textContent = 'Accept, Sign & Reserve';
       alert('Something went wrong — please try again, or email jacxbschrader@gmail.com.');
     }
   });

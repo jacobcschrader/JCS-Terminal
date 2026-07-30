@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Book a Shoot — Jacob Schrader</title>
-<meta name="description" content="Build your shoot — square footage, services, and live pricing. Real estate, architecture & design photography and film by Jacob Schrader.">
+<title>Work With Me — Jacob Schrader</title>
+<meta name="description" content="Apply to work together — the property, the services you're interested in, and your timing. A personal proposal follows within 24 hours.">
 <link rel="canonical" href="https://www.jacobcschrader.com/book">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Jacob Schrader">
-<meta property="og:title" content="Book a Shoot — Jacob Schrader">
-<meta property="og:description" content="Build your shoot — services, add-ons, and live pricing.">
+<meta property="og:title" content="Work With Me — Jacob Schrader">
+<meta property="og:description" content="Apply to work together — a personal proposal follows within 24 hours.">
 <meta property="og:url" content="https://www.jacobcschrader.com/book">
 <meta property="og:image" content="https://www.jacobcschrader.com/images/og/og-default.jpg">
 <meta name="twitter:card" content="summary_large_image">
@@ -180,7 +180,7 @@ body { background: var(--paper-warm); }
  "@graph": [
   { "@type": "BreadcrumbList", "itemListElement": [
     { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.jacobcschrader.com/" },
-    { "@type": "ListItem", "position": 2, "name": "Book a Shoot" } ] }
+    { "@type": "ListItem", "position": 2, "name": "Work With Me" } ] }
  ]
 }
 </script>
@@ -204,9 +204,8 @@ body { background: var(--paper-warm); }
 <div class="fw-foot" id="fw-foot">
   <div class="fw-foot__in">
     <div class="fw-total">
-      <b>Estimated Total</b>
-      <span id="fw-total">—</span>
-      <small id="fw-total-note" hidden></small>
+      <b>Application</b>
+      <small style="font-size:0.8rem;color:var(--muted)">Personal proposal within 24 hours</small>
     </div>
     <span class="grow"></span>
     <button class="fw-back" id="fw-back" hidden>Back</button>
@@ -224,6 +223,8 @@ body { background: var(--paper-warm); }
   var money = function (n) { return n == null ? '—' : '$' + Number(n).toLocaleString(); };
 
   // ------------------------------------------------------------ state
+  // Application flow — no live pricing, no signature. Pricing arrives
+  // with the proposal Jacob sends; accepting THAT is the contract.
   var st = {
     step: 1,
     sqft: '',
@@ -233,82 +234,28 @@ body { background: var(--paper-warm); }
     address: '', city: '', state: 'CA', zip: '',
     status: '', listing: '', offmarket: '', faces: '', view: '', access: '', homeowner: '',
     shoot_date: '', launch_date: '',
-    first: '', last: '', phone: '', email: '', brokerage: '', message: '',
-    signature: ''
+    first: '', last: '', phone: '', email: '', brokerage: '', message: ''
   };
-  var STEPS = ['Services', 'Add-ons', 'Property', 'Details', 'Timing', 'Review', 'Agreement'];
-
-  // ------------------------------------------------------------ pricing
-  function fromPrice(tiers) {
-    for (var i = 0; i < tiers.length; i++) if (tiers[i] != null) return tiers[i];
-    return null;
-  }
-  function svcPrice(svc) {
-    if (svc.quote) return null;
-    if (svc.tiers && !st.sqft) return { label: 'From ' + money(fromPrice(svc.tiers)), value: null };
-    var p = P.priceAt(svc, st.sqft);
-    if (p == null) return { label: 'Inquire', value: null, inquire: true };
-    return { label: money(p), value: p };
-  }
-  function extraPrice(x) {
-    if (x.tiers && !st.sqft) return { label: 'From ' + money(fromPrice(x.tiers)), value: null };
-    var p = P.priceAt(x, st.sqft);
-    if (p == null) return { label: 'Inquire', value: null, inquire: true };
-    return { label: money(p), value: p };
-  }
-  function total() {
-    var sum = 0, any = false, perUnit = false, pending = false, inquire = false;
-    P.services.forEach(function (svc) {
-      if (!st.services[svc.key] || svc.quote) return;
-      var p = svcPrice(svc); any = true;
-      if (p.value == null) { if (p.inquire) inquire = true; else pending = true; return; }
-      sum += p.value;
-      svc.addons.forEach(function (a) {
-        if (!st.addons[svc.key + '|' + a.name]) return;
-        if (a.unit) { perUnit = true; return; }
-        sum += a.price;
-      });
-    });
-    P.extras.forEach(function (x) {
-      if (!st.extras[x.name]) return;
-      var p = extraPrice(x); any = true;
-      if (p.value == null) { if (p.inquire) inquire = true; else pending = true; return; }
-      sum += p.value;
-    });
-    return { sum: sum, any: any, perUnit: perUnit, pending: pending, inquire: inquire };
-  }
-  function paintTotal() {
-    var t = total();
-    $('fw-total').textContent = (!t.any || (!t.sum && (t.pending || t.inquire)))
-      ? '—' : money(t.sum) + ((t.pending || t.inquire) ? ' +' : '');
-    var note = $('fw-total-note');
-    if (t.inquire) { note.textContent = 'Over ' + P.inquireOver.toLocaleString() + ' sqft — I’ll confirm your exact quote personally.'; note.hidden = false; }
-    else if (t.pending) { note.textContent = 'Enter the square footage for the full total.'; note.hidden = false; }
-    else if (t.perUnit) { note.textContent = 'Per-image services quoted after the shoot.'; note.hidden = false; }
-    else note.hidden = true;
-  }
+  var STEPS = ['Services', 'Add-ons', 'Property', 'Details', 'Timing', 'Review'];
 
   // ------------------------------------------------------------ steps
   function eyebrow(n) {
-    return '<div class="fw-eyebrow">Step ' + n + ' of 7 · ' + STEPS[n - 1] + '</div>';
+    return '<div class="fw-eyebrow">Step ' + n + ' of ' + STEPS.length + ' · ' + STEPS[n - 1] + '</div>';
   }
 
   function s1() {
     var cards = P.services.map(function (svc) {
-      var p = svcPrice(svc);
       return '<button type="button" class="fw-card' + (st.services[svc.key] ? ' on' : '') + '" data-svc="' + svc.key + '">' +
-        '<span class="tick">&#10003;</span><b>' + esc(svc.name) + '</b><p>' + esc(svc.desc) + '</p>' +
-        '<span class="pr">' + (svc.quote ? '<small>Let&rsquo;s talk</small>' : p.label +
-          (svc.tiers && !st.sqft ? ' <small>by square footage</small>' : '')) + '</span></button>';
+        '<span class="tick">&#10003;</span><b>' + esc(svc.name) + '</b><p>' + esc(svc.desc) + '</p></button>';
     }).join('');
     return eyebrow(1) +
-      '<h1 class="fw-h">Build your shoot.</h1>' +
-      '<p class="fw-sub">Enter the square footage, then choose the services you&rsquo;d like &mdash; pricing updates as you go.</p>' +
+      '<h1 class="fw-h">Tell me about the shoot.</h1>' +
+      '<p class="fw-sub">The square footage and the services you&rsquo;re interested in &mdash; exact pricing arrives with your personal proposal.</p>' +
       '<div class="fw-label" style="text-align:center">Square Footage</div>' +
       '<input class="fw-input fw-sqft" id="f-sqft" inputmode="numeric" placeholder="4,500" value="' + esc(st.sqft) + '">' +
       '<p class="fw-hint" style="text-align:center">Include ADUs, guest houses, garages, and gym/studio space.</p>' +
       '<div class="fw-cards" id="f-cards">' + cards + '</div>' +
-      '<p class="fw-microcopy">Prefer to talk first? <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> &nbsp;·&nbsp; <a href="tel:+14088248719">(408)&nbsp;824-8719</a></p>';
+      '<p class="fw-microcopy">Want rates first? <a href="/pricing">View 2026 pricing</a> &nbsp;·&nbsp; Prefer to talk? <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> &nbsp;·&nbsp; <a href="tel:+14088248719">(408)&nbsp;824-8719</a></p>';
   }
 
   function s2() {
@@ -319,20 +266,17 @@ body { background: var(--paper-warm); }
         svc.addons.map(function (a) {
           var k = svc.key + '|' + a.name;
           return '<button type="button" class="fw-add' + (st.addons[k] ? ' on' : '') + '" data-add="' + esc(k) + '">' +
-            '<span class="tick">&#10003;</span><span>' + esc(a.name) + '</span>' +
-            '<span class="apr">+' + money(a.price) + (a.unit ? '/' + a.unit : '') + '</span></button>';
+            '<span class="tick">&#10003;</span><span>' + esc(a.name) + '</span></button>';
         }).join('') + '</div>';
     });
     var extras = '<div class="fw-label">Extras</div><div class="fw-adds">' +
       P.extras.map(function (x) {
-        var p = extraPrice(x);
         return '<button type="button" class="fw-add' + (st.extras[x.name] ? ' on' : '') + '" data-extra="' + esc(x.name) + '">' +
-          '<span class="tick">&#10003;</span><span>' + esc(x.name) + '</span>' +
-          '<span class="apr">' + (p.value == null && x.tiers ? p.label : '+' + p.label) + '</span></button>';
+          '<span class="tick">&#10003;</span><span>' + esc(x.name) + '</span></button>';
       }).join('') + '</div>';
     return eyebrow(2) +
       '<h1 class="fw-h">Elevate it.</h1>' +
-      '<p class="fw-sub">Optional add-ons, based on the services you selected.</p>' +
+      '<p class="fw-sub">Anything else you&rsquo;re interested in &mdash; I&rsquo;ll price the full scope in your proposal.</p>' +
       groups + extras +
       '<p class="fw-note">Twilight and vertical/vignette work are highly encouraged for luxury listings &mdash; they meaningfully elevate the presentation.</p>';
   }
@@ -387,14 +331,13 @@ body { background: var(--paper-warm); }
     var svcs = [], adds = [];
     P.services.forEach(function (svc) {
       if (!st.services[svc.key]) return;
-      var p = svcPrice(svc);
-      svcs.push(esc(svc.name) + (svc.quote ? '' : ' — ' + p.label));
+      svcs.push(esc(svc.name));
       svc.addons.forEach(function (a) {
-        if (st.addons[svc.key + '|' + a.name]) adds.push(esc(a.name) + ' (+' + money(a.price) + (a.unit ? '/' + a.unit : '') + ')');
+        if (st.addons[svc.key + '|' + a.name]) adds.push(esc(a.name));
       });
     });
     P.extras.forEach(function (x) {
-      if (st.extras[x.name]) adds.push(esc(x.name) + ' (' + extraPrice(x).label + ')');
+      if (st.extras[x.name]) adds.push(esc(x.name));
     });
     var rows = '';
     var addr = [st.address, st.city].filter(Boolean).join(', ');
@@ -404,15 +347,14 @@ body { background: var(--paper-warm); }
     if (adds.length) rows += '<div class="fw-sumrow"><b>Add-ons</b><span>' + adds.join('<br>') + '</span></div>';
     if (st.shoot_date) rows += '<div class="fw-sumrow"><b>Shoot date</b><span>' + esc(st.shoot_date) + '</span></div>';
     if (st.launch_date) rows += '<div class="fw-sumrow"><b>Launch date</b><span>' + esc(st.launch_date) + '</span></div>';
-    var t = total();
-    rows += '<div class="fw-sumrow total"><b>Estimated total</b><span>' + ((!t.any || (!t.sum && (t.pending || t.inquire))) ? 'Custom quote' : money(t.sum) + ((t.pending || t.inquire) ? ' +' : '')) + '</span></div>';
+    rows += '<div class="fw-sumrow total"><b>Next step</b><span style="font-family:var(--serif);font-weight:300;font-size:1.15rem;color:var(--navy)">Personal proposal within 24 hours</span></div>';
     return rows;
   }
 
   function s6() {
     return eyebrow(6) +
-      '<h1 class="fw-h">Review.</h1>' +
-      '<p class="fw-sub">Confirm your details and review the booking below.</p>' +
+      '<h1 class="fw-h">Review &amp; apply.</h1>' +
+      '<p class="fw-sub">Confirm your details and review your application below.</p>' +
       '<div class="fw-grid">' +
       '<div class="fw-field"><label>First name *</label><input id="f-first" required autocomplete="given-name" value="' + esc(st.first) + '"></div>' +
       '<div class="fw-field"><label>Last name *</label><input id="f-last" required autocomplete="family-name" value="' + esc(st.last) + '"></div>' +
@@ -422,43 +364,19 @@ body { background: var(--paper-warm); }
       '<div class="fw-field full"><label>Anything else? <span style="text-transform:none;letter-spacing:0;font-weight:400">(optional)</span></label><textarea id="f-message" rows="3" placeholder="The listing story, what matters most, special requests&hellip;">' + esc(st.message) + '</textarea></div>' +
       '</div>' +
       '<input type="text" id="f-honey" style="display:none" tabindex="-1" autocomplete="off">' +
-      '<div class="fw-summary"><h3>Your booking</h3>' + sumRows() + '</div>' +
-      '<p class="fw-hint" style="text-align:center;margin-top:1.2rem">Final quote confirmed on booking &mdash; you&rsquo;ll also receive a client portal link to track everything.</p>';
-  }
-
-  function s7() {
-    return eyebrow(7) +
-      '<h1 class="fw-h">Agreement.</h1>' +
-      '<p class="fw-sub">Please review and sign to submit your request.</p>' +
-      '<div class="fw-terms">' +
-      '<h4>Usage Rights &amp; Ownership</h4>' +
-      '<p>All photos, films, and related media (&ldquo;Content&rdquo;) remain the sole property and copyright of JCS LLC. You are granted a non-transferable license to use the Content for the marketing and sale of the specific property captured. Redistribution, resale, or repurposing for other properties or third parties requires written consent. The Content may not be altered in ways that misrepresent the original work, including AI-driven alteration or virtual staging without disclosure. JCS reserves the right to use Content for portfolio, promotional, and social purposes unless requested otherwise in writing.</p>' +
-      '<h4>Advertising Standards &amp; Disclosure</h4>' +
-      '<p>Some jurisdictions and MLS bodies have rules on disclosing digitally altered media (including virtual staging and virtual twilight). Determining whether disclosure is required is the client&rsquo;s responsibility, and the client assumes liability for the proper representation of the property in published media.</p>' +
-      '<h4>Shoot Day</h4>' +
-      '<p>Properties are shot as-is &mdash; cleaning, de-cluttering, and staging are not included. It is strongly encouraged that the homeowner be away for the duration of the visit. If no client representative is present during the shoot, creative choices (angles, compositions, lighting, staging adjustments, music, and the volume of media delivered) are final. Cancellations within 24 hours of the shoot may incur a fee.</p>' +
-      '<h4>Revisions</h4>' +
-      '<p>The first round of revisions is included with every delivery. Extensive additional revision requests may incur further fees, discussed before any work begins.</p>' +
-      '<h4>Liability</h4>' +
-      '<p>JCS LLC is not liable for injuries, damages, or losses incurred on site. The client is responsible for the property being accessible and ready at the scheduled time.</p>' +
-      '<h4>Payment</h4>' +
-      '<p>Your date is reserved on confirmation. Unless otherwise arranged, payment is due upon receipt of the final invoice, delivered with your media.</p>' +
-      '</div>' +
-      '<div class="fw-sign fw-field"><label>Sign &mdash; type your full legal name *</label>' +
-      '<input id="f-signature" required autocomplete="name" placeholder="' + esc((st.first + ' ' + st.last).trim() || 'Your full name') + '" value="' + esc(st.signature) + '"></div>' +
-      '<p class="fw-signnote">Typing your name above serves as your electronic signature and constitutes acceptance of the terms. Questions? <a href="mailto:jacxbschrader@gmail.com" style="color:var(--navy)">Ask before signing</a>.</p>';
+      '<div class="fw-summary"><h3>Your application</h3>' + sumRows() + '</div>' +
+      '<p class="fw-hint" style="text-align:center;margin-top:1.2rem">I review every application personally. Your proposal arrives by email &mdash; accepting it is what confirms and signs your shoot.</p>';
   }
 
   // ------------------------------------------------------------ render
-  var RENDER = [s1, s2, s3, s4, s5, s6, s7];
+  var RENDER = [s1, s2, s3, s4, s5, s6];
   function render() {
     $('fw-main').innerHTML = RENDER[st.step - 1]() + '<p class="fw-err" id="fw-err">Please complete the highlighted fields to continue.</p>';
-    $('fw-bar').style.width = (st.step / 7 * 100) + '%';
+    $('fw-bar').style.width = (st.step / STEPS.length * 100) + '%';
     $('fw-back').hidden = st.step === 1;
-    $('fw-next').innerHTML = st.step === 7 ? 'Submit Request' : 'Continue &rarr;';
+    $('fw-next').innerHTML = st.step === STEPS.length ? 'Submit Application' : 'Continue &rarr;';
     wire();
     window.scrollTo({ top: 0 });
-    paintTotal();
   }
 
   function capture() {
@@ -468,7 +386,6 @@ body { background: var(--paper-warm); }
     grab('f-shoot', 'shoot_date'); grab('f-launch', 'launch_date');
     grab('f-first', 'first'); grab('f-last', 'last'); grab('f-phone', 'phone');
     grab('f-email', 'email'); grab('f-brokerage', 'brokerage'); grab('f-message', 'message');
-    grab('f-signature', 'signature');
     if ($('f-sqft')) st.sqft = st.sqft.replace(/[^0-9]/g, '');
   }
 
@@ -476,13 +393,6 @@ body { background: var(--paper-warm); }
     var sq = $('f-sqft');
     if (sq) sq.addEventListener('input', function () {
       st.sqft = sq.value.replace(/[^0-9]/g, '');
-      document.querySelectorAll('#f-cards .fw-card').forEach(function (c) {
-        var svc = P.services.find(function (s) { return s.key === c.dataset.svc; });
-        var p = svcPrice(svc);
-        c.querySelector('.pr').innerHTML = svc.quote ? '<small>Let&rsquo;s talk</small>'
-          : p.label + (svc.tiers && !st.sqft ? ' <small>by square footage</small>' : '');
-      });
-      paintTotal();
     });
     document.querySelectorAll('[data-svc]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -492,21 +402,18 @@ body { background: var(--paper-warm); }
           Object.keys(st.addons).forEach(function (ak) { if (ak.indexOf(k + '|') === 0) delete st.addons[ak]; });
         }
         b.classList.toggle('on', !!st.services[k]);
-        paintTotal();
       });
     });
     document.querySelectorAll('[data-add]').forEach(function (b) {
       b.addEventListener('click', function () {
         st.addons[b.dataset.add] = !st.addons[b.dataset.add];
         b.classList.toggle('on', !!st.addons[b.dataset.add]);
-        paintTotal();
       });
     });
     document.querySelectorAll('[data-extra]').forEach(function (b) {
       b.addEventListener('click', function () {
         st.extras[b.dataset.extra] = !st.extras[b.dataset.extra];
         b.classList.toggle('on', !!st.extras[b.dataset.extra]);
-        paintTotal();
       });
     });
     [['f-status', 'status'], ['f-listing', 'listing'], ['f-faces', 'faces'], ['f-view', 'view'], ['f-homeowner', 'homeowner']].forEach(function (pair) {
@@ -545,7 +452,6 @@ body { background: var(--paper-warm); }
       if (!st.phone) hl('f-phone');
       if (!st.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(st.email)) hl('f-email');
     }
-    if (st.step === 7) { if (!st.signature || st.signature.length < 4) hl('f-signature'); }
     return bad.length;
   }
 
@@ -557,16 +463,14 @@ body { background: var(--paper-warm); }
     var svcs = [], adds = [];
     P.services.forEach(function (svc) {
       if (!st.services[svc.key]) return;
-      var p = svcPrice(svc);
-      svcs.push(svc.name + (svc.quote ? '' : ' (' + p.label + ')'));
+      svcs.push(svc.name);
       svc.addons.forEach(function (a) {
-        if (st.addons[svc.key + '|' + a.name]) adds.push(a.name + ' (+$' + a.price + (a.unit ? '/' + a.unit : '') + ')');
+        if (st.addons[svc.key + '|' + a.name]) adds.push(a.name);
       });
     });
     P.extras.forEach(function (x) {
-      if (st.extras[x.name]) adds.push(x.name + ' (' + extraPrice(x).label + ')');
+      if (st.extras[x.name]) adds.push(x.name);
     });
-    var t = total();
     try {
       var r = await fetch('/api/book', {
         method: 'POST',
@@ -577,12 +481,11 @@ body { background: var(--paper-warm); }
           address: st.address, city: st.city, state: st.state, zip: st.zip,
           sqft: st.sqft, target_date: st.shoot_date, launch_date: st.launch_date,
           services: svcs.join(' · '), addons: adds.join(' · '),
-          estimated_total: (t.any && t.sum && !t.pending && !t.inquire) ? t.sum : null,
           details: JSON.stringify({
             status: st.status, listing_type: st.listing, faces: st.faces,
             view_home: st.view, access: st.access, homeowner_home: st.homeowner
           }),
-          message: st.message, signature: st.signature,
+          message: st.message,
           _honey: ($('f-honey') || { value: '' }).value
         })
       });
@@ -593,15 +496,15 @@ body { background: var(--paper-warm); }
       // their secure sign-in link automatically.
       var portalHref = j.portal || ('/portal?email=' + encodeURIComponent(st.email));
       $('fw-main').innerHTML =
-        '<div class="fw-done"><span class="eyebrow">Request received</span>' +
+        '<div class="fw-done"><span class="eyebrow">Application received</span>' +
         '<h1>Thank you.</h1>' +
-        '<p>I review every request personally &mdash; you&rsquo;ll hear from me within 24 hours with availability and your confirmed quote. A confirmation is on its way to your inbox, and your application is already waiting in your client portal.</p>' +
+        '<p>I review every application personally &mdash; you&rsquo;ll hear from me within 24 hours with availability and your personal proposal. Accepting the proposal is what confirms and signs your shoot. A confirmation is on its way to your inbox, and your application is already waiting in your client portal.</p>' +
         '<a class="btn btn--solid" href="' + portalHref + '">Go to Your Portal</a>' +
         '<p style="margin-top:1.2rem;font-size:0.8rem"><a href="/projects" style="color:var(--muted);text-decoration:underline;text-underline-offset:3px">or view recent work</a></p></div>';
       $('fw-foot').remove();
       window.scrollTo({ top: 0 });
     } catch (e) {
-      btn.disabled = false; btn.textContent = 'Submit Request';
+      btn.disabled = false; btn.textContent = 'Submit Application';
       var err = $('fw-err');
       err.textContent = 'Something went wrong — please try again, or email jacxbschrader@gmail.com directly.';
       err.style.display = 'block';
@@ -611,7 +514,7 @@ body { background: var(--paper-warm); }
   // ------------------------------------------------------------ nav
   $('fw-next').addEventListener('click', function () {
     if (invalid()) { $('fw-err').style.display = 'block'; return; }
-    if (st.step === 7) { submit(); return; }
+    if (st.step === STEPS.length) { submit(); return; }
     st.step++; render();
   });
   $('fw-back').addEventListener('click', function () { capture(); st.step--; render(); });

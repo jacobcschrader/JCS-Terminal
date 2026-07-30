@@ -131,14 +131,15 @@ module.exports = async function handler(req, res) {
         replyTo: OWNER,
         subject: `${f.title} | Application Received`,
         text: `Hi ${f.name},\n\nThank you — your application for ${f.title} has been received. ` +
-          "I review every request personally and will reply within 24 hours.\n\n" +
-          `Once your shoot is confirmed, everything lives in your client portal: ${portalUrl}\n\n` +
+          "I review every application personally and will reply within 24 hours with availability and your personal proposal. " +
+          "Accepting the proposal is what confirms and signs your shoot.\n\n" +
+          `Everything lives in your client portal: ${portalUrl}\n\n` +
           "— Jacob Schrader · jacobcschrader.com",
         html: jcsEmail({
           eyebrow: "Application Received",
-          headline: "Thank you — I have your request.",
+          headline: "Thank you — I have your application.",
           note: `Hi ${escHtml(f.name)} — your application for <b>${escHtml(f.title)}</b> has been received. ` +
-            "I review every request personally and will reply within 24&nbsp;hours with availability and a custom quote.",
+            "I review every application personally and will reply within 24&nbsp;hours with availability and your personal proposal — accepting it is what confirms your shoot.",
           rows: [
             ["Property", escHtml(f.title) + (loc ? `<br><span style="color:#8a94a6;">${escHtml(loc)}</span>` : "")],
             ["Services", f.services ? escHtml(f.services) : ""],

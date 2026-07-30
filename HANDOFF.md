@@ -18,6 +18,18 @@ domain www.jacobcschrader.com):
 3. **Client experience** — magic-link portal (`/portal`), shareable
    delivery pages (`/delivery?t=…`), invoices (`/invoice?t=…`).
 
+**The booking flow is proposal-first (2026-07-29):** /book is an
+application (no pricing, no signature). Jacob reviews it in Requests →
+"Send Proposal" (client + PENDING project + prefilled draft proposal) or
+"Book directly" (project straight to Upcoming). Same choice exists on
++ New project for text/email clients ("Send a proposal first" checkbox).
+Client acceptance on the proposal page collects phone/access/notes +
+terms + typed e-signature and flips the project to Upcoming; Jacob then
+Confirms as usual. 'pending' projects sit above the pipeline in a strip,
+are hidden from the client portal's project list, and surface there as a
+"Your Proposal Is Ready" band once the proposal is SENT (cron never
+touches 'pending').
+
 **Stack:** static HTML/CSS/vanilla JS + Vercel serverless functions (Node,
 CommonJS) + Neon Postgres (`@neondatabase/serverless`) + Vercel Blob
 (portfolio media) + Resend (email). No framework, no build step. Deploys
@@ -33,9 +45,12 @@ index.html                 Home (video hero, work grid, services, approach,
                            marquee, testimonials, press, CTA)
 projects.html              Work grid          services.html   Photography/Films/Reels/Design
 about.html                 About
-book.html                  7-step booking wizard (Guthrie-style, live sqft
-                           pricing) — /book + form.jacobcschrader.com.
-                           Replaced contact.html (301 /contact → /book).
+book.html                  6-step APPLICATION wizard (Guthrie-style) —
+                           /book + form.jacobcschrader.com. No live
+                           pricing, no signature: info + interest only;
+                           Jacob answers with a proposal, and ACCEPTING
+                           the proposal is the contract. Replaced
+                           contact.html (301 /contact → /book).
 pricing.html               Shareable pricing page — /pricing +
                            pricing.jacobcschrader.com (noindex). Renders 4
                            cards: the two reels merge into one "Social
@@ -44,10 +59,18 @@ pricing.html               Shareable pricing page — /pricing +
 pricing-data.js            THE pricing source of truth (services, sqft
                            tiers, add-ons) — powers book.html + pricing.html
 proposal.html              Private client proposal page — /proposals/<slug>
-                           + proposal.jacobcschrader.com/<slug> (noindex)
+                           + proposal.jacobcschrader.com/<slug> (noindex).
+                           Acceptance = the contract: phone, access,
+                           notes, terms + typed e-signature; flips a
+                           linked 'pending' project to Upcoming.
 project.html               Dynamic project page (renders ?slug=…)
 project/<slug>.html        Static share pages (generated — see §4)
-portal.html delivery.html invoice.html   Client pages (minimal .mnav chrome)
+portal.html delivery.html invoice.html   Client pages (minimal .mnav chrome).
+                           Portal: textured navy hero (the .ph placeholder
+                           treatment; no photo — Jacob's call) with stats
+                           inside it + delivery takeover on ?p=, gallery-
+                           cover thumbs on rows (no service names — also
+                           his call), split-panel photo sign-in.
 admin.html                 Entire admin SPA (single file: CSS + views + JS)
 admin-blob.js              Browser bundle of @vercel/blob/client (esbuild IIFE)
 styles.css                 All public-site styles (tokens at top, "v2 layer"
@@ -184,15 +207,20 @@ toggle, delete (cleans Blob media).
 api/admin/[action].js   Router → api/_lib/admin/*: login logout me clients
                         bookings confirm requests discounts deliver invoice
                         settings portallink proposals licensing covers siteprojects upload
-api/book.js             Public booking wizard → request + 2 emails (now also
-                        addons, estimated_total, details JSON, e-signature)
+api/book.js             Public application → request + 2 emails (addons,
+                        details JSON; estimated_total/signature columns
+                        remain for legacy rows)
 api/calendar.js         .ics feed (signed); exports sigFor
 api/cron.js             Daily stage advance (optional CRON_SECRET)
 api/delivery.js         Delivery data + approve/changes actions
 api/invoice.js          Invoice data
-api/portal.js           Magic link, session, portal data
+api/portal.js           Magic link, session, portal data (incl. per-project
+                        cover — the portal hero + row thumbs use it)
 api/proposal.js         Public proposal by slug + accept action (drafts 404
-                        unless ?preview=1 with admin session)
+                        unless ?preview=1 with admin session). Accept
+                        stores acceptance JSON + signature/signed_at,
+                        flips linked pending booking → upcoming, emails
+                        Jacob + client (portal login link)
 api/site-projects.js    Public published projects (Cache-Control: no-store)
 ```
 

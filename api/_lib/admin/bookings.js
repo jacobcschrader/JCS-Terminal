@@ -5,14 +5,16 @@
 //    PUT    {id, ...} → update
 //    DELETE {id}      → delete
 //  Pipeline stages: upcoming | editing | revisions | delivered | completed | paid
-//  (+ canceled). Delivery fields: delivery_url, delivered_at.
+//  (+ canceled, + pending = proposal sent, not yet accepted — sits
+//  before the pipeline; accepting the proposal flips it to upcoming).
+//  Delivery fields: delivery_url, delivered_at.
 // =====================================================================
 const crypto = require("node:crypto");
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 
 const field = (v, max = 300) => String(v == null ? "" : v).trim().slice(0, max);
-const STATUSES = ["upcoming", "editing", "revisions", "delivered", "completed", "paid", "canceled"];
+const STATUSES = ["pending", "upcoming", "editing", "revisions", "delivered", "completed", "paid", "canceled"];
 
 function parse(b) {
   return {

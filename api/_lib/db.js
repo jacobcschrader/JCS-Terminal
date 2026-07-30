@@ -183,6 +183,13 @@ function ensureSchema() {
         updated_at   timestamptz NOT NULL DEFAULT now()
       )`;
       await s`CREATE UNIQUE INDEX IF NOT EXISTS proposals_slug ON proposals (slug)`;
+      // Proposal-first booking flow: a proposal can gate a booking
+      // (booking.status 'pending' until accepted). Acceptance doubles as
+      // the contract — deeper info JSON + typed e-signature live here.
+      await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS booking_id integer`;
+      await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS acceptance text DEFAULT ''`;
+      await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signature text DEFAULT ''`;
+      await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signed_at timestamptz`;
       // Media licensing leads (admin Licensing section) — companies that
       // worked on a shot property (architect, builder, designer…) who can
       // license the media for their own marketing.

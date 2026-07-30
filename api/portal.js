@@ -112,16 +112,35 @@ module.exports = async function handler(req, res) {
     if (!c) { res.status(401).json({ error: "unauthorized" }); return; }
 
     // Applications still in review — shown in the portal so a client who
-    // just booked lands on something real, not an empty dashboard.
+    // just applied lands on something real, not an empty dashboard. An
+    // accepted request whose project is proposal-gated ('pending') and
+    // whose proposal hasn't been SENT yet still reads as "in review" —
+    // the client should never see a blank gap mid-handoff.
     const pendingRows = c.email ? await s`
-      SELECT title, city, state, services, created_at FROM requests
-      WHERE lower(email) = ${String(c.email).toLowerCase()} AND status = 'pending'
-      ORDER BY created_at DESC` : [];
+      SELECT r.title, r.city, r.state, r.services, r.created_at FROM requests r
+      WHERE lower(r.email) = ${String(c.email).toLowerCase()} AND (
+        r.status = 'pending'
+        OR (r.status = 'accepted' AND EXISTS (
+          SELECT 1 FROM bookings bk WHERE bk.id = r.project_id AND bk.status = 'pending'
+            AND NOT EXISTS (SELECT 1 FROM proposals p WHERE p.booking_id = bk.id AND p.status = 'sent')
+        ))
+      )
+      ORDER BY r.created_at DESC` : [];
 
     const rows = await s`
       SELECT * FROM bookings
-      WHERE client_id = ${c.id} AND status != 'canceled'
+      WHERE client_id = ${c.id} AND status NOT IN ('canceled', 'pending')
       ORDER BY shoot_date DESC NULLS LAST, id DESC`;
+
+    // Proposal-gated projects (status 'pending'): not in the pipeline
+    // yet — surfaced as "your proposal is ready" once the proposal has
+    // actually been SENT (drafts stay invisible).
+    const awaiting = await s`
+      SELECT p.title, p.location, p.slug, p.sent_at
+      FROM bookings bk JOIN proposals p ON p.booking_id = bk.id
+      WHERE bk.client_id = ${c.id} AND bk.status = 'pending'
+        AND p.status = 'sent'
+      ORDER BY p.sent_at DESC NULLS LAST`;
 
     let outstanding = 0;
     const projects = rows.map((b) => {
@@ -135,6 +154,9 @@ module.exports = async function handler(req, res) {
         location: b.location || "",
         shoot_date: b.shoot_date || null,
         service: b.type || "",
+        // Gallery cover (unfurled at delivery time) — the portal leads
+        // with photography: hero backdrop + project card thumbs.
+        cover: (b.delivery_cover_url && b.delivery_cover_url !== "-") ? b.delivery_cover_url : null,
         stage: stageOf(b),
         delivery: b.delivery_sent_at
           ? { token: b.delivery_token, links: linksOf(b), delivered_at: b.delivered_at || null }
@@ -154,6 +176,12 @@ module.exports = async function handler(req, res) {
         location: [r.city, r.state].filter(Boolean).join(", "),
         services: r.services || "",
         created_at: r.created_at,
+      })),
+      awaiting: awaiting.map((p) => ({
+        title: p.title,
+        location: p.location || "",
+        url: "https://www.jacobcschrader.com/proposals/" + p.slug,
+        sent_at: p.sent_at,
       })),
       stats: {
         upcoming: projects.filter((p) => p.stage === "Upcoming").length,

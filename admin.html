@@ -497,8 +497,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     'Beyond':      ['Zillow 3D Tour','2D Floor Plan','Property Website']
   };
   var STAGES = ['upcoming','editing','revisions','delivered','completed','paid'];   // pipeline order
-  var STAGE_LABEL = { upcoming:'Upcoming', editing:'Editing', revisions:'Revisions', delivered:'Delivered', completed:'Completed', paid:'Paid' };
-  var STATUSES = STAGES.concat(['canceled']);
+  // 'pending' sits BEFORE the pipeline: proposal sent, waiting on the
+  // client's acceptance (which flips the project to upcoming).
+  var STAGE_LABEL = { pending:'Pending proposal', upcoming:'Upcoming', editing:'Editing', revisions:'Revisions', delivered:'Delivered', completed:'Completed', paid:'Paid' };
+  var STATUSES = ['pending'].concat(STAGES).concat(['canceled']);
 
   async function api(path, method, body) {
     var r = await fetch('/api/admin/' + path, {
@@ -707,6 +709,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         '<input type="checkbox" id="f-showprice" style="width:auto"' + (v.show_price === false ? '' : ' checked') + '> Show price in the client\'s booking confirmation</label></div>' +
       '<div class="adm-field full" style="margin-top:-0.6rem"><label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink);cursor:pointer">' +
         '<input type="checkbox" id="f-skipconf" style="width:auto"' + (v.skip_confirmation ? ' checked' : '') + '> Don\'t email confirmation to the client <small style="color:var(--muted)">(you still get your copy + calendar)</small></label></div>' +
+      (!b.id
+        ? '<div class="adm-field full" style="margin-top:-0.6rem"><label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink);cursor:pointer">' +
+          '<input type="checkbox" id="f-proposal" style="width:auto"> Send a proposal first <small style="color:var(--muted)">(project waits as Pending; their acceptance signs it and moves it to Upcoming)</small></label></div>'
+        : '') +
       '<div class="adm-field full" style="border-top:1px solid var(--line);padding-top:0.9rem;display:flex;justify-content:space-between;align-items:baseline">' +
         '<label style="margin:0">Total</label>' +
         '<div><span id="f-total" style="font-family:var(--rx-mono);font-size:1.25rem;color:var(--ink);font-weight:700">$0</span>' +
@@ -715,7 +721,29 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         // merge over the existing booking so delivery fields (managed in
         // the delivery editor) survive a project edit
         var body = Object.assign({}, b.id ? b : {}, collectProjectForm(b.id));
+        var viaProposal = !b.id && $('f-proposal') && $('f-proposal').checked;
+        if (viaProposal) body.status = 'pending';
         var j = await api('bookings', b.id ? 'PUT' : 'POST', body);
+        // Proposal-first: draft a linked proposal prefilled from the
+        // project (service + price + travel), then land in the editor —
+        // review, tweak, Send. The project stays Pending until accepted.
+        if (viaProposal && j.booking) {
+          var bk = j.booking;
+          var cl = state.clients.find(function (c) { return c.id == bk.client_id; }) || {};
+          var items = [{ group: 'The Campaign', name: bk.type || 'Photography',
+            desc: bk.deliverables || '', price: bk.price == null || bk.price === '' ? '' : Number(bk.price), badge: '' }];
+          if (Number(bk.travel_fee)) items.push({ group: 'The Campaign', name: 'Travel',
+            desc: bk.travel_note || '', price: Number(bk.travel_fee), badge: '' });
+          var pj = await api('proposals', 'POST', {
+            title: bk.title, location: bk.location || '',
+            client_name: cl.name || '', client_email: cl.email || '',
+            items: items, booking_id: bk.id
+          });
+          await reload();
+          go('proposal/' + pj.proposal.id);
+          toast('Project saved as Pending — review the proposal, then send it.');
+          return;
+        }
         await reload();
         if (!b.id && j.booking) go('project/' + j.booking.id); else render();
       });
@@ -1107,7 +1135,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
                 '<div style="font-size:0.84rem;color:var(--muted)">' + esc(r.email) + (r.phone ? ' · ' + esc(r.phone) : '') + '</div>' +
                 '<span style="flex:1"></span>' +
                 (r.status === 'pending'
-                  ? '<button class="adm-btn" onclick="ADM.reqAccept(' + r.id + ')">Accept &rarr; project</button>' +
+                  ? '<button class="adm-btn" onclick="ADM.reqPropose(' + r.id + ')">Send Proposal</button>' +
+                    '<button class="adm-btn adm-btn--ghost" onclick="ADM.reqAccept(' + r.id + ')">Book directly</button>' +
                     '<button class="adm-btn--danger adm-btn" onclick="ADM.reqDecline(' + r.id + ')">Decline</button>'
                   : (r.project_id ? '<button class="adm-btn adm-btn--ghost" onclick="ADM.go(\'project/' + r.project_id + '\')">Open project</button>' : '') +
                     '<button class="adm-btn--danger adm-btn" onclick="ADM.reqDelete(' + r.id + ')">Delete</button>') +
@@ -1194,9 +1223,29 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       }).join('') + '</div>';
     }
 
+    // Proposal-gated projects sit above the pipeline until accepted.
+    var gated = items.filter(function (b) { return b.status === 'pending'; });
+    var pendingStrip = gated.length
+      ? '<div class="adm-card" style="margin-bottom:1.1rem">' +
+        '<div style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;font-weight:600;color:var(--muted);margin-bottom:0.35rem">Pending proposal &mdash; awaiting client acceptance</div>' +
+        gated.map(function (b) {
+          var p = state.proposals.find(function (x) { return x.booking_id == b.id; });
+          return '<div style="display:flex;align-items:baseline;gap:0.9rem;flex-wrap:wrap;padding:0.6rem 0;border-bottom:1px solid var(--line-soft)">' +
+            '<b style="cursor:pointer;font-weight:700;letter-spacing:-0.01em;color:var(--ink)" onclick="ADM.go(\'project/' + b.id + '\')">' + esc(b.title) + '</b>' +
+            '<small class="mut">' + esc(b.client_name || '') + '</small>' +
+            (p ? (p.status === 'sent'
+                    ? '<span class="adm-badge adm-badge--pending">Sent ' + dstr(p.sent_at) + (p.sends > 1 ? ' · ×' + p.sends : '') + '</span>'
+                    : '<span class="adm-badge adm-badge--draft">Draft &mdash; not sent yet</span>')
+                : '<span class="adm-badge adm-badge--draft">No proposal linked</span>') +
+            '<span style="flex:1"></span>' +
+            (p ? '<button class="adm-btn adm-btn--ghost" onclick="ADM.go(\'proposal/' + p.id + '\')">Open proposal</button>' : '') +
+          '</div>';
+        }).join('') + '</div>'
+      : '';
+
     var canceled = state.bookings.filter(function (b) { return b.status === 'canceled'; }).length;
     return head('Projects', '<button class="adm-btn" onclick="ADM.newBooking()">+ New project</button>') +
-      toolbar + body +
+      toolbar + pendingStrip + body +
       (canceled ? '<p class="adm-empty">' + canceled + ' canceled project' + (canceled > 1 ? 's' : '') + ' hidden — find them via client pages.</p>' : '') +
       '<p class="adm-empty">Drag a card between stages, or use the &rsaquo; button to advance it.</p>';
   }
@@ -1448,6 +1497,16 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         '<button class="adm-btn adm-btn--ghost" onclick="ADM.propPreview(' + p.id + ')">Preview</button>' +
         '<button class="adm-btn adm-btn--ghost" onclick="ADM.propCopy(' + p.id + ')">Copy link</button>' +
         '<button class="adm-btn" onclick="ADM.propSend(' + p.id + ')">' + (p.sent_at ? 'Resend' : 'Send to client') + '</button>', true) +
+      (p.booking_id
+        ? '<p class="mut" style="font-size:0.82rem;margin:0 0 0.9rem">Linked to a <b>Pending</b> project &mdash; the client&rsquo;s acceptance signs it and moves it to Upcoming. ' +
+          '<a style="cursor:pointer;color:var(--rx-teal);text-decoration:underline;text-underline-offset:3px" onclick="ADM.go(\'project/' + p.booking_id + '\')">Open project</a></p>'
+        : '') +
+      (p.signed_at
+        ? '<p class="mut" style="font-size:0.82rem;margin:0 0 0.9rem">&#10003; Signed by <b>' + esc(p.signature || p.accepted_by || '') + '</b> on ' + dstr(p.signed_at) +
+          (function () { try { var a = JSON.parse(p.acceptance || '{}');
+            return (a.phone ? ' &middot; ' + esc(a.phone) : '') + (a.access ? ' &middot; Access: ' + esc(a.access) : '') + (a.notes ? ' &middot; &ldquo;' + esc(a.notes) + '&rdquo;' : '');
+          } catch (e) { return ''; } })() + '</p>'
+        : '') +
       '<div class="adm-card"><h2>The property</h2><div class="adm-form">' +
         fld('pp-title', 'Property / title *', '<input id="pp-title" required value="' + esc(p.title) + '">') +
         fld('pp-location', 'Location <small style="text-transform:none;letter-spacing:0">(e.g. Danville, California)</small>', '<input id="pp-location" value="' + esc(p.location || '') + '">') +
@@ -2515,10 +2574,18 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       catch (e) { toast(friendly(e), 'err'); }
     },
     reqAccept: async function (id) {
-      if (!confirm('Accept this request? A client + project are created (no email is sent yet — you set the quote, then Confirm & send).')) return;
+      if (!confirm('Book directly (skip the proposal)? A client + project are created as Upcoming (no email yet — you set the quote, then Confirm & send).')) return;
       try {
         var j = await api('requests', 'POST', { id: id, action: 'accept' });
         await reload(); go('project/' + j.projectId);
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
+    reqPropose: async function (id) {
+      if (!confirm('Send a proposal? A client + Pending project + draft proposal are created, prefilled from the application — you set the prices, then Send. Their acceptance signs it and books the project.')) return;
+      try {
+        var j = await api('requests', 'POST', { id: id, action: 'propose' });
+        await reload(); go('proposal/' + j.proposalId);
+        toast('Draft proposal ready — set the prices, then send.');
       } catch (e) { toast(friendly(e), 'err'); }
     },
     reqDecline: async function (id) {

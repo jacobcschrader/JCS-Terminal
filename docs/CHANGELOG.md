@@ -1122,3 +1122,64 @@ title, else a navy JCS monogram tile.
   available on the basic cut.
 - book.html is deliberately unchanged: the wizard still offers Basic
   Social Reel and Luxury Social Reel as separate selectable services.
+
+### Client portal revamp — photography-first
+- The portal now leads with the client's own work, per the brand kit
+  ("photography is the hero"). /api/portal includes each project's
+  delivery cover (`cover`, from delivery_cover_url, "-" filtered).
+- Hero: full-bleed cover of the newest project (black scrim, serif
+  "Welcome back, Name.", spare sub-line) with the four stats moved
+  INTO the hero on white hairlines. Arriving from a delivery email
+  (?p=…) the hero becomes the delivery itself — that project's cover,
+  "Your Delivery Is Ready", location, delivered date, gallery/download
+  buttons. Flat navy fallback when no cover exists yet.
+- Project rows now carry a 16:10 cover thumb (hover scale); projects
+  without a cover get a navy tile with the serif-italic JCS monogram
+  (typography only — no icons). Search, grouping, chips, invoice/
+  delivery links unchanged.
+- "Application in review" moved out of the navy box into a white
+  hairline card below the hero.
+- Sign-in became a split panel: site photography (images/svc/
+  photography.jpg) under a bottom scrim with the monogram and "Your
+  projects, one place." beside the same magic-link form. Nav switches
+  to a light overlay over the dark hero and back to flow chrome on
+  the sign-in/invalid states. All auth flows untouched (magic link,
+  ?email= auto-request guard, seamless new-client token, sign out).
+- Follow-ups per Jacob: no photo behind the hero — it now wears the
+  site's textured-navy .ph treatment (150° navy gradient, soft glow,
+  135° pinstripes) borrowed from the about-page portrait placeholder;
+  and service names came off the project rows (location + date only —
+  search still matches services).
+
+### Proposal-first booking (the "apply → proposal → accept & sign" flow)
+- /book is now an APPLICATION, not a booking: same Guthrie-style wizard,
+  6 steps, but no live pricing, no estimated total, no signature step —
+  info + interest only ("exact pricing arrives with your personal
+  proposal"; step 1 links the pricing page for rates). api/book.js
+  emails updated to proposal language; estimated_total/signature columns
+  stay for legacy rows.
+- Accepting a proposal is now the contract. /proposals/<slug> "Accept
+  the Proposal" opens the deeper form: phone (required), property
+  access, notes, the full terms (moved from the old booking step 7),
+  and a typed e-signature. api/proposal.js stores acceptance JSON +
+  signature/signed_at, emails Jacob the details, and sends the client a
+  confirmation with an auto-sign-in portal link.
+- New booking status 'pending' = proposal sent, awaiting acceptance —
+  sits BEFORE the pipeline. Acceptance flips pending → upcoming (and
+  appends phone/access/notes to project notes, backfills client phone).
+  Projects created without a proposal are upcoming, exactly as before.
+  Cron only advances 'upcoming', so pending never auto-moves.
+- Admin: Requests inbox actions are now "Send Proposal" (client +
+  pending project + DRAFT proposal prefilled from the application —
+  set prices, then Send) and "Book directly" (straight to upcoming).
+  + New project has a "Send a proposal first" checkbox doing the same
+  for text/email clients (prefills service/price/travel as line items).
+  Pending projects show in a strip above the pipeline with proposal
+  state (Draft / Sent ×n) and a jump to the proposal; the proposal
+  editor shows the linked project and, once signed, the signature +
+  acceptance details. proposals.booking_id/acceptance/signature/
+  signed_at added in db.js.
+- Portal: 'pending' projects are hidden from the project list; once the
+  proposal is SENT the portal shows a "Your Proposal Is Ready" band with
+  Review & Accept. Between "Send Proposal" and actually sending, the
+  original application still reads "In Review" — no blank gap.

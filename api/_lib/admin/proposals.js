@@ -142,14 +142,17 @@ module.exports = async function handler(req, res) {
     }
 
     // ---- POST create ----------------------------------------------------
+    // booking_id links a proposal to a gated booking (status 'pending');
+    // accepting the proposal flips that booking to 'upcoming'.
     const title = field(b.title);
     if (!title) { res.status(400).json({ error: "missing-title" }); return; }
     const slug = await uniqueSlug(s, b.slug || title);
+    const bookingId = b.booking_id ? parseInt(b.booking_id, 10) || null : null;
     const [row] = await s`
-      INSERT INTO proposals (slug, title, location, client_name, client_email, intro, note, items)
+      INSERT INTO proposals (slug, title, location, client_name, client_email, intro, note, items, booking_id)
       VALUES (${slug}, ${title}, ${field(b.location, 160)}, ${field(b.client_name, 160)},
               ${field(b.client_email, 200)}, ${field(b.intro, 600)}, ${field(b.note, 600)},
-              ${cleanItems(b.items || [])})
+              ${cleanItems(b.items || [])}, ${bookingId})
       RETURNING *`;
     res.status(200).json({ ok: true, proposal: row });
   } catch (e) {
