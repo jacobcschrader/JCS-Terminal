@@ -1272,3 +1272,19 @@ title, else a navy JCS monogram tile.
   its own line. Falls back to the single-line shape for projects with
   nothing checked.
 - Project form: the Client picker row now spans the full form width.
+
+### Project form: four sending options, no Stage select
+- The bottom of the project form is now four options per Jacob: "Send
+  booking confirmation" (on create, this EMAILS the client + calendar
+  invite immediately — his call), "Include price in confirmation"
+  (implies the first), "Don't send confirmation", and "Send a proposal"
+  (only by itself). Rules keep them honest — silent/proposal clear the
+  others, price re-checks confirm — and saving requires one of them.
+  Sending on create requires a shoot date (clear inline message if
+  missing); the toast reports sent / no-client-email / send-failed.
+- Stage select removed from the form. Status sets itself exactly like
+  the pipeline: proposal → Pending; past shoot date → straight to
+  Editing; otherwise Upcoming. Editing an existing project never
+  touches its stage (that stays on the pipeline board/list).
+- Submit button now reads "Create project" / "Create proposal" on the
+  create modals ("Save" stays for edits).

@@ -617,12 +617,12 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
 
   // ================= modal =================
   function closeModal(){ $('modal-root').innerHTML = ''; }
-  function openModal(title, formHtml, onSubmit) {
+  function openModal(title, formHtml, onSubmit, submitLabel) {
     $('modal-root').innerHTML =
       '<div class="adm-modal" id="modal-bg"><form class="adm-modal__card" id="modal-form">' +
       '<h2>' + esc(title) + '</h2><div class="adm-form">' + formHtml + '</div>' +
       '<div style="margin-top:1.4rem;display:flex;gap:0.8rem">' +
-      '<button class="adm-btn" type="submit">Save</button>' +
+      '<button class="adm-btn" type="submit">' + esc(submitLabel || 'Save') + '</button>' +
       '<button class="adm-btn adm-btn--ghost" type="button" id="modal-cancel">Cancel</button></div>' +
       '<p class="adm-msg adm-hidden" id="modal-msg"></p></form></div>';
     $('modal-cancel').addEventListener('click', closeModal);
@@ -684,7 +684,6 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     try { checkedAddons = JSON.parse(v.addons || '[]'); } catch (e) {}
     var selClientId = v.client_id || presetClient || '';
     var selClient = state.clients.find(function (c) { return c.id == selClientId; });
-    var statusOpts = STATUSES.map(function (s) { return '<option value="' + s + '"' + (v.status === s ? ' selected' : '') + '>' + (STAGE_LABEL[s] || 'Canceled') + '</option>'; }).join('');
     function addonLabel(label, on) {
       return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
         '<input type="checkbox" class="f-addon" value="' + esc(label) + '"' + (on ? ' checked' : '') + ' style="width:auto"> ' + esc(label) + '</label>';
@@ -731,7 +730,6 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       '<div class="adm-field full"><label for="f-deliverables">Deliverables <small style="text-transform:none;letter-spacing:0">(shown to client — edit freely)</small></label><textarea id="f-deliverables">' + esc(v.deliverables || '') + '</textarea></div>' +
       fld('f-price', 'Price ($) <small style="text-transform:none;letter-spacing:0">(auto from sqft + service + add-ons — type to override)</small>',
         '<input id="f-price" type="number" min="0" step="1" value="' + (v.price == null ? '' : v.price) + '">') +
-      fld('f-status', 'Stage', '<select id="f-status">' + statusOpts + '</select>') +
       fld('f-travel', 'Travel fee ($)', '<input id="f-travel" type="number" min="0" step="1" placeholder="e.g. 150" value="' + (v.travel_fee == null ? '' : v.travel_fee) + '">') +
       fld('f-travelnote', 'Travel fee note', '<input id="f-travelnote" placeholder="e.g. Tahoe trip" value="' + esc(v.travel_note || '') + '">') +
       fld('f-discount', 'Discount code', '<select id="f-discount"><option value="">No discount</option>' +
@@ -739,25 +737,63 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           return '<option value="' + esc(d.code) + '"' + (v.discount_code === d.code ? ' selected' : '') + '>' + esc(discLabel(d)) + '</option>';
         }).join('') + '</select>') +
       '<div class="adm-field full"><label for="f-notes">Access notes <small style="text-transform:none;letter-spacing:0">(internal — your calendar only)</small></label><textarea id="f-notes" placeholder="Gate codes, staging, access notes…">' + esc(v.notes || '') + '</textarea></div>' +
-      '<div class="adm-field full"><label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink);cursor:pointer">' +
-        '<input type="checkbox" id="f-showprice" style="width:auto"' + (v.show_price === false ? '' : ' checked') + '> Show price in the client\'s booking confirmation</label></div>' +
-      '<div class="adm-field full" style="margin-top:-0.6rem"><label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink);cursor:pointer">' +
-        '<input type="checkbox" id="f-skipconf" style="width:auto"' + (v.skip_confirmation ? ' checked' : '') + '> Don\'t email confirmation to the client <small style="color:var(--muted)">(you still get your copy + calendar)</small></label></div>' +
-      (!b.id
-        ? '<div class="adm-field full" style="margin-top:-0.6rem"><label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink);cursor:pointer">' +
-          '<input type="checkbox" id="f-proposal" style="width:auto"> Send a proposal first <small style="color:var(--muted)">(project waits as Pending; their acceptance signs it and moves it to Upcoming)</small></label></div>'
-        : '') +
       '<div class="adm-field full" style="border-top:1px solid var(--line);padding-top:0.9rem;display:flex;justify-content:space-between;align-items:baseline">' +
         '<label style="margin:0">Total</label>' +
         '<div><span id="f-total" style="font-family:var(--rx-mono);font-size:1.25rem;color:var(--ink);font-weight:700">$0</span>' +
-        '<small id="f-total-note" class="mut" style="display:block;text-align:right;letter-spacing:0"></small></div></div>',
+        '<small id="f-total-note" class="mut" style="display:block;text-align:right;letter-spacing:0"></small></div></div>' +
+      // Sending options — pick from the first three, or the proposal by
+      // itself. No Stage select: status sets itself (proposal → Pending;
+      // otherwise Upcoming, or straight to Editing for a past date).
+      (function () {
+        var optConfirm = b.id ? !v.skip_confirmation : true;
+        var optPrice = v.show_price !== false;
+        var optSilent = !!v.skip_confirmation;
+        var chk = function (id, text, on, sub) {
+          return '<label style="display:flex;align-items:center;gap:0.5rem;text-transform:none;letter-spacing:0;font-size:0.85rem;color:var(--ink);cursor:pointer' + (sub ? ';margin-left:1.55rem' : '') + '">' +
+            '<input type="checkbox" id="' + id + '" style="width:auto"' + (on ? ' checked' : '') + '> ' + text + '</label>';
+        };
+        return '<div class="adm-field full" style="border-top:1px solid var(--line);padding-top:0.9rem">' +
+          '<label>' + (b.id ? 'Confirmation preferences' : 'On create') + '</label>' +
+          '<div style="display:grid;gap:0.45rem;margin-top:0.35rem">' +
+          chk('f-opt-confirm', 'Send booking confirmation' + (b.id ? '' : ' <small style="color:var(--muted)">(emails the client + calendar invite when you create)</small>'), optConfirm) +
+          chk('f-opt-price', 'Include price in confirmation', optPrice, true) +
+          chk('f-opt-silent', 'Don&rsquo;t send confirmation <small style="color:var(--muted)">(you still get your copy + calendar on Confirm)</small>', optSilent) +
+          (!b.id
+            ? chk('f-opt-proposal', 'Send a proposal <small style="color:var(--muted)">(project waits as Pending &mdash; their acceptance signs &amp; books it)</small>', false)
+            : '') +
+          '</div></div>';
+      })(),
       async function () {
         // merge over the existing booking so delivery fields (managed in
         // the delivery editor) survive a project edit
         var body = Object.assign({}, b.id ? b : {}, collectProjectForm(b.id));
-        var viaProposal = !b.id && $('f-proposal') && $('f-proposal').checked;
-        if (viaProposal) body.status = 'pending';
+        var viaProposal = !b.id && $('f-opt-proposal') && $('f-opt-proposal').checked;
+        var sendNow = !b.id && !viaProposal && $('f-opt-confirm').checked;
+        if (!b.id && !viaProposal && !$('f-opt-confirm').checked && !$('f-opt-silent').checked) {
+          throw Object.assign(new Error('opt'), { userMessage: 'Pick a sending option — confirmation, no confirmation, or a proposal.' });
+        }
+        if (sendNow && !$('f-date').value) {
+          throw Object.assign(new Error('opt'), { userMessage: 'Add a shoot date to send the confirmation on create — or choose "Don\u2019t send confirmation".' });
+        }
+        if (!b.id) {
+          // status sets itself, mirroring the pipeline: proposal gates as
+          // Pending; a past shoot date lands straight in Editing.
+          var todayLA = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Los_Angeles' });
+          body.status = viaProposal ? 'pending'
+            : ($('f-date').value && $('f-date').value <= todayLA ? 'editing' : 'upcoming');
+        }
         var j = await api('bookings', b.id ? 'PUT' : 'POST', body);
+        if (sendNow && j.booking) {
+          try {
+            var conf = await api('confirm', 'POST', { id: j.booking.id });
+            toast(conf.clientSent ? 'Project created — confirmation sent.'
+              : 'Project created — no client email on file, so only you received the copy.');
+          } catch (e3) {
+            toast('Project created, but the confirmation failed to send — use Confirm inside the project.', 'err');
+          }
+        } else if (!b.id && !viaProposal) {
+          toast('Project created — no emails sent.');
+        }
         // Proposal-first: draft a linked proposal prefilled from the
         // project (service + price + travel), then land in the editor —
         // review, tweak, Send. The project stays Pending until accepted.
@@ -795,7 +831,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         }
         await reload();
         if (!b.id && j.booking) go('project/' + j.booking.id); else render();
-      });
+      }, b.id ? 'Save' : 'Create project');
 
     // addons → deliverables composer
     function checkedList() {
@@ -993,6 +1029,18 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       $('f-price').value = sum == null ? '' : sum;
       updateTotal();
     }
+    // Sending options keep each other honest: price implies confirm;
+    // silent and proposal clear the others; at least one stays checked
+    // at save (validated in the handler).
+    (function () {
+      var c = $('f-opt-confirm'), p = $('f-opt-price'), sl = $('f-opt-silent'), pr = $('f-opt-proposal');
+      function un(x) { if (x) x.checked = false; }
+      if (c) c.addEventListener('change', function () { if (c.checked) { un(sl); un(pr); } else un(p); });
+      if (p) p.addEventListener('change', function () { if (p.checked) { c.checked = true; un(sl); un(pr); } });
+      if (sl) sl.addEventListener('change', function () { if (sl.checked) { un(c); un(p); un(pr); } });
+      if (pr) pr.addEventListener('change', function () { if (pr.checked) { un(c); un(p); un(sl); } });
+    })();
+
     $('f-price').addEventListener('input', function () { priceAuto = false; });
     $('f-sqft').addEventListener('input', autoPrice);
     $('modal-form').addEventListener('change', function (e) {
@@ -1046,11 +1094,11 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
                type: id ? (b.type || '') : derivedType(),
                twilight_date: $('f-twidate').value, twilight_time: $('f-twitime').value,
                addons: JSON.stringify(checkedList()), deliverables: $('f-deliverables').value,
-               price: $('f-price').value, status: $('f-status').value,
+               price: $('f-price').value,
                travel_fee: $('f-travel').value, travel_note: $('f-travelnote').value,
                discount_code: $('f-discount').value,
-               notes: $('f-notes').value, show_price: $('f-showprice').checked,
-               skip_confirmation: $('f-skipconf').checked };
+               notes: $('f-notes').value, show_price: $('f-opt-price').checked,
+               skip_confirmation: $('f-opt-silent').checked };
     }
   }
 
@@ -2156,7 +2204,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
             items: items
           });
           await reload(); go('proposal/' + j.proposal.id);
-        });
+        }, 'Create proposal');
 
       // client typeahead — same behavior as the project form
       (function () {

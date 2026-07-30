@@ -39,8 +39,14 @@ services/add-ons (the Service dropdown + TYPES list are gone — scope
 lives in the checklist; bookings.type derives silently from the first
 checked main service on create, edits keep the stored value). Custom
 services take an optional price box that joins the quote. "Send a
-proposal first" turns each checked service into its own priced line
-item at the project's sqft. 'pending' projects sit above the pipeline in a strip,
+proposal" turns each checked service into its own priced line item at
+the project's sqft. The form ends in four sending options (Send
+booking confirmation / Include price / Don't send / Send a proposal —
+price implies confirm, silent + proposal are exclusive, one required)
+and has NO Stage select: creating sends the confirmation immediately
+when chosen (needs a shoot date; toast reports it), and status sets
+itself — proposal → pending, past shoot date → editing, else
+upcoming. Edits never touch status (move stages on the pipeline). 'pending' projects sit above the pipeline in a strip,
 are hidden from the client portal's project list, and surface there as a
 "Your Proposal Is Ready" band once the proposal is SENT (cron never
 touches 'pending').
