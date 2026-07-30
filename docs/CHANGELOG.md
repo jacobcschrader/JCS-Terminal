@@ -1357,3 +1357,11 @@ title, else a navy JCS monogram tile.
 - Photography section is strictly 8225 Lahontan: the fallback to other
   projects was removed — if Lahontan is ever absent from the portfolio
   feed the section hides instead of substituting another property.
+- Proposal photography replaced with Jacob's ordered nine (sent
+  2026-07-30): twilight front, day front, entry twilight, great room
+  toward dining, great room toward fireplace, fireplace living,
+  kitchen, rear twilight, spa bath. Eight matched frame-for-frame to
+  their hosted CMS gallery URLs (perceptual-hash match against all 38
+  frames); the entry twilight isn't in the CMS gallery so it ships as
+  a repo asset (images/proposal/8225-lahontan-entry.jpg, 2000px q80).
+  Display order = his order, reading across the rows.

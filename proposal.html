@@ -413,14 +413,17 @@ body { background: var(--paper-warm); color: var(--ink); }
       if (ph) {
         var gallery = typeof ph.gallery === 'string' ? JSON.parse(ph.gallery || '[]') : ph.gallery;
         var pool = [ph.cover_url].concat(gallery).filter(Boolean);
-        // 9 frames, interior/exterior mixed. For 8225 Lahontan the set is
-        // hand-picked (twilight hero, great room, patio firepit, kitchen,
-        // rear elevation, bedroom, aerial, fireplace living, bath) and
-        // ordered so each of the three columns alternates ext/int.
+        // Jacob's ordered 9 (2026-07-30), matched frame-for-frame to the
+        // CMS gallery: twilight front, day front, entry twilight (a repo
+        // asset — that frame isn't in the CMS gallery), great room x2,
+        // fireplace living, kitchen, rear twilight, spa bath. Numbers are
+        // pool indices (cover + gallery); strings are literal srcs.
         var imgs;
-        var LAHONTAN_PICKS = [0, 10, 30, 16, 34, 23, 36, 12, 25];
+        var LAHONTAN_PICKS = [5, 3, '/images/proposal/8225-lahontan-entry.jpg', 17, 10, 19, 16, 34, 29];
         if (isLahontan(ph) && pool.length > 30) {
-          imgs = LAHONTAN_PICKS.map(function (ix) { return pool[ix]; }).filter(Boolean);
+          imgs = LAHONTAN_PICKS.map(function (ix) {
+            return typeof ix === 'number' ? pool[ix] : ix;
+          }).filter(Boolean);
         } else {
           // any other project: even spread across the set — exteriors
           // bookend real-estate galleries, so this lands a mix too
