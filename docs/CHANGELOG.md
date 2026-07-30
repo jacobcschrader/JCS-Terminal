@@ -1206,3 +1206,22 @@ title, else a navy JCS monogram tile.
   <slug> everywhere (send email, portal "Proposal Ready" band, admin
   list) — the middleware rewrite already served it; only the printed
   URLs changed.
+
+### New-proposal flow: client-first + services selection
+- "+ New proposal" now works like the project form: a required CLIENT
+  picker (typeahead over name/email/brokerage, + New opens the client
+  modal and returns with your title/location/services draft intact)
+  instead of free-typed name/email fields; the chosen client's
+  name/email flow onto the proposal and the Send button.
+- Under it, a grouped services selection (Photography / Film / Beyond,
+  same lineup as the project form) seeds the Scope & Investment line
+  items — group headers map to Photography/Film/Extras, descriptions
+  pull from pricing-data.js where names match (admin now loads
+  pricing-data.js), prices stay blank for Jacob to set in the editor.
+- proposals.client_id added (db.js; stored by every creation path —
+  modal, request "Send Proposal", project checkbox). Accepting a
+  STANDALONE proposal (one created without a gated project) now
+  creates the project automatically as Upcoming — client resolved by
+  client_id/email or created — and links it back, so acceptance always
+  lands a project in the pipeline. friendly() passes through
+  err.userMessage for inline validation notes.

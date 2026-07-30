@@ -187,6 +187,7 @@ function ensureSchema() {
       // (booking.status 'pending' until accepted). Acceptance doubles as
       // the contract — deeper info JSON + typed e-signature live here.
       await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS booking_id integer`;
+      await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS client_id integer`;
       await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS acceptance text DEFAULT ''`;
       await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signature text DEFAULT ''`;
       await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS signed_at timestamptz`;

@@ -67,28 +67,54 @@ module.exports = async function handler(req, res) {
           signature = ${name}, signed_at = now(), acceptance = ${acceptance}, updated_at = now()
         WHERE id = ${p.id} RETURNING accepted_at`;
 
+      let total = 0, firstService = "";
+      try {
+        JSON.parse(p.items || "[]").forEach((it) => {
+          if (typeof it.price === "number") total += it.price;
+          if (!firstService && it.name) firstService = it.name;
+        });
+      } catch (e) {}
+      const extra = [
+        `Proposal accepted & signed by ${name}`,
+        phone ? `Phone: ${phone}` : null,
+        access ? `Access: ${access}` : null,
+        notes ? `Client notes: ${notes}` : null,
+      ].filter(Boolean).join("\n");
+
       // Linked gated booking: pending → upcoming, acceptance details
       // appended to the project notes, client phone backfilled.
       let booking = null;
       if (p.booking_id) {
-        const extra = [
-          `Proposal accepted & signed by ${name}`,
-          phone ? `Phone: ${phone}` : null,
-          access ? `Access: ${access}` : null,
-          notes ? `Client notes: ${notes}` : null,
-        ].filter(Boolean).join("\n");
         [booking] = await s`
           UPDATE bookings SET
             status = CASE WHEN status = 'pending' THEN 'upcoming' ELSE status END,
             notes = TRIM(BOTH E'\n' FROM COALESCE(NULLIF(notes, ''), '') || E'\n\n' || ${extra})
           WHERE id = ${p.booking_id} RETURNING *`;
-        if (booking && booking.client_id && phone) {
-          await s`UPDATE clients SET phone = ${phone} WHERE id = ${booking.client_id} AND COALESCE(phone, '') = ''`;
+      } else {
+        // Standalone proposal (created straight from + New proposal):
+        // acceptance IS the booking moment — resolve/create the client
+        // and open the project as Upcoming, linked back to the proposal.
+        let client = null;
+        if (p.client_id) [client] = await s`SELECT * FROM clients WHERE id = ${p.client_id} LIMIT 1`;
+        if (!client && p.client_email) {
+          [client] = await s`SELECT * FROM clients WHERE lower(email) = ${String(p.client_email).toLowerCase()} LIMIT 1`;
         }
+        if (!client) {
+          [client] = await s`
+            INSERT INTO clients (name, email, phone, notes)
+            VALUES (${p.client_name || name}, ${p.client_email || ""}, ${phone}, ${"Created from proposal acceptance."})
+            RETURNING *`;
+        }
+        [booking] = await s`
+          INSERT INTO bookings (client_id, title, location, type, price, status, notes)
+          VALUES (${client.id}, ${p.title}, ${p.location || ""}, ${firstService || "Photography"},
+                  ${total || null}, ${"upcoming"}, ${extra})
+          RETURNING *`;
+        await s`UPDATE proposals SET booking_id = ${booking.id} WHERE id = ${p.id}`;
       }
-
-      let total = 0;
-      try { JSON.parse(p.items || "[]").forEach((it) => { if (typeof it.price === "number") total += it.price; }); } catch (e) {}
+      if (booking && booking.client_id && phone) {
+        await s`UPDATE clients SET phone = ${phone} WHERE id = ${booking.client_id} AND COALESCE(phone, '') = ''`;
+      }
       const adminUrl = booking
         ? `https://www.jacobcschrader.com/admin#project/${booking.id}`
         : `https://www.jacobcschrader.com/admin#proposal/${p.id}`;

@@ -474,6 +474,7 @@ select.lx-input { border-radius: 999px; padding-right: 2rem; }
 <div id="modal-root"></div>
 
 <script src="projects-data.js"></script>
+<script src="pricing-data.js"></script>
 <script src="admin-blob.js"></script>
 <script>
 (function () {
@@ -514,6 +515,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     return j;
   }
   function friendly(err) {
+    if (err && err.userMessage) return err.userMessage;   // validation notes pass through
     return String(err.message) === 'db-not-configured'
       ? 'Database not connected — check the Neon integration in Vercel.'
       : 'Something went wrong — try again.';
@@ -737,7 +739,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           var pj = await api('proposals', 'POST', {
             title: bk.title, location: bk.location || '',
             client_name: cl.name || '', client_email: cl.email || '',
-            items: items, booking_id: bk.id
+            items: items, booking_id: bk.id, client_id: bk.client_id || ''
           });
           await reload();
           go('proposal/' + pj.proposal.id);
@@ -2009,22 +2011,104 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     },
 
     // ---- proposals ----
-    propNew: function () {
+    // New proposal = pick the property, the CLIENT (search / select /
+    // create — same typeahead as projects), and the services that seed
+    // Scope & Investment. Prices stay blank ("Included") until Jacob
+    // sets them in the editor.
+    propNew: function (presetClientId, draft) {
+      draft = draft || {};
+      var selClient = state.clients.find(function (c) { return c.id == (draft.client_id || presetClientId); });
+      // Service lineup, grouped like the sheet; descriptions pulled from
+      // pricing-data.js when the names match.
+      function svcDesc(nm) {
+        var P = window.JCS_PRICING || { services: [], extras: [] };
+        var hit = '';
+        (P.services || []).forEach(function (s) {
+          if (s.name === nm && s.desc) hit = hit || s.desc;
+          (s.addons || []).forEach(function (a) { if (a.name === nm) hit = hit || a.note || ''; });
+        });
+        (P.extras || []).forEach(function (x) { if (x.name === nm) hit = hit || x.note || ''; });
+        return hit;
+      }
+      var GROUP_LABEL = { 'Photography': 'Photography', 'Film': 'Film', 'Beyond': 'Extras' };
+      var picked = draft.services || [];
+      var svcHtml = Object.keys(ADDONS).map(function (group) {
+        return '<div style="margin-top:0.6rem"><div style="font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem">' + group + '</div>' +
+          '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.35rem 1rem">' +
+          ADDONS[group].map(function (label) {
+            return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
+              '<input type="checkbox" class="p-svc" value="' + esc(label) + '" data-group="' + esc(GROUP_LABEL[group] || group) + '"' +
+              (picked.indexOf(label) > -1 ? ' checked' : '') + ' style="width:auto"> ' + esc(label) + '</label>';
+          }).join('') + '</div></div>';
+      }).join('');
+
       openModal('New proposal',
-        fld('f-ptitle', 'Property / title *', '<input id="f-ptitle" required placeholder="465 Headwaters Way">') +
-        fld('f-ploc', 'Location', '<input id="f-ploc" placeholder="Danville, California">') +
-        fld('f-pclient', 'Prepared for', '<input id="f-pclient" placeholder="Client name">') +
-        fld('f-pemail', 'Client email', '<input id="f-pemail" type="email" placeholder="client@brokerage.com">'),
+        fld('f-ptitle', 'Property / title *', '<input id="f-ptitle" required placeholder="465 Headwaters Way" value="' + esc(draft.title || '') + '">') +
+        fld('f-ploc', 'Location', '<input id="f-ploc" placeholder="Danville, California" value="' + esc(draft.location || '') + '">') +
+        '<div class="adm-field full"><label for="p-client-q">Client *</label><div style="display:flex;gap:0.5rem">' +
+          '<div style="position:relative;flex:1">' +
+            '<input type="hidden" id="p-client" value="' + esc(selClient ? selClient.id : '') + '">' +
+            '<input id="p-client-q" placeholder="Search clients…" autocomplete="off" value="' + esc(selClient ? selClient.name : '') + '">' +
+            '<div id="p-client-list" class="adm-cl-list" hidden></div>' +
+          '</div>' +
+          '<button type="button" class="adm-btn adm-btn--ghost" id="p-newclient" style="padding:0.55rem 0.9rem">+ New</button></div></div>' +
+        '<div class="adm-field full"><label>Scope &amp; investment <small style="text-transform:none;letter-spacing:0">(selected services become the line items — you set prices in the editor)</small></label>' +
+          svcHtml + '</div>',
         async function () {
+          var cl = state.clients.find(function (c) { return c.id == $('p-client').value; });
+          if (!cl) {
+            $('p-client-q').focus();
+            throw Object.assign(new Error('pick-client'), { userMessage: 'Choose a client — search above, or create one with + New.' });
+          }
+          var items = Array.prototype.map.call(document.querySelectorAll('.p-svc:checked'), function (x) {
+            return { group: x.dataset.group, name: x.value, desc: svcDesc(x.value), price: '', badge: '' };
+          });
           var j = await api('proposals', 'POST', {
             title: $('f-ptitle').value, location: $('f-ploc').value,
-            client_name: $('f-pclient').value, client_email: $('f-pemail').value,
-            items: [
-              { group: 'Photography', name: 'Photography', desc: 'Editorial flash-and-ambient stills of the full property — interiors, exteriors, grounds, and aerial coverage.', price: '', badge: 'Includes drone' }
-            ]
+            client_id: cl.id, client_name: cl.name || '', client_email: cl.email || '',
+            items: items
           });
           await reload(); go('proposal/' + j.proposal.id);
         });
+
+      // client typeahead — same behavior as the project form
+      (function () {
+        var q = $('p-client-q'), hid = $('p-client'), list = $('p-client-list');
+        function draw(term) {
+          term = (term || '').trim().toLowerCase();
+          var hits = state.clients.filter(function (c) {
+            return !term || (c.name + ' ' + (c.email || '') + ' ' + (c.brokerage || '')).toLowerCase().indexOf(term) > -1;
+          }).slice(0, 8);
+          list.innerHTML = hits.length
+            ? hits.map(function (c) {
+                return '<div class="adm-cl-item" data-id="' + c.id + '"><b>' + esc(c.name) + '</b>' +
+                  (c.email || c.brokerage ? '<small>' + esc([c.email, c.brokerage].filter(Boolean).join(' · ')) + '</small>' : '') + '</div>';
+              }).join('')
+            : '<div class="adm-cl-item adm-cl-item--empty">No matches — use + New</div>';
+          list.hidden = false;
+        }
+        q.addEventListener('focus', function () { draw(q.value); });
+        q.addEventListener('input', function () { hid.value = ''; draw(q.value); });
+        q.addEventListener('keydown', function (e) { if (e.key === 'Escape') list.hidden = true; });
+        list.addEventListener('mousedown', function (e) {
+          var item = e.target.closest('.adm-cl-item'); if (!item || !item.dataset.id) return;
+          var c = state.clients.find(function (x) { return x.id == item.dataset.id; });
+          hid.value = c.id; q.value = c.name; list.hidden = true;
+        });
+        q.addEventListener('blur', function () {
+          setTimeout(function () {
+            list.hidden = true;
+            if (!hid.value) q.value = '';
+          }, 150);
+        });
+      })();
+      $('p-newclient').addEventListener('click', function () {
+        var draftNow = {
+          title: $('f-ptitle').value, location: $('f-ploc').value,
+          services: Array.prototype.map.call(document.querySelectorAll('.p-svc:checked'), function (x) { return x.value; })
+        };
+        clientModal(null, function (nc) { ADM.propNew(nc ? nc.id : null, draftNow); });
+      });
     },
     propReadItems: function () {
       return Array.prototype.map.call(document.querySelectorAll('#pp-items .adm-prop-item'), function (row) {

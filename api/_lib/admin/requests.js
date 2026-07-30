@@ -99,9 +99,9 @@ module.exports = async function handler(req, res) {
           slug = `${base}-${Date.now().toString(36)}`;
         }
         const [p] = await s`
-          INSERT INTO proposals (slug, title, location, client_name, client_email, items, booking_id)
+          INSERT INTO proposals (slug, title, location, client_name, client_email, items, booking_id, client_id)
           VALUES (${slug}, ${r.title}, ${location}, ${r.name || ""}, ${r.email || ""},
-                  ${JSON.stringify(items.slice(0, 40))}, ${project.id})
+                  ${JSON.stringify(items.slice(0, 40))}, ${project.id}, ${client.id})
           RETURNING id`;
         proposalId = p.id;
       }

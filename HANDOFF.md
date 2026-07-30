@@ -25,7 +25,12 @@ application (no pricing, no signature). Jacob reviews it in Requests →
 + New project for text/email clients ("Send a proposal first" checkbox).
 Client acceptance on the proposal page collects phone/access/notes +
 terms + typed e-signature and flips the project to Upcoming; Jacob then
-Confirms as usual. 'pending' projects sit above the pipeline in a strip,
+Confirms as usual. "+ New proposal" itself is client-first: search/
+select/create the client (typeahead, same as projects) + a grouped
+services selection that seeds Scope & Investment (descs pulled from
+pricing-data.js; prices set in the editor). A STANDALONE proposal (no
+gated project) creates the project as Upcoming at acceptance time —
+acceptance always produces a project either way. 'pending' projects sit above the pipeline in a strip,
 are hidden from the client portal's project list, and surface there as a
 "Your Proposal Is Ready" band once the proposal is SENT (cron never
 touches 'pending').
