@@ -407,10 +407,30 @@ body { background: var(--paper-warm); color: var(--ink); }
         }).join('');
         $('pp-film-sec').hidden = false;
       }
-      var ph = all.find(isLahontan) || all.find(isNine) || all.find(function (p) { return (p.gallery && p.gallery.length >= 6); });
+      // Photography is 8225 Lahontan ONLY — if it's ever absent from the
+      // portfolio the section hides rather than substituting a project.
+      var ph = all.find(isLahontan);
       if (ph) {
         var gallery = typeof ph.gallery === 'string' ? JSON.parse(ph.gallery || '[]') : ph.gallery;
-        var imgs = [ph.cover_url].concat(gallery).filter(Boolean).slice(0, 6);
+        var pool = [ph.cover_url].concat(gallery).filter(Boolean);
+        // 9 frames, interior/exterior mixed. For 8225 Lahontan the set is
+        // hand-picked (twilight hero, great room, patio firepit, kitchen,
+        // rear elevation, bedroom, aerial, fireplace living, bath) and
+        // ordered so each of the three columns alternates ext/int.
+        var imgs;
+        var LAHONTAN_PICKS = [0, 10, 30, 16, 34, 23, 36, 12, 25];
+        if (isLahontan(ph) && pool.length > 30) {
+          imgs = LAHONTAN_PICKS.map(function (ix) { return pool[ix]; }).filter(Boolean);
+        } else {
+          // any other project: even spread across the set — exteriors
+          // bookend real-estate galleries, so this lands a mix too
+          var count = Math.min(9, pool.length);
+          imgs = [];
+          for (var ix2 = 0; ix2 < count; ix2++) {
+            imgs.push(pool[Math.round(ix2 * (pool.length - 1) / Math.max(1, count - 1))]);
+          }
+          imgs = imgs.filter(function (u, ix3) { return imgs.indexOf(u) === ix3; });
+        }
         $('pp-photo-h').textContent = 'Recent work — ' + (ph.headline || ph.title) + '.';
         $('pp-photo-sub').textContent = ph.title + (ph.shot_for ? ' — shot for ' + ph.shot_for + (ph.brokerage ? ' · ' + ph.brokerage : '') : '') + '.';
         // Three natural-height columns, filled round-robin (reference layout).

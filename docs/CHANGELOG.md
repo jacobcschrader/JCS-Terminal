@@ -1347,3 +1347,13 @@ title, else a navy JCS monogram tile.
   asset, pinned directly with its poster since it isn't a portfolio
   project), and the photo section pulls from 8225 Lahontan Drive (CMS
   project; falls back to Ninebark, then any 6+-image project).
+- Proposal photography: now 9 frames in the three columns, a real
+  interior/exterior mix. For 8225 Lahontan the set is hand-picked off
+  the live CMS gallery (twilight front hero, great room, patio
+  firepit, kitchen, rear elevation, primary bedroom, aerial, fireplace
+  living, bath) and ordered so every column alternates ext/int; any
+  other project falls back to an even spread across its gallery
+  (exteriors bookend, interiors mid — lands a mix naturally).
+- Photography section is strictly 8225 Lahontan: the fallback to other
+  projects was removed — if Lahontan is ever absent from the portfolio
+  feed the section hides instead of substituting another property.
