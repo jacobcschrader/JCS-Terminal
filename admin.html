@@ -716,7 +716,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         '<div class="adm-field"><label for="f-zip">Zip</label><input id="f-zip" value="' + esc(v.zip || '') + '"></div>' +
         '<div class="adm-field"><label for="f-sqft">Sqft</label><input id="f-sqft" type="number" min="0" value="' + (v.sqft == null ? '' : v.sqft) + '"></div>' +
       '</div>' +
-      '<div class="adm-field"><label for="f-client-q">Client</label><div style="display:flex;gap:0.5rem">' +
+      '<div class="adm-field full"><label for="f-client-q">Client</label><div style="display:flex;gap:0.5rem">' +
         '<div style="position:relative;flex:1">' +
           '<input type="hidden" id="f-client" value="' + esc(selClientId) + '">' +
           '<input id="f-client-q" placeholder="Search clients\u2026" autocomplete="off" value="' + esc(selClient ? selClient.name : '') + '">' +

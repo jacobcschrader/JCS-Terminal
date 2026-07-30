@@ -1271,3 +1271,4 @@ title, else a navy JCS monogram tile.
   Photography/Film/Extras, per-image noted), with the travel fee as
   its own line. Falls back to the single-line shape for projects with
   nothing checked.
+- Project form: the Client picker row now spans the full form width.
