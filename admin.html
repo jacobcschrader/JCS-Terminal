@@ -491,7 +491,6 @@ select.lx-input { border-radius: 999px; padding-right: 2rem; }
               licTab: 'all', licProp: '', licResults: null, licSearching: false };
 var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', delivered:'#7a5fb8', completed:'#3f7a4f', paid:'#1d4d2a' };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
-  var TYPES = ['Flash / Ambient Photography','Cinematic Property Film','Luxury Social Reel','Basic Property Video','Basic Social Reel','Full Campaign (Stills + Film)','Other'];
   var ADDONS = {
     'Photography': ['Flash / Ambient Photography','Aerial Photography','Vertical / Vignette Images','Twilight Photography','Virtual Staging','Virtual Twilight'],
     'Film':        ['Cinematic Property Film','Luxury Social Reel','Basic Property Video','Basic Social Reel','Twilight Videography','Teaser Video'],
@@ -685,11 +684,6 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     try { checkedAddons = JSON.parse(v.addons || '[]'); } catch (e) {}
     var selClientId = v.client_id || presetClient || '';
     var selClient = state.clients.find(function (c) { return c.id == selClientId; });
-    // Legacy service names (pre-2026-07-29 lineup) stay selectable on
-    // existing projects so editing never silently rewrites the type.
-    var typeOpts = (v.type && TYPES.indexOf(v.type) === -1
-        ? '<option selected>' + esc(v.type) + '</option>' : '') +
-      TYPES.map(function (t) { return '<option' + (v.type === t ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('');
     var statusOpts = STATUSES.map(function (s) { return '<option value="' + s + '"' + (v.status === s ? ' selected' : '') + '>' + (STAGE_LABEL[s] || 'Canceled') + '</option>'; }).join('');
     function addonLabel(label, on) {
       return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
@@ -708,6 +702,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         customAddons.map(function (label) { return addonLabel(label, true); }).join('') + '</div>' +
         '<div style="display:flex;gap:0.5rem;margin-top:0.5rem">' +
           '<input id="f-customsvc" placeholder="Add a custom service…" style="flex:1;font-family:var(--sans);font-size:0.85rem;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.5rem 0.7rem;outline:none">' +
+          '<input id="f-customprice" type="number" min="0" step="1" placeholder="$" style="width:110px;font-family:var(--sans);font-size:0.85rem;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.5rem 0.7rem;outline:none">' +
           '<button type="button" class="adm-btn adm-btn--ghost" id="f-addcustom" style="padding:0.45rem 0.9rem">+ Add</button>' +
         '</div></div>';
 
@@ -728,7 +723,6 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           '<div id="f-client-list" class="adm-cl-list" hidden></div>' +
         '</div>' +
         '<button type="button" class="adm-btn adm-btn--ghost" id="f-newclient" style="padding:0.55rem 0.9rem">+ New</button></div></div>' +
-      fld('f-type', 'Service', '<select id="f-type">' + typeOpts + '</select>') +
       fld('f-date', 'Shoot date', '<input id="f-date" type="date" value="' + (v.shoot_date ? String(v.shoot_date).slice(0, 10) : '') + '">') +
       fld('f-time', 'Shoot time', timeSel('f-time', v.shoot_time)) +
       fld('f-twidate', 'Twilight <small style="text-transform:none;letter-spacing:0">(optional — date blank = same day)</small>', '<input id="f-twidate" type="date" value="' + (v.twilight_date ? String(v.twilight_date).slice(0, 10) : '') + '">') +
@@ -770,7 +764,22 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         if (viaProposal && j.booking) {
           var bk = j.booking;
           var cl = state.clients.find(function (c) { return c.id == bk.client_id; }) || {};
-          var items = [{ group: 'The Campaign', name: bk.type || 'Photography',
+          // Each checked service becomes its own priced line (sheet rates
+          // at the project's sqft); custom services ride along unpriced.
+          var picked = [];
+          try { picked = JSON.parse(bk.addons || '[]'); } catch (e2) {}
+          var groupOf = function (label) {
+            var g = Object.keys(ADDONS).filter(function (k) { return ADDONS[k].indexOf(label) > -1; })[0];
+            return g === 'Beyond' ? 'Extras' : (g || 'The Campaign');
+          };
+          var items = picked.map(function (nm) {
+            var q = svcQuote(nm, bk.sqft);
+            var d = svcDesc(nm);
+            return { group: groupOf(nm), name: nm,
+                     desc: d + (q.note ? (d ? ' — ' : '') + q.note : ''),
+                     price: q.price, badge: '' };
+          });
+          if (!items.length) items = [{ group: 'The Campaign', name: bk.type || 'Photography',
             desc: bk.deliverables || '', price: bk.price == null || bk.price === '' ? '' : Number(bk.price), badge: '' }];
           if (Number(bk.travel_fee)) items.push({ group: 'The Campaign', name: 'Travel',
             desc: bk.travel_note || '', price: Number(bk.travel_fee), badge: '' });
@@ -792,6 +801,13 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     function checkedList() {
       return Array.prototype.map.call(document.querySelectorAll('.f-addon:checked'), function (x) { return x.value; });
     }
+    // With no Service dropdown, the stored type derives from the first
+    // checked MAIN service (calendar + emails still read naturally).
+    function derivedType() {
+      var mains = ((window.JCS_PRICING || {}).services || []).map(function (s) { return s.name; });
+      var hit = checkedList().filter(function (l) { return mains.indexOf(l) > -1; })[0];
+      return hit || '';
+    }
     function regenDeliverables() { $('f-deliverables').value = checkedList().join(' · '); }
     // delegate so custom checkboxes added later also trigger the composer
     $('modal-form').addEventListener('change', function (e) {
@@ -800,6 +816,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     function addCustomService() {
       var input = $('f-customsvc');
       var label = input.value.trim().slice(0, 100);
+      var price = $('f-customprice').value === '' ? null : Number($('f-customprice').value) || 0;
       if (!label) return;
       var exists = Array.prototype.some.call(document.querySelectorAll('.f-addon'), function (x) {
         return x.value.toLowerCase() === label.toLowerCase();
@@ -807,10 +824,19 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       if (!exists) {
         var wrap = document.createElement('div');
         wrap.innerHTML = addonLabel(label, true);
+        var box = wrap.firstChild.querySelector('input');
+        if (price != null) {
+          box.setAttribute('data-price', price);
+          var tag = document.createElement('small');
+          tag.style.cssText = 'color:var(--muted);margin-left:0.35rem';
+          tag.textContent = '— ' + money(price);
+          wrap.firstChild.appendChild(tag);
+        }
         $('f-customlist').appendChild(wrap.firstChild);
       }
-      input.value = '';
+      input.value = ''; $('f-customprice').value = '';
       regenDeliverables();
+      autoPrice();   // declaration is hoisted; joins the quote instantly
     }
     $('f-addcustom').addEventListener('click', addCustomService);
     $('f-customsvc').addEventListener('keydown', function (e) {
@@ -956,17 +982,19 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     var priceAuto = !b.id && (v.price == null || v.price === '');
     function autoPrice() {
       if (!priceAuto) return;
-      var type = $('f-type').value, sq = $('f-sqft').value, sum = null;
-      function add(nm) { var q = svcQuote(nm, sq); if (typeof q.price === 'number') sum = (sum || 0) + q.price; }
-      if (type === 'Full Campaign (Stills + Film)') { add('Flash / Ambient Photography'); add('Cinematic Property Film'); }
-      else add(type);
-      checkedList().forEach(add);
+      var sq = $('f-sqft').value, sum = null;
+      checkedList().forEach(function (nm) {
+        var q = svcQuote(nm, sq);
+        if (typeof q.price === 'number') sum = (sum || 0) + q.price;
+      });
+      document.querySelectorAll('.f-addon:checked[data-price]').forEach(function (x) {
+        sum = (sum || 0) + (Number(x.dataset.price) || 0);
+      });
       $('f-price').value = sum == null ? '' : sum;
       updateTotal();
     }
     $('f-price').addEventListener('input', function () { priceAuto = false; });
     $('f-sqft').addEventListener('input', autoPrice);
-    $('f-type').addEventListener('change', autoPrice);
     $('modal-form').addEventListener('change', function (e) {
       if (e.target.classList && e.target.classList.contains('f-addon')) autoPrice();
     });
@@ -1014,7 +1042,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     function collectProjectForm(id) {
       return { id: id, title: $('f-title').value, client_id: $('f-client').value,
                city: $('f-city').value, state: $('f-state').value, zip: $('f-zip').value, sqft: $('f-sqft').value,
-               shoot_date: $('f-date').value, shoot_time: $('f-time').value, type: $('f-type').value,
+               shoot_date: $('f-date').value, shoot_time: $('f-time').value,
+               type: id ? (b.type || '') : derivedType(),
                twilight_date: $('f-twidate').value, twilight_time: $('f-twitime').value,
                addons: JSON.stringify(checkedList()), deliverables: $('f-deliverables').value,
                price: $('f-price').value, status: $('f-status').value,

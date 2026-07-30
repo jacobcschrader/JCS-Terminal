@@ -1252,3 +1252,22 @@ title, else a navy JCS monogram tile.
   is typed by hand; existing projects never get clobbered. Verified:
   film @3,200 → $1,450; +Twilight → $1,700; Full Campaign → $2,700;
   manual override survives sqft edits; 6,000+ leaves it blank.
+
+### Service dropdown removed — the checklist IS the scope
+- The project form's Service dropdown (and the TYPES list behind it)
+  is gone per Jacob: it duplicated the services/add-ons checklist. The
+  auto-quote now sums every CHECKED service at the sqft (photography +
+  film both checked at 3,200 = $2,450), so "Full Campaign" is simply
+  checking both. bookings.type still exists for calendar/email copy —
+  it derives silently from the first checked main service on create,
+  and edits never rewrite the stored value on old projects.
+- Custom services gained a price box ("Matterport Tour — $450") — the
+  attached price joins the auto-quote live (and drops out when
+  unchecked); deliverables text stays names-only. Manual price
+  overrides still win over everything.
+- "Send a proposal first" upgraded to match: instead of one line for
+  the old type field, every checked service becomes its own priced
+  line item (sheet rates at the project's sqft, grouped
+  Photography/Film/Extras, per-image noted), with the travel fee as
+  its own line. Falls back to the single-line shape for projects with
+  nothing checked.
