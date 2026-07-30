@@ -106,9 +106,9 @@ module.exports = async function handler(req, res) {
             RETURNING *`;
         }
         [booking] = await s`
-          INSERT INTO bookings (client_id, title, location, type, price, status, notes)
+          INSERT INTO bookings (client_id, title, location, type, price, status, notes, sqft)
           VALUES (${client.id}, ${p.title}, ${p.location || ""}, ${firstService || "Photography"},
-                  ${total || null}, ${"upcoming"}, ${extra})
+                  ${total || null}, ${"upcoming"}, ${extra}, ${p.sqft || null})
           RETURNING *`;
         await s`UPDATE proposals SET booking_id = ${booking.id} WHERE id = ${p.id}`;
       }

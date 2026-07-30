@@ -151,11 +151,12 @@ module.exports = async function handler(req, res) {
     const slug = await uniqueSlug(s, b.slug || title);
     const bookingId = b.booking_id ? parseInt(b.booking_id, 10) || null : null;
     const clientId = b.client_id ? parseInt(b.client_id, 10) || null : null;
+    const sqft = b.sqft ? parseInt(b.sqft, 10) || null : null;
     const [row] = await s`
-      INSERT INTO proposals (slug, title, location, client_name, client_email, intro, note, items, booking_id, client_id)
+      INSERT INTO proposals (slug, title, location, client_name, client_email, intro, note, items, booking_id, client_id, sqft)
       VALUES (${slug}, ${title}, ${field(b.location, 160)}, ${field(b.client_name, 160)},
               ${field(b.client_email, 200)}, ${field(b.intro, 600)}, ${field(b.note, 600)},
-              ${cleanItems(b.items || [])}, ${bookingId}, ${clientId})
+              ${cleanItems(b.items || [])}, ${bookingId}, ${clientId}, ${sqft})
       RETURNING *`;
     res.status(200).json({ ok: true, proposal: row });
   } catch (e) {

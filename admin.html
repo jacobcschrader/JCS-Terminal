@@ -503,6 +503,43 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   var STAGE_LABEL = { pending:'Pending proposal', upcoming:'Upcoming', editing:'Editing', revisions:'Revisions', delivered:'Delivered', completed:'Completed', paid:'Paid' };
   var STATUSES = ['pending'].concat(STAGES).concat(['canceled']);
 
+  // ---- pricing-data.js hookups (the Numbers-sheet rates) -------------
+  // Shared by the project + proposal forms so admin quotes always match
+  // the sheet. svcDesc: the public description for a service name.
+  function svcDesc(nm) {
+    var P = window.JCS_PRICING || { services: [], extras: [] };
+    var hit = '';
+    (P.services || []).forEach(function (s) {
+      if (s.name === nm && s.desc) hit = hit || s.desc;
+      (s.addons || []).forEach(function (a) { if (a.name === nm) hit = hit || a.note || ''; });
+    });
+    (P.extras || []).forEach(function (x) { if (x.name === nm) hit = hit || x.note || ''; });
+    return hit;
+  }
+  // svcQuote: exact price at a sqft — same engine as the booking wizard
+  // (tiered brackets, flat add-ons, Zillow's own table). Tiered things
+  // stay blank without a sqft; per-image add-ons return a note instead
+  // of a price; 6,000+ (Inquire) stays blank for a hand quote.
+  function svcQuote(nm, sqft) {
+    var P = window.JCS_PRICING, out = { price: '', note: '' };
+    if (!P) return out;
+    var n = parseInt(sqft, 10) || 0;
+    function tiered(t) { if (!n) return; var p = P.priceAt(t, n); if (typeof p === 'number') out.price = p; }
+    (P.services || []).forEach(function (s) {
+      if (s.name === nm) tiered(s);
+      (s.addons || []).forEach(function (a) {
+        if (a.name !== nm) return;
+        if (a.unit) out.note = '$' + a.price + ' per ' + a.unit + ' — tallied after the shoot';
+        else out.price = a.price;
+      });
+    });
+    (P.extras || []).forEach(function (x) {
+      if (x.name !== nm) return;
+      if (typeof x.price === 'number') out.price = x.price; else tiered(x);
+    });
+    return out;
+  }
+
   async function api(path, method, body) {
     var r = await fetch('/api/admin/' + path, {
       method: method || 'GET',
@@ -698,7 +735,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       fld('f-twitime', 'Twilight time <small style="text-transform:none;letter-spacing:0">(optional)</small>', timeSel('f-twitime', v.twilight_time)) +
       '<div class="adm-field full"><label>Addons <small style="text-transform:none;letter-spacing:0">(builds the deliverables list)</small></label>' + addonsHtml + '</div>' +
       '<div class="adm-field full"><label for="f-deliverables">Deliverables <small style="text-transform:none;letter-spacing:0">(shown to client — edit freely)</small></label><textarea id="f-deliverables">' + esc(v.deliverables || '') + '</textarea></div>' +
-      fld('f-price', 'Price ($)', '<input id="f-price" type="number" min="0" step="1" value="' + (v.price == null ? '' : v.price) + '">') +
+      fld('f-price', 'Price ($) <small style="text-transform:none;letter-spacing:0">(auto from sqft + service + add-ons — type to override)</small>',
+        '<input id="f-price" type="number" min="0" step="1" value="' + (v.price == null ? '' : v.price) + '">') +
       fld('f-status', 'Stage', '<select id="f-status">' + statusOpts + '</select>') +
       fld('f-travel', 'Travel fee ($)', '<input id="f-travel" type="number" min="0" step="1" placeholder="e.g. 150" value="' + (v.travel_fee == null ? '' : v.travel_fee) + '">') +
       fld('f-travelnote', 'Travel fee note', '<input id="f-travelnote" placeholder="e.g. Tahoe trip" value="' + esc(v.travel_note || '') + '">') +
@@ -909,6 +947,30 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     ['f-price', 'f-travel'].forEach(function (id) { $(id).addEventListener('input', updateTotal); });
     $('f-discount').addEventListener('change', updateTotal);
     updateTotal();
+
+    // ---- price auto-generates from the pricing sheet -----------------
+    // New projects only, and only until the price is touched by hand:
+    // base service at the sqft (Full Campaign = stills + film), plus
+    // every flat-priced add-on that matches the sheet. Per-image and
+    // custom add-ons never join the sum.
+    var priceAuto = !b.id && (v.price == null || v.price === '');
+    function autoPrice() {
+      if (!priceAuto) return;
+      var type = $('f-type').value, sq = $('f-sqft').value, sum = null;
+      function add(nm) { var q = svcQuote(nm, sq); if (typeof q.price === 'number') sum = (sum || 0) + q.price; }
+      if (type === 'Full Campaign (Stills + Film)') { add('Flash / Ambient Photography'); add('Cinematic Property Film'); }
+      else add(type);
+      checkedList().forEach(add);
+      $('f-price').value = sum == null ? '' : sum;
+      updateTotal();
+    }
+    $('f-price').addEventListener('input', function () { priceAuto = false; });
+    $('f-sqft').addEventListener('input', autoPrice);
+    $('f-type').addEventListener('change', autoPrice);
+    $('modal-form').addEventListener('change', function (e) {
+      if (e.target.classList && e.target.classList.contains('f-addon')) autoPrice();
+    });
+    autoPrice();
 
     // client typeahead — search by name, email, or brokerage
     (function () {
@@ -2018,18 +2080,6 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     propNew: function (presetClientId, draft) {
       draft = draft || {};
       var selClient = state.clients.find(function (c) { return c.id == (draft.client_id || presetClientId); });
-      // Service lineup, grouped like the sheet; descriptions pulled from
-      // pricing-data.js when the names match.
-      function svcDesc(nm) {
-        var P = window.JCS_PRICING || { services: [], extras: [] };
-        var hit = '';
-        (P.services || []).forEach(function (s) {
-          if (s.name === nm && s.desc) hit = hit || s.desc;
-          (s.addons || []).forEach(function (a) { if (a.name === nm) hit = hit || a.note || ''; });
-        });
-        (P.extras || []).forEach(function (x) { if (x.name === nm) hit = hit || x.note || ''; });
-        return hit;
-      }
       var GROUP_LABEL = { 'Photography': 'Photography', 'Film': 'Film', 'Beyond': 'Extras' };
       var picked = draft.services || [];
       var svcHtml = Object.keys(ADDONS).map(function (group) {
@@ -2038,13 +2088,16 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           ADDONS[group].map(function (label) {
             return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
               '<input type="checkbox" class="p-svc" value="' + esc(label) + '" data-group="' + esc(GROUP_LABEL[group] || group) + '"' +
-              (picked.indexOf(label) > -1 ? ' checked' : '') + ' style="width:auto"> ' + esc(label) + '</label>';
+              (picked.indexOf(label) > -1 ? ' checked' : '') + ' style="width:auto"> ' + esc(label) +
+              '<span class="p-svc-pr mut" data-nm="' + esc(label) + '" style="margin-left:auto;font-size:0.78rem;white-space:nowrap"></span></label>';
           }).join('') + '</div></div>';
       }).join('');
 
       openModal('New proposal',
         fld('f-ptitle', 'Property / title *', '<input id="f-ptitle" required placeholder="465 Headwaters Way" value="' + esc(draft.title || '') + '">') +
         fld('f-ploc', 'Location', '<input id="f-ploc" placeholder="Danville, California" value="' + esc(draft.location || '') + '">') +
+        fld('f-psqft', 'Sqft <small style="text-transform:none;letter-spacing:0">(prices services exactly, like a project)</small>',
+          '<input id="f-psqft" type="number" min="0" placeholder="4500" value="' + esc(draft.sqft || '') + '">') +
         '<div class="adm-field full"><label for="p-client-q">Client *</label><div style="display:flex;gap:0.5rem">' +
           '<div style="position:relative;flex:1">' +
             '<input type="hidden" id="p-client" value="' + esc(selClient ? selClient.id : '') + '">' +
@@ -2060,11 +2113,16 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
             $('p-client-q').focus();
             throw Object.assign(new Error('pick-client'), { userMessage: 'Choose a client — search above, or create one with + New.' });
           }
+          var sqft = $('f-psqft').value;
           var items = Array.prototype.map.call(document.querySelectorAll('.p-svc:checked'), function (x) {
-            return { group: x.dataset.group, name: x.value, desc: svcDesc(x.value), price: '', badge: '' };
+            var q = svcQuote(x.value, sqft);
+            var d = svcDesc(x.value);
+            return { group: x.dataset.group, name: x.value,
+                     desc: d + (q.note ? (d ? ' — ' : '') + q.note : ''),
+                     price: q.price, badge: '' };
           });
           var j = await api('proposals', 'POST', {
-            title: $('f-ptitle').value, location: $('f-ploc').value,
+            title: $('f-ptitle').value, location: $('f-ploc').value, sqft: sqft,
             client_id: cl.id, client_name: cl.name || '', client_email: cl.email || '',
             items: items
           });
@@ -2104,11 +2162,21 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       })();
       $('p-newclient').addEventListener('click', function () {
         var draftNow = {
-          title: $('f-ptitle').value, location: $('f-ploc').value,
+          title: $('f-ptitle').value, location: $('f-ploc').value, sqft: $('f-psqft').value,
           services: Array.prototype.map.call(document.querySelectorAll('.p-svc:checked'), function (x) { return x.value; })
         };
         clientModal(null, function (nc) { ADM.propNew(nc ? nc.id : null, draftNow); });
       });
+      // live prices beside every service as the sqft is typed
+      function paintSvcPrices() {
+        var sq = $('f-psqft').value;
+        document.querySelectorAll('.p-svc-pr').forEach(function (el) {
+          var q = svcQuote(el.dataset.nm, sq);
+          el.textContent = q.price !== '' ? money(q.price) : (q.note ? 'per image' : (sq ? 'inquire' : ''));
+        });
+      }
+      $('f-psqft').addEventListener('input', paintSvcPrices);
+      paintSvcPrices();
     },
     propReadItems: function () {
       return Array.prototype.map.call(document.querySelectorAll('#pp-items .adm-prop-item'), function (row) {

@@ -30,7 +30,13 @@ select/create the client (typeahead, same as projects) + a grouped
 services selection that seeds Scope & Investment (descs pulled from
 pricing-data.js; prices set in the editor). A STANDALONE proposal (no
 gated project) creates the project as Upcoming at acceptance time —
-acceptance always produces a project either way. 'pending' projects sit above the pipeline in a strip,
+acceptance always produces a project either way. Admin loads
+pricing-data.js: svcDesc()/svcQuote() price services exactly from the
+sheet rates — the proposal modal takes a sqft and prices each selected
+service live (per-image add-ons annotate instead; 6,000+ stays blank),
+and the project form auto-generates Price from sqft + service (+ flat
+add-ons; Full Campaign = stills + film) until the price is edited by
+hand. 'pending' projects sit above the pipeline in a strip,
 are hidden from the client portal's project list, and surface there as a
 "Your Proposal Is Ready" band once the proposal is SENT (cron never
 touches 'pending').

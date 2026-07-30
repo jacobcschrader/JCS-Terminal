@@ -1235,3 +1235,20 @@ title, else a navy JCS monogram tile.
   property films"), and the Numbers pricing sheet (title row + note).
   Existing projects keep their stored type label by design (the admin
   edit form preserves legacy type values).
+
+### Sheet rates hooked into admin quoting (sqft → exact prices)
+- Admin now quotes straight from pricing-data.js (the Numbers-sheet
+  rates) via shared svcQuote()/svcDesc() helpers.
+- New proposal modal: added a Sqft field — every service checkbox shows
+  its exact price live as the sqft is typed (per-image add-ons read
+  "per image"; over 6,000 sqft reads "inquire"), and created line items
+  carry those exact prices (per-image items get a "$25 per image —
+  tallied after the shoot" note instead; Inquire tiers stay blank for a
+  hand quote). proposals.sqft stored (db.js + create API) and carried
+  onto the auto-created booking when a standalone proposal is accepted.
+- Project form: Price ($) auto-generates from sqft + service + every
+  flat-priced add-on that matches the sheet (Full Campaign = photography
+  + film tiers combined) — new projects only, and only until the price
+  is typed by hand; existing projects never get clobbered. Verified:
+  film @3,200 → $1,450; +Twilight → $1,700; Full Campaign → $2,700;
+  manual override survives sqft edits; 6,000+ leaves it blank.
