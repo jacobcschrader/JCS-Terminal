@@ -42,8 +42,8 @@
     },
     {
       key: "film",
-      name: "Cinematic Listing Film",
-      desc: "A horizontal listing film that tells the property's story — cut for the MLS, websites, and YouTube.",
+      name: "Cinematic Property Film",
+      desc: "A cinematic horizontal film that tells the property's story — cut for the MLS, websites, and YouTube.",
       includes: "Aerial drone · Licensed music · Branded + unbranded cuts",
       tiers: [1250, 1350, 1450, 1550, 1650, null],
       addons: [TWILIGHT_VIDEO, TEASER]

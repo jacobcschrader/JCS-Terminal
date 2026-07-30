@@ -1225,3 +1225,13 @@ title, else a navy JCS monogram tile.
   client_id/email or created — and links it back, so acceptance always
   lands a project in the pipeline. friendly() passes through
   err.userMessage for inline validation notes.
+- /book step 1 microcopy trimmed per Jacob: dropped "Want rates first?
+  View 2026 pricing · Prefer to talk?" — the line is now just the
+  email + phone.
+- Service renamed: "Cinematic Listing Film" → "Cinematic Property Film"
+  everywhere — pricing-data.js (name + desc now "A cinematic horizontal
+  film…"), admin TYPES + Film add-on group, home film-card alt,
+  services-page meta descriptions, proposal-page film lede ("Recent
+  property films"), and the Numbers pricing sheet (title row + note).
+  Existing projects keep their stored type label by design (the admin
+  edit form preserves legacy type values).
