@@ -79,7 +79,8 @@ body { background: var(--paper-warm); color: var(--ink); }
 
 /* ---- films ----------------------------------------------------------- */
 .pp-filmsec { padding: 90px 0 70px; }
-.pp-films { display: flex; flex-direction: column; gap: 26px; margin-top: 44px; }
+.pp-films { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 44px; }
+.pp-films > div:only-child { grid-column: 1 / -1; max-width: 720px; }
 .pp-films video { width: 100%; display: block; background: var(--navy-deep, #091627); aspect-ratio: 16 / 9; }
 .pp-films .cap { font-family: var(--sans); font-size: 11px; letter-spacing: 0.16em;
   text-transform: uppercase; color: var(--pp-faint); margin-top: 12px; }
@@ -90,11 +91,12 @@ body { background: var(--paper-warm); color: var(--ink); }
 .pp-gallery .col { flex: 1; display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .pp-gallery img { width: 100%; display: block; }
 
-/* ---- what they say: white cards -------------------------------------- */
-.pp-quotesec { padding: 90px 0; }
-.pp-quotes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 980px; margin-top: 44px; }
+/* ---- what they say: white cards, centered ---------------------------- */
+.pp-quotesec { padding: 90px 0; text-align: center; }
+.pp-quotes { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; max-width: 980px;
+  margin: 44px auto 0; }
 .pp-quote { background: #fff; border: 1px solid var(--pp-line); padding: clamp(24px, 2.4vw, 36px);
-  display: flex; flex-direction: column; }
+  display: flex; flex-direction: column; text-align: left; }
 .pp-quote .mark { font-family: var(--serif); font-size: 44px; line-height: 22px; color: var(--accent); }
 .pp-quote blockquote { font-family: var(--serif); font-weight: 300; font-size: 17px; line-height: 1.55;
   color: var(--ink); margin: 14px 0 0; flex: 1 0 auto; }
@@ -160,6 +162,7 @@ body { background: var(--paper-warm); color: var(--ink); }
 
 @media (max-width: 900px) {
   .pp-quotes { grid-template-columns: 1fr; max-width: 560px; }
+  .pp-films { grid-template-columns: 1fr; }
 }
 @media (max-width: 700px) {
   .pp-scope { padding: 52px 0 60px; }
@@ -386,9 +389,12 @@ body { background: var(--paper-warm); color: var(--ink); }
   function portfolio() {
     var go = function () {
       var all = (window.PROJECTS_DATA || []).filter(function (p) { return !p.draft; });
-      var films = all.map(function (p) {
-        return { t: p.title, loc: p.location, url: p.horizontal_video || p.horizontal_url || '', poster: p.cover_url || '' };
-      }).filter(function (f) { return f.url; }).slice(0, 2);
+      // The Ninebark project leads the samples (Jacob's pick).
+      var isNine = function (p) { return /ninebark/i.test((p.title || '') + ' ' + (p.slug || '')); };
+      var films = all.slice().sort(function (a, b) { return (isNine(b) ? 1 : 0) - (isNine(a) ? 1 : 0); })
+        .map(function (p) {
+          return { t: p.title, loc: p.location, url: p.horizontal_video || p.horizontal_url || '', poster: p.cover_url || '' };
+        }).filter(function (f) { return f.url; }).slice(0, 2);
       if (films.length) {
         $('pp-films').innerHTML = films.map(function (f) {
           return '<div><video controls preload="none" playsinline poster="' + esc(f.poster) + '" src="' + esc(f.url) + '"></video>' +
@@ -396,10 +402,10 @@ body { background: var(--paper-warm); color: var(--ink); }
         }).join('');
         $('pp-film-sec').hidden = false;
       }
-      var ph = all.find(function (p) { return (p.gallery && p.gallery.length >= 6); });
+      var ph = all.find(isNine) || all.find(function (p) { return (p.gallery && p.gallery.length >= 6); });
       if (ph) {
         var gallery = typeof ph.gallery === 'string' ? JSON.parse(ph.gallery || '[]') : ph.gallery;
-        var imgs = [ph.cover_url].concat(gallery).filter(Boolean).slice(0, 12);
+        var imgs = [ph.cover_url].concat(gallery).filter(Boolean).slice(0, 6);
         $('pp-photo-h').textContent = 'Recent work — ' + (ph.headline || ph.title) + '.';
         $('pp-photo-sub').textContent = ph.title + (ph.shot_for ? ' — shot for ' + ph.shot_for + (ph.brokerage ? ' · ' + ph.brokerage : '') : '') + '.';
         // Three natural-height columns, filled round-robin (reference layout).

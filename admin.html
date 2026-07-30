@@ -428,6 +428,46 @@ select.lx-input { border-radius: 999px; padding-right: 2rem; }
 .adm-field label, .adm-kv label, .adm-stat span, .lx-ledger .cell span,
 .adm-day__date span, .adm-sched__date span, .adm-col__head b,
 .adm-del .lnk, .adm-del .nolnk { font-weight: 600; }
+
+/* ---- proposal line-item editor: quiet editorial ledger ------------- */
+/* Inputs read as typography (the finished proposal's ledger) until you
+   touch them — hairline underline on hover, teal on focus. */
+.adm-prop-item { display: grid; grid-template-columns: 132px 1fr 150px auto;
+  gap: 0.15rem 1.2rem; align-items: start; background: #fff;
+  border: 1px solid var(--line); border-radius: 14px;
+  padding: 1rem 1.1rem 0.9rem; margin-bottom: 0.7rem; }
+.adm-prop-item input { width: 100%; box-sizing: border-box; font-family: var(--sans);
+  background: transparent; border: 0; border-bottom: 1px solid transparent; border-radius: 0;
+  padding: 0.18rem 0.05rem; outline: none; color: var(--ink); transition: border-color 0.2s; }
+.adm-prop-item input:hover { border-bottom-color: rgba(15,34,64,0.14); }
+.adm-prop-item input:focus { border-bottom-color: var(--rx-teal); }
+.adm-prop-item input::placeholder { color: #b6bdc9; font-weight: 400; }
+.adm-prop-item .pi-group { font-size: 0.64rem; letter-spacing: 0.18em; text-transform: uppercase;
+  font-weight: 600; color: var(--muted); margin-top: 0.55rem; }
+.adm-prop-item .pi-name { font-family: var(--serif); font-size: 1.25rem; font-weight: 500;
+  letter-spacing: -0.01em; font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; }
+.adm-prop-item .pi-name::placeholder { font-family: var(--sans); font-size: 0.9rem; }
+.adm-prop-item .pi-desc { font-size: 0.83rem; color: var(--muted); }
+.adm-prop-item .pi-badge { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase;
+  font-weight: 600; color: var(--rx-teal); }
+.adm-prop-item .pi-badge::placeholder { letter-spacing: 0.04em; text-transform: none; font-weight: 400; }
+.adm-prop-item .pi-price { font-family: var(--serif); font-size: 1.2rem; font-weight: 500;
+  text-align: right; margin-top: 0.3rem;
+  font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1;
+  -moz-appearance: textfield; appearance: textfield; }
+.adm-prop-item .pi-price::-webkit-outer-spin-button,
+.adm-prop-item .pi-price::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.adm-prop-item .pi-price::placeholder { font-family: var(--sans); font-size: 0.72rem;
+  letter-spacing: 0.12em; text-transform: uppercase; }
+.adm-prop-item .pi-acts { display: flex; flex-direction: column; gap: 0.3rem;
+  opacity: 0.3; transition: opacity 0.2s; padding-top: 0.15rem; }
+.adm-prop-item:hover .pi-acts, .adm-prop-item:focus-within .pi-acts { opacity: 1; }
+.adm-prop-item .pi-acts button { width: 27px; height: 27px; display: flex; align-items: center;
+  justify-content: center; padding: 0; border-radius: 999px; font-size: 0.8rem; line-height: 1; }
+@media (max-width: 760px) {
+  .adm-prop-item { grid-template-columns: 1fr 110px auto; }
+  .adm-prop-item .pi-group { grid-column: 1 / -1; margin-top: 0; }
+}
 </style>
 </head>
 <body>
@@ -1654,16 +1694,16 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
 
   function propItemRow(it, i) {
     it = it || {};
-    return '<div class="adm-prop-item" data-i="' + i + '" style="display:grid;grid-template-columns:110px 1fr 110px auto;gap:0.5rem;align-items:start;padding:0.55rem 0;border-bottom:1px solid var(--line-soft)">' +
+    return '<div class="adm-prop-item" data-i="' + i + '">' +
       '<input class="pi-group" placeholder="Group" value="' + esc(it.group || '') + '">' +
-      '<span><input class="pi-name" placeholder="Line item — e.g. Photography" value="' + esc(it.name || '') + '" style="width:100%;box-sizing:border-box">' +
-      '<input class="pi-desc" placeholder="One-line description (optional)" value="' + esc(it.desc || '') + '" style="width:100%;box-sizing:border-box;margin-top:0.35rem;font-size:0.8rem">' +
-      '<input class="pi-badge" placeholder="Badge (optional — e.g. INCLUDES DRONE)" value="' + esc(it.badge || '') + '" style="width:100%;box-sizing:border-box;margin-top:0.35rem;font-size:0.72rem"></span>' +
-      '<input class="pi-price" type="number" min="0" step="50" placeholder="$ (blank = Included)" oninput="ADM.propLiveTotal()" value="' + (it.price === '' || it.price == null ? '' : esc(it.price)) + '">' +
-      '<span style="display:flex;gap:0.25rem;padding-top:0.4rem">' +
-        '<button type="button" class="adm-btn adm-btn--ghost" style="padding:0.3rem 0.55rem" title="Move up" onclick="ADM.propItemMove(' + i + ',-1)">&uarr;</button>' +
-        '<button type="button" class="adm-btn adm-btn--ghost" style="padding:0.3rem 0.55rem" title="Move down" onclick="ADM.propItemMove(' + i + ',1)">&darr;</button>' +
-        '<button type="button" class="adm-btn--danger adm-btn" style="padding:0.3rem 0.55rem" title="Remove" onclick="ADM.propItemDel(' + i + ')">&times;</button>' +
+      '<span><input class="pi-name" placeholder="Line item — e.g. Photography" value="' + esc(it.name || '') + '">' +
+      '<input class="pi-desc" placeholder="One-line description (optional)" value="' + esc(it.desc || '') + '">' +
+      '<input class="pi-badge" placeholder="Badge (optional — e.g. Includes drone)" value="' + esc(it.badge || '') + '"></span>' +
+      '<input class="pi-price" type="number" min="0" step="50" placeholder="Included" oninput="ADM.propLiveTotal()" value="' + (it.price === '' || it.price == null ? '' : esc(it.price)) + '">' +
+      '<span class="pi-acts">' +
+        '<button type="button" class="adm-btn adm-btn--ghost" title="Move up" onclick="ADM.propItemMove(' + i + ',-1)">&uarr;</button>' +
+        '<button type="button" class="adm-btn adm-btn--ghost" title="Move down" onclick="ADM.propItemMove(' + i + ',1)">&darr;</button>' +
+        '<button type="button" class="adm-btn--danger adm-btn" title="Remove" onclick="ADM.propItemDel(' + i + ')">&times;</button>' +
       '</span></div>';
   }
 

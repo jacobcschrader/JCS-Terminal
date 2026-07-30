@@ -1323,3 +1323,22 @@ title, else a navy JCS monogram tile.
   already renamed it in the sheet): pricing-data.js name + the admin
   Film services list. The internal key stays 'basic-video' and the
   card still uses images/svc/basic-video.jpg.
+
+### Proposal editor de-phonied + proposal page tuning
+- The Scope & Investment row editor in admin was raw browser inputs
+  (Jacob: "looks phony not high end"). Rebuilt as an editorial ledger:
+  each line item is a white hairline card (14px radius) whose inputs
+  render as typography — tracked-caps group, Cormorant item name,
+  muted description, teal caps badge, right-aligned serif price with
+  lining numerals ("Included" placeholder when blank), number spinners
+  hidden — with a hairline underline appearing on hover and teal on
+  focus. Move/remove controls are round icon buttons that fade in on
+  row hover. Same classes/handlers, so save/reorder/live-total logic
+  is untouched.
+- Proposal page: reviews ("What They Say") centered — section kicker
+  centered and the two cards center as a block, card text stays left.
+- Films now render smaller, side by side (two-up grid, 18px gap; a
+  lone film spans centered at 720px; single column on mobile).
+- Photography section slimmed to 6 images and pinned to the Ninebark
+  project (9304 Ninebark Road leads films + photos when present;
+  falls back to the first 6+-image project otherwise).
