@@ -2326,6 +2326,19 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         toast(String(e.message) === 'no-client-email' ? 'Add a valid client email first.' : friendly(e), 'err');
       }
     },
+    propDelete: async function (id) {
+      var p = state.proposals.find(function (x) { return x.id == id; }); if (!p) return;
+      var warn = 'Delete the proposal for ' + p.title + '? The share link goes dead immediately.';
+      if (p.booking_id) warn += '\n\nIts linked project stays put (still ' +
+        ((state.bookings.find(function (bk) { return bk.id == p.booking_id; }) || {}).status === 'pending'
+          ? 'Pending — move or delete it from the pipeline' : 'in the pipeline') + ').';
+      if (!confirm(warn)) return;
+      try {
+        await api('proposals', 'DELETE', { id: id });
+        await reload(); go('proposals');
+        toast('Proposal deleted.');
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
 
     // ---- licensing ----
     licTab: function (t) { state.licTab = t; render(); },

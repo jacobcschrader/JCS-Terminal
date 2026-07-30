@@ -1288,3 +1288,8 @@ title, else a navy JCS monogram tile.
   touches its stage (that stays on the pipeline board/list).
 - Submit button now reads "Create project" / "Create proposal" on the
   create modals ("Save" stays for edits).
+- Fixed the proposal editor's Delete button: it called ADM.propDelete,
+  which was never defined (the API's DELETE route existed all along).
+  Now wired with a confirm that warns the share link dies immediately
+  and, for linked proposals, that the project stays in the pipeline
+  (still Pending if unaccepted). Deletes, reloads, returns to the list.
