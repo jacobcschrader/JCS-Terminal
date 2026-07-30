@@ -1293,3 +1293,22 @@ title, else a navy JCS monogram tile.
   Now wired with a confirm that warns the share link dies immediately
   and, for linked proposals, that the project stays in the pipeline
   (still Pending if unaccepted). Deletes, reloads, returns to the list.
+- New-proposal services section now mirrors the project form exactly:
+  same Photography/Film/Beyond checkbox grid plus a Custom group with
+  the name + price + "+ Add" row (custom lines land under Extras with
+  their price). Live sqft prices moved inline beside each name
+  ("— $1,550") instead of right-aligned chips, matching how custom
+  items tag their price; the +New-client roundtrip preserves customs.
+
+### 6,000+ sqft: custom price per line item
+- Past 6,000 sqft the sheet says Inquire, so both create modals now
+  give every tiered service its own inline price input instead of an
+  auto price. Project form: typed prices sum into the auto total with
+  flat add-ons and customs ($2,200 + $2,600 at 7,200 sqft → $4,800;
+  + Twilight Videography → $5,050), survive sqft edits, feed the
+  drafted proposal's line items, and are required at create when
+  auto-pricing is active (missing ones are named). Proposal modal:
+  same inputs beside each service; created line items carry the typed
+  prices and creation blocks until every checked 6,000+ line has one.
+  Zillow/floor-plan keep auto-pricing at any size (their tables never
+  hit Inquire).

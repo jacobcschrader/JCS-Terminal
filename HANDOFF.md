@@ -33,14 +33,18 @@ gated project) creates the project as Upcoming at acceptance time —
 acceptance always produces a project either way. Admin loads
 pricing-data.js: svcDesc()/svcQuote() price services exactly from the
 sheet rates — the proposal modal takes a sqft and prices each selected
-service live (per-image add-ons annotate instead; 6,000+ stays blank),
+service live (per-image add-ons annotate instead),
 and the project form auto-generates Price from sqft + the CHECKED
 services/add-ons (the Service dropdown + TYPES list are gone — scope
 lives in the checklist; bookings.type derives silently from the first
 checked main service on create, edits keep the stored value). Custom
 services take an optional price box that joins the quote. "Send a
 proposal" turns each checked service into its own priced line item at
-the project's sqft. The form ends in four sending options (Send
+the project's sqft. Past 6,000 sqft (the sheet's Inquire zone) every tiered service
+swaps its auto price for a per-line custom price input in BOTH create
+modals — typed prices add into the project total / proposal line
+items, survive sqft edits, and are required at create (named in the
+validation message). The form ends in four sending options (Send
 booking confirmation / Include price / Don't send / Send a proposal —
 price implies confirm, silent + proposal are exclusive, one required)
 and has NO Stage select: creating sends the confirmation immediately

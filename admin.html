@@ -523,7 +523,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     var P = window.JCS_PRICING, out = { price: '', note: '' };
     if (!P) return out;
     var n = parseInt(sqft, 10) || 0;
-    function tiered(t) { if (!n) return; var p = P.priceAt(t, n); if (typeof p === 'number') out.price = p; }
+    function tiered(t) { if (!n) return; var p = P.priceAt(t, n); if (typeof p === 'number') out.price = p; else out.inquire = true; }
     (P.services || []).forEach(function (s) {
       if (s.name === nm) tiered(s);
       (s.addons || []).forEach(function (a) {
@@ -686,7 +686,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     var selClient = state.clients.find(function (c) { return c.id == selClientId; });
     function addonLabel(label, on) {
       return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
-        '<input type="checkbox" class="f-addon" value="' + esc(label) + '"' + (on ? ' checked' : '') + ' style="width:auto"> ' + esc(label) + '</label>';
+        '<input type="checkbox" class="f-addon" value="' + esc(label) + '"' + (on ? ' checked' : '') + ' style="width:auto"> ' + esc(label) +
+        '<small class="f-svc-pr" data-nm="' + esc(label) + '" style="color:var(--muted);margin-left:0.35rem;white-space:nowrap"></small></label>';
     }
     var standardAddons = Object.keys(ADDONS).reduce(function (all, g) { return all.concat(ADDONS[g]); }, []);
     var customAddons = checkedAddons.filter(function (x) { return standardAddons.indexOf(x) === -1; });
@@ -775,6 +776,14 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         if (sendNow && !$('f-date').value) {
           throw Object.assign(new Error('opt'), { userMessage: 'Add a shoot date to send the confirmation on create — or choose "Don\u2019t send confirmation".' });
         }
+        var missingInq = [];
+        document.querySelectorAll('.f-svc-pr .f-inqprice').forEach(function (inp) {
+          var lab = inp.closest('label'); var box = lab && lab.querySelector('.f-addon');
+          if (box && box.checked && inp.value === '') missingInq.push(box.value);
+        });
+        if (!b.id && priceAuto && missingInq.length) {
+          throw Object.assign(new Error('inq'), { userMessage: 'Past 6,000 sqft each service takes a custom price. Set: ' + missingInq.join(', ') + '.' });
+        }
         if (!b.id) {
           // status sets itself, mirroring the pipeline: proposal gates as
           // Pending; a past shoot date lands straight in Editing.
@@ -808,12 +817,17 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
             var g = Object.keys(ADDONS).filter(function (k) { return ADDONS[k].indexOf(label) > -1; })[0];
             return g === 'Beyond' ? 'Extras' : (g || 'The Campaign');
           };
+          var inqMap = {};
+          document.querySelectorAll('.f-svc-pr .f-inqprice').forEach(function (inp) {
+            if (inp.value !== '') inqMap[inp.dataset.nm] = Number(inp.value) || 0;
+          });
           var items = picked.map(function (nm) {
             var q = svcQuote(nm, bk.sqft);
             var d = svcDesc(nm);
+            var priceVal = (q.inquire && inqMap[nm] != null) ? inqMap[nm] : q.price;
             return { group: groupOf(nm), name: nm,
                      desc: d + (q.note ? (d ? ' — ' : '') + q.note : ''),
-                     price: q.price, badge: '' };
+                     price: priceVal, badge: '' };
           });
           if (!items.length) items = [{ group: 'The Campaign', name: bk.type || 'Photography',
             desc: bk.deliverables || '', price: bk.price == null || bk.price === '' ? '' : Number(bk.price), badge: '' }];
@@ -1016,6 +1030,19 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     // every flat-priced add-on that matches the sheet. Per-image and
     // custom add-ons never join the sum.
     var priceAuto = !b.id && (v.price == null || v.price === '');
+    // Past 6,000 sqft the sheet says Inquire: each tiered service takes
+    // its own custom price input, and those add into the auto total.
+    function paintProjPrices() {
+      var sq = $('f-sqft').value;
+      document.querySelectorAll('.f-svc-pr').forEach(function (el) {
+        var q = svcQuote(el.dataset.nm, sq);
+        if (q.inquire) {
+          var prev = el.querySelector('.f-inqprice');
+          var val = prev ? prev.value : '';
+          el.innerHTML = '&mdash; <input type="number" min="0" step="1" class="f-inqprice" data-nm="' + esc(el.dataset.nm) + '" placeholder="$" value="' + esc(val) + '" style="width:84px;font-family:var(--sans);font-size:0.8rem;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.25rem 0.45rem;outline:none">';
+        } else el.innerHTML = '';
+      });
+    }
     function autoPrice() {
       if (!priceAuto) return;
       var sq = $('f-sqft').value, sum = null;
@@ -1025,6 +1052,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       });
       document.querySelectorAll('.f-addon:checked[data-price]').forEach(function (x) {
         sum = (sum || 0) + (Number(x.dataset.price) || 0);
+      });
+      document.querySelectorAll('.f-svc-pr .f-inqprice').forEach(function (inp) {
+        var lab = inp.closest('label'); var box = lab && lab.querySelector('.f-addon');
+        if (box && box.checked && inp.value !== '') sum = (sum || 0) + (Number(inp.value) || 0);
       });
       $('f-price').value = sum == null ? '' : sum;
       updateTotal();
@@ -1042,10 +1073,19 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     })();
 
     $('f-price').addEventListener('input', function () { priceAuto = false; });
-    $('f-sqft').addEventListener('input', autoPrice);
+    $('f-sqft').addEventListener('input', function () { paintProjPrices(); autoPrice(); });
     $('modal-form').addEventListener('change', function (e) {
       if (e.target.classList && e.target.classList.contains('f-addon')) autoPrice();
     });
+    $('modal-form').addEventListener('input', function (e) {
+      if (e.target.classList && e.target.classList.contains('f-inqprice')) autoPrice();
+    });
+    $('modal-form').addEventListener('click', function (e) {
+      if (e.target.classList && e.target.classList.contains('f-inqprice')) {
+        e.preventDefault(); e.target.focus();
+      }
+    });
+    paintProjPrices();
     autoPrice();
 
     // client typeahead — search by name, email, or brokerage
@@ -2159,16 +2199,32 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       var selClient = state.clients.find(function (c) { return c.id == (draft.client_id || presetClientId); });
       var GROUP_LABEL = { 'Photography': 'Photography', 'Film': 'Film', 'Beyond': 'Extras' };
       var picked = draft.services || [];
+      var customs = draft.customs || [];
+      var pLabel = function (label, group, on, priceAttr, priceTag) {
+        return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
+          '<input type="checkbox" class="p-svc" value="' + esc(label) + '" data-group="' + esc(group) + '"' +
+          (priceAttr != null ? ' data-price="' + esc(priceAttr) + '"' : '') +
+          (on ? ' checked' : '') + ' style="width:auto"> ' + esc(label) +
+          (priceTag != null
+            ? '<small style="color:var(--muted);margin-left:0.35rem">&mdash; ' + money(priceTag) + '</small>'
+            : '<small class="p-svc-pr" data-nm="' + esc(label) + '" style="color:var(--muted);margin-left:0.35rem;white-space:nowrap"></small>') +
+          '</label>';
+      };
       var svcHtml = Object.keys(ADDONS).map(function (group) {
         return '<div style="margin-top:0.6rem"><div style="font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem">' + group + '</div>' +
           '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.35rem 1rem">' +
           ADDONS[group].map(function (label) {
-            return '<label style="display:flex;align-items:center;gap:0.5rem;font-size:0.85rem;color:var(--ink);text-transform:none;letter-spacing:0;cursor:pointer">' +
-              '<input type="checkbox" class="p-svc" value="' + esc(label) + '" data-group="' + esc(GROUP_LABEL[group] || group) + '"' +
-              (picked.indexOf(label) > -1 ? ' checked' : '') + ' style="width:auto"> ' + esc(label) +
-              '<span class="p-svc-pr mut" data-nm="' + esc(label) + '" style="margin-left:auto;font-size:0.78rem;white-space:nowrap"></span></label>';
+            return pLabel(label, GROUP_LABEL[group] || group, picked.indexOf(label) > -1);
           }).join('') + '</div></div>';
-      }).join('');
+      }).join('') +
+        '<div style="margin-top:0.6rem"><div style="font-size:0.6rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted);margin-bottom:0.4rem">Custom</div>' +
+          '<div id="p-customlist" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.35rem 1rem">' +
+          customs.map(function (cx) { return pLabel(cx.name, 'Extras', true, cx.price, cx.price === '' ? null : cx.price); }).join('') + '</div>' +
+          '<div style="display:flex;gap:0.5rem;margin-top:0.5rem">' +
+            '<input id="p-customsvc" placeholder="Add a custom service…" style="flex:1;font-family:var(--sans);font-size:0.85rem;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.5rem 0.7rem;outline:none">' +
+            '<input id="p-customprice" type="number" min="0" step="1" placeholder="$" style="width:110px;font-family:var(--sans);font-size:0.85rem;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.5rem 0.7rem;outline:none">' +
+            '<button type="button" class="adm-btn adm-btn--ghost" id="p-addcustom" style="padding:0.45rem 0.9rem">+ Add</button>' +
+          '</div></div>';
 
       openModal('New proposal',
         fld('f-ptitle', 'Property / title *', '<input id="f-ptitle" required placeholder="465 Headwaters Way" value="' + esc(draft.title || '') + '">') +
@@ -2182,7 +2238,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
             '<div id="p-client-list" class="adm-cl-list" hidden></div>' +
           '</div>' +
           '<button type="button" class="adm-btn adm-btn--ghost" id="p-newclient" style="padding:0.55rem 0.9rem">+ New</button></div></div>' +
-        '<div class="adm-field full"><label>Scope &amp; investment <small style="text-transform:none;letter-spacing:0">(selected services become the line items — you set prices in the editor)</small></label>' +
+        '<div class="adm-field full"><label>Scope &amp; investment <small style="text-transform:none;letter-spacing:0">(selected services become the line items, priced from the sqft — tweak anything in the editor)</small></label>' +
           svcHtml + '</div>',
         async function () {
           var cl = state.clients.find(function (c) { return c.id == $('p-client').value; });
@@ -2191,13 +2247,27 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
             throw Object.assign(new Error('pick-client'), { userMessage: 'Choose a client — search above, or create one with + New.' });
           }
           var sqft = $('f-psqft').value;
+          var needPrice = [];
           var items = Array.prototype.map.call(document.querySelectorAll('.p-svc:checked'), function (x) {
+            if (x.hasAttribute('data-price')) {
+              return { group: x.dataset.group, name: x.value, desc: '',
+                       price: x.dataset.price === '' ? '' : Number(x.dataset.price) || 0, badge: '' };
+            }
             var q = svcQuote(x.value, sqft);
             var d = svcDesc(x.value);
+            var priceVal = q.price;
+            if (q.inquire) {
+              var inp = document.querySelector('.p-inqprice[data-nm="' + CSS.escape(x.value) + '"]');
+              if (inp && inp.value !== '') priceVal = Number(inp.value) || 0;
+              else needPrice.push(x.value);
+            }
             return { group: x.dataset.group, name: x.value,
                      desc: d + (q.note ? (d ? ' — ' : '') + q.note : ''),
-                     price: q.price, badge: '' };
+                     price: priceVal, badge: '' };
           });
+          if (needPrice.length) {
+            throw Object.assign(new Error('inq'), { userMessage: 'Past 6,000 sqft each line item takes a custom price — set: ' + needPrice.join(', ') + '.' });
+          }
           var j = await api('proposals', 'POST', {
             title: $('f-ptitle').value, location: $('f-ploc').value, sqft: sqft,
             client_id: cl.id, client_name: cl.name || '', client_email: cl.email || '',
@@ -2240,7 +2310,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       $('p-newclient').addEventListener('click', function () {
         var draftNow = {
           title: $('f-ptitle').value, location: $('f-ploc').value, sqft: $('f-psqft').value,
-          services: Array.prototype.map.call(document.querySelectorAll('.p-svc:checked'), function (x) { return x.value; })
+          services: Array.prototype.map.call(document.querySelectorAll('.p-svc:checked:not([data-price])'), function (x) { return x.value; }),
+          customs: Array.prototype.map.call(document.querySelectorAll('.p-svc:checked[data-price]'), function (x) {
+            return { name: x.value, price: x.dataset.price };
+          })
         };
         clientModal(null, function (nc) { ADM.propNew(nc ? nc.id : null, draftNow); });
       });
@@ -2249,11 +2322,45 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         var sq = $('f-psqft').value;
         document.querySelectorAll('.p-svc-pr').forEach(function (el) {
           var q = svcQuote(el.dataset.nm, sq);
-          el.textContent = q.price !== '' ? money(q.price) : (q.note ? 'per image' : (sq ? 'inquire' : ''));
+          if (q.inquire) {
+            // 6,000+ — the sheet says Inquire, so each line takes its
+            // own custom price (typed values survive sqft edits).
+            var prev = el.querySelector('.p-inqprice');
+            var val = prev ? prev.value : '';
+            el.innerHTML = '&mdash; <input type="number" min="0" step="1" class="p-inqprice" data-nm="' + esc(el.dataset.nm) + '" placeholder="$" value="' + esc(val) + '" style="width:84px;font-family:var(--sans);font-size:0.8rem;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.25rem 0.45rem;outline:none">';
+          } else {
+            el.innerHTML = q.price !== '' ? '&mdash; ' + money(q.price)
+              : (q.note ? '&mdash; per image' : '');
+          }
         });
       }
+      // clicking a nested price input must not toggle the checkbox
+      $('modal-form').addEventListener('click', function (e) {
+        if (e.target.classList && e.target.classList.contains('p-inqprice')) {
+          e.preventDefault(); e.target.focus();
+        }
+      });
       $('f-psqft').addEventListener('input', paintSvcPrices);
       paintSvcPrices();
+      // custom line items, same as the project form (name + price + Add)
+      function addCustomLine() {
+        var nm = $('p-customsvc').value.trim().slice(0, 100);
+        var pr = $('p-customprice').value === '' ? '' : Number($('p-customprice').value) || 0;
+        if (!nm) return;
+        var exists = Array.prototype.some.call(document.querySelectorAll('.p-svc'), function (x) {
+          return x.value.toLowerCase() === nm.toLowerCase();
+        });
+        if (!exists) {
+          var wrap = document.createElement('div');
+          wrap.innerHTML = pLabel(nm, 'Extras', true, pr, pr === '' ? null : pr);
+          $('p-customlist').appendChild(wrap.firstChild);
+        }
+        $('p-customsvc').value = ''; $('p-customprice').value = '';
+      }
+      $('p-addcustom').addEventListener('click', addCustomLine);
+      $('p-customsvc').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); addCustomLine(); }
+      });
     },
     propReadItems: function () {
       return Array.prototype.map.call(document.querySelectorAll('#pp-items .adm-prop-item'), function (row) {
