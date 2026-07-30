@@ -389,12 +389,17 @@ body { background: var(--paper-warm); color: var(--ink); }
   function portfolio() {
     var go = function () {
       var all = (window.PROJECTS_DATA || []).filter(function (p) { return !p.draft; });
-      // The Ninebark project leads the samples (Jacob's pick).
-      var isNine = function (p) { return /ninebark/i.test((p.title || '') + ' ' + (p.slug || '')); };
+      // Jacob's curation: film #1 is Ninebark, film #2 the McKinley cut
+      // (a repo film asset, not a portfolio project — pinned directly);
+      // the photo set comes from 8225 Lahontan Drive.
+      var pick = function (re) { return function (p) { return re.test((p.title || '') + ' ' + (p.slug || '')); }; };
+      var isNine = pick(/ninebark/i), isLahontan = pick(/8225|lahontan/i);
+      var MCKINLEY = { t: '1590 McKinley Road — Wine Country Estate', loc: 'Napa, CA',
+        url: '/videos/1590%20Mckinley%20Rd%20-%20Horizontal.mp4', poster: '/images/posters/1590-mckinley.jpg' };
       var films = all.slice().sort(function (a, b) { return (isNine(b) ? 1 : 0) - (isNine(a) ? 1 : 0); })
         .map(function (p) {
           return { t: p.title, loc: p.location, url: p.horizontal_video || p.horizontal_url || '', poster: p.cover_url || '' };
-        }).filter(function (f) { return f.url; }).slice(0, 2);
+        }).filter(function (f) { return f.url; }).slice(0, 1).concat([MCKINLEY]);
       if (films.length) {
         $('pp-films').innerHTML = films.map(function (f) {
           return '<div><video controls preload="none" playsinline poster="' + esc(f.poster) + '" src="' + esc(f.url) + '"></video>' +
@@ -402,7 +407,7 @@ body { background: var(--paper-warm); color: var(--ink); }
         }).join('');
         $('pp-film-sec').hidden = false;
       }
-      var ph = all.find(isNine) || all.find(function (p) { return (p.gallery && p.gallery.length >= 6); });
+      var ph = all.find(isLahontan) || all.find(isNine) || all.find(function (p) { return (p.gallery && p.gallery.length >= 6); });
       if (ph) {
         var gallery = typeof ph.gallery === 'string' ? JSON.parse(ph.gallery || '[]') : ph.gallery;
         var imgs = [ph.cover_url].concat(gallery).filter(Boolean).slice(0, 6);

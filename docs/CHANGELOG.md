@@ -1342,3 +1342,8 @@ title, else a navy JCS monogram tile.
 - Photography section slimmed to 6 images and pinned to the Ninebark
   project (9304 Ninebark Road leads films + photos when present;
   falls back to the first 6+-image project otherwise).
+- Proposal-page curation per Jacob: film #1 Ninebark, film #2 the
+  McKinley cut (1590 McKinley Rd "Wine Country Estate" — a repo film
+  asset, pinned directly with its poster since it isn't a portfolio
+  project), and the photo section pulls from 8225 Lahontan Drive (CMS
+  project; falls back to Ninebark, then any 6+-image project).
