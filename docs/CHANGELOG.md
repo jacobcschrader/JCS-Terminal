@@ -1365,3 +1365,14 @@ title, else a navy JCS monogram tile.
   frames); the entry twilight isn't in the CMS gallery so it ships as
   a repo asset (images/proposal/8225-lahontan-entry.jpg, 2000px q80).
   Display order = his order, reading across the rows.
+
+### Google Calendar self-check in Settings
+- Admin -> Settings gained a "Google Calendar" card that verifies the
+  hookup end to end without writing anything: env vars present, the
+  service-account JSON parses, an OAuth token mints, and the calendar
+  answers with the shared permission. Runs automatically when Settings
+  opens (plus a Run test button) and names the exact failure — not
+  configured / bad JSON / calendar not found (ID) / not shared (with
+  the service-account address printed for copy-paste). New admin route
+  gcalcheck (api/_lib/admin/gcal-check.js); gcal.js now exports
+  accessToken for it.

@@ -20,6 +20,7 @@ const routes = {
   proposals: require("../_lib/admin/proposals.js"),
   licensing: require("../_lib/admin/licensing.js"),
   covers: require("../_lib/admin/covers.js"),
+  gcalcheck: require("../_lib/admin/gcal-check.js"),
   siteprojects: require("../_lib/admin/site-projects.js"),
   upload: require("../_lib/admin/upload.js"),
 };

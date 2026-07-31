@@ -107,4 +107,4 @@ async function upsertEvents(events) {
   return events.length;
 }
 
-module.exports = { isConfigured, upsertEvents };
+module.exports = { isConfigured, upsertEvents, accessToken };
