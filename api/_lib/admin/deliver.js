@@ -14,7 +14,7 @@ const { db } = require("../db.js");
 const { linksOf, recipientsOf } = require("../links.js");
 const { loginUrl } = require("../portal-auth.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
-const { ogImage } = require("./covers.js");
+const { coverFor } = require("./covers.js");
 
 const escHtml = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
@@ -45,7 +45,7 @@ module.exports = async function handler(req, res) {
     // the page (retries earlier misses — the gallery may exist by now).
     let coverUrl = b.delivery_cover_url;
     if (!coverUrl || coverUrl === "-") {
-      coverUrl = (await ogImage(links[0].url)) || "-";
+      coverUrl = (await coverFor(s, b, links)) || "-";
       await s`UPDATE bookings SET delivery_cover_url = ${coverUrl} WHERE id = ${id}`;
     }
     // the email button signs the client in and lands on their portal

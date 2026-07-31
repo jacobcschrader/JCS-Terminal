@@ -46,6 +46,7 @@ function parse(b) {
     delivery_message: field(b.delivery_message, 2000),
     delivery_cc: field(b.delivery_cc, 600),
     delivery_links: parseLinks(b.delivery_links),
+    delivery_cover_url: field(b.delivery_cover_url, 600),
     delivery_created_at: field(b.delivery_created_at, 40) || null,
   };
 }
@@ -153,6 +154,7 @@ module.exports = async function handler(req, res) {
           download_url = ${f.download_url},
           delivery_message = ${f.delivery_message}, delivery_cc = ${f.delivery_cc},
           delivery_links = ${f.delivery_links},
+          delivery_cover_url = ${f.delivery_cover_url},
           delivery_created_at = COALESCE(delivery_created_at, ${f.delivery_created_at}),
           delivery_token = COALESCE(NULLIF(delivery_token, ''), ${(f.delivery_links || f.delivery_url) ? crypto.randomBytes(12).toString("base64url") : null})
         WHERE id = ${id} RETURNING *`;

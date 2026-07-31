@@ -1232,6 +1232,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         '<div class="adm-field full"><label for="dv-msg">Message to client <small style="text-transform:none;letter-spacing:0">(goes in the delivery email)</small></label>' +
           '<textarea id="dv-msg" placeholder="Add a note — e.g. Fixed the TVs!">' + esc(b.delivery_message || '') + '</textarea></div>' +
         fld('dv-cc', 'CC recipients', '<input id="dv-cc" placeholder="Buyer\'s agent, spouse… — comma-separated emails" value="' + esc(b.delivery_cc || '') + '">') +
+        '<div class="adm-field full"><label for="dv-cover">Cover photo URL <small style="text-transform:none;letter-spacing:0">(hero on the delivery page — auto-fills from your Portfolio when the property matches; paste any image address to override)</small></label>' +
+          '<input id="dv-cover" placeholder="https://…/photo.jpg" value="' + esc(!b.delivery_cover_url || b.delivery_cover_url === '-' ? '' : b.delivery_cover_url) + '">' +
+          (b.delivery_cover_url && b.delivery_cover_url !== '-' ? '<img src="' + esc(b.delivery_cover_url) + '" alt="" style="margin-top:0.6rem;max-width:220px;border-radius:10px;display:block">' : '') +
+        '</div>' +
       '</div></div>' +
 
       '<div class="adm-card"><h2>Links</h2>' +
@@ -2716,6 +2720,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       var body = Object.assign({}, b, {
         delivery_message: $('dv-msg').value,
         delivery_cc: $('dv-cc').value,
+        delivery_cover_url: $('dv-cover').value.trim(),
         delivery_links: JSON.stringify(links)
       });
       try {

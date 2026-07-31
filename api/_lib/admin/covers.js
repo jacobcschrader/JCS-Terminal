@@ -13,8 +13,11 @@ async function ogImage(url) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 6000);
   try {
+    // Full browser UA — some hosts 403 obvious bots. (Pixieset sits
+    // behind a Cloudflare JS challenge that no server fetch passes,
+    // which is why portfolio matching below is the primary source.)
     const r = await fetch(url, { signal: ctrl.signal, redirect: "follow",
-      headers: { "User-Agent": "Mozilla/5.0 (compatible; JCSBot/1.0; +https://www.jacobcschrader.com)" } });
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" } });
     if (!r.ok) return "";
     const html = (await r.text()).slice(0, 200000);
     const m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
@@ -25,6 +28,23 @@ async function ogImage(url) {
   } finally {
     clearTimeout(timer);
   }
+}
+
+// Cover resolution, most reliable first: a portfolio project with the
+// same property title (Blob-hosted, always loads) -> the gallery
+// link's og:image (works on hosts without bot challenges) -> miss.
+const slugKey = (v) => String(v || "").toLowerCase().replace(/[^a-z0-9]+/g, "");
+async function portfolioCover(s, title) {
+  if (!title) return "";
+  const key = slugKey(title);
+  if (!key) return "";
+  const rows = await s`SELECT title, cover_url FROM site_projects WHERE cover_url != ''`;
+  const hit = rows.find((p) => slugKey(p.title) === key);
+  return hit ? String(hit.cover_url).slice(0, 600) : "";
+}
+async function coverFor(s, b, links) {
+  return (await portfolioCover(s, b.title)) ||
+    (links && links.length ? await ogImage(links[0].url) : "");
 }
 
 async function handler(req, res) {
@@ -41,7 +61,7 @@ async function handler(req, res) {
     for (const b of rows) {
       const links = linksOf(b);
       if (!links.length) continue;
-      const img = await ogImage(links[0].url);
+      const img = await coverFor(s, b, links);
       // cache '-' for misses so we don't refetch forever
       await s`UPDATE bookings SET delivery_cover_url = ${img || "-"} WHERE id = ${b.id}`;
       if (img) updated++;
@@ -54,4 +74,5 @@ async function handler(req, res) {
 }
 
 module.exports = handler;
-module.exports.ogImage = ogImage;   // reused by deliver.js at send time
+module.exports.ogImage = ogImage;
+module.exports.coverFor = coverFor;   // reused by deliver.js at send time

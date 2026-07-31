@@ -1390,3 +1390,17 @@ title, else a navy JCS monogram tile.
   delivery@/enquiry@/billing@/admin@). The SENDERS keys remain so any
   flow can get its own address back with a one-line change; reply-to
   stays his gmail everywhere.
+
+### Delivery covers: Pixieset scrape was Cloudflare-blocked — portfolio-first now
+- Why covers were missing: Pixieset galleries sit behind a Cloudflare
+  JS challenge, so the server-side og:image fetch got 403 "Just a
+  moment…" for every link (verified live; even a full Chrome UA fails)
+  and cached "-" misses.
+- New resolution order in covers.coverFor(): (1) a Portfolio CMS
+  project with the same property title — slug-matched, Blob-hosted, so
+  it always loads; (2) the gallery link's og:image with a real browser
+  UA (works on hosts without bot walls); (3) miss. deliver.js and the
+  Deliveries backfill both use it; resends retry cached misses.
+- Delivery editor gained a "Cover photo URL" field (with thumbnail
+  preview) — paste any image address to set the hero by hand; saved
+  via bookings PUT (delivery_cover_url now persisted there).
