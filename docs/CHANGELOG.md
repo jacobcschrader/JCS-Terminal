@@ -1385,3 +1385,8 @@ title, else a navy JCS monogram tile.
   One-line import fix. (Also verified live: sender identities were
   already "Jacob C Schrader" with purpose addresses — delivery@,
   billing@, enquiry@, admin@ — per Jacob's ask.)
+- All outgoing email now sends from a single identity per Jacob:
+  "Jacob C Schrader <admin@jacobcschrader.com>" (was purpose-split
+  delivery@/enquiry@/billing@/admin@). The SENDERS keys remain so any
+  flow can get its own address back with a one-line change; reply-to
+  stays his gmail everywhere.

@@ -67,11 +67,14 @@ const LINE = "#ece8df";
 
 // Sender identities — domain is verified on Resend, so any mailbox
 // @jacobcschrader.com sends without further setup.
+// One sender for everything (Jacob's call, 2026-07-31). The purpose
+// keys stay so any flow can get its own address back with one line.
+const SENDER = "Jacob C Schrader <admin@jacobcschrader.com>";
 const SENDERS = {
-  delivery: "Jacob C Schrader <delivery@jacobcschrader.com>",
-  enquiry: "Jacob C Schrader <enquiry@jacobcschrader.com>",
-  billing: "Jacob C Schrader <billing@jacobcschrader.com>",
-  admin: "Jacob C Schrader <admin@jacobcschrader.com>",
+  delivery: SENDER,
+  enquiry: SENDER,
+  billing: SENDER,
+  admin: SENDER,
 };
 
 // One detail row: uppercase label left, value right.
