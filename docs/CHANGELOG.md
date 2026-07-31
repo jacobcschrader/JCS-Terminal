@@ -1376,3 +1376,12 @@ title, else a navy JCS monogram tile.
   the service-account address printed for copy-paste). New admin route
   gcalcheck (api/_lib/admin/gcal-check.js); gcal.js now exports
   accessToken for it.
+- Fixed direct Google Calendar writes: gcal.js used ymd() to format
+  event dates without importing it from ics.js, so upsertEvents threw
+  "ymd is not defined" on every confirm — swallowed by the deliberate
+  non-fatal catch (emails must never block on calendar problems), so
+  confirms reported calendarWritten:false with no visible error. The
+  Settings self-check passed because it only exercises the read path.
+  One-line import fix. (Also verified live: sender identities were
+  already "Jacob C Schrader" with purpose addresses — delivery@,
+  billing@, enquiry@, admin@ — per Jacob's ask.)

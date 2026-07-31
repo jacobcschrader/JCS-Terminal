@@ -22,7 +22,7 @@
 // =====================================================================
 
 const crypto = require("node:crypto");
-const { TZID } = require("./ics.js");
+const { TZID, ymd } = require("./ics.js");
 
 function isConfigured() {
   return !!(process.env.GOOGLE_SA_KEY && process.env.GCAL_CALENDAR_ID);
