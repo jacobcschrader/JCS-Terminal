@@ -1404,3 +1404,35 @@ title, else a navy JCS monogram tile.
 - Delivery editor gained a "Cover photo URL" field (with thumbnail
   preview) — paste any image address to set the hero by hand; saved
   via bookings PUT (delivery_cover_url now persisted there).
+- Delivery cover now has an Upload button: picks a photo, resizes to
+  2400px q82 in the browser, ships it to Vercel Blob via the existing
+  Portfolio pipeline (delivery/<id>-cover-*.jpg), saves, and it's live
+  on the client page. Guard added for the trap Jacob hit: a pasted
+  file:///Users/... path (a file on his Mac that no webpage can load)
+  is rejected with a toast pointing at Upload instead of silently
+  saving a cover nobody can see.
+
+### Licensing rebuilt as a license tracker (two-email pipeline)
+- New per-lead pipeline: prospect → preview_sent → accepted → licensed
+  → paid (+ declined); legacy statuses normalize on read. New columns:
+  preview_url (watermarked Pixieset gallery), final_url, payment_url,
+  accepted_at/licensed_at/paid_at stage stamps.
+- Email 1 "Send preview": the personalized role-aware outreach now
+  carries the WATERMARKED gallery as its button ("reply yes and I'll
+  send the license, final gallery, and a simple invoice"). Blocks with
+  a named missing-list (email / preview link) instead of sending thin.
+- Email 2 "Send license + invoice" (after They said yes): the final
+  gallery button, the license fee, payment (14-day reply-to-arrange or
+  an optional Stripe/PayPal payment_url), and the full License Terms &
+  Conditions block (grant scope, exclusions, credit, ownership,
+  alterations, effective-on-payment). Sending stamps licensed_at;
+  Mark paid stamps paid_at.
+- Admin view rebuilt tracker-first: ledger stats (Active licenses,
+  Collected, Invoiced-unpaid, Awaiting reply, Follow-ups due), tabs
+  Active/Outreach/All/Declined/Follow-ups (Active is default), rows
+  show stage chips + preview/final link state + a full stage timeline,
+  and only the actions that fit the stage (Send preview → They said
+  yes → Send license + invoice → Mark paid). Accepting without a fee
+  prompts with the rate-card suggestion. The proposal-offer path was
+  retired; research + one-click leads unchanged. Lead editor gained
+  the three link fields.

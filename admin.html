@@ -359,11 +359,11 @@ select.lx-input { border-radius: 999px; padding-right: 2rem; }
   font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; padding: 0.32rem 0.7rem;
   border-radius: 999px; border: 1px solid rgba(15,34,64,0.18); color: var(--muted); background: #fff; white-space: nowrap; }
 .lx-chip .d { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-.lx-chip--found { color: #8a6d1f; border-color: rgba(138,109,31,0.35); background: #faf6e9; }
-.lx-chip--contacted { color: var(--lx-teal); border-color: rgba(63,124,146,0.4); background: #eef4f7; }
-.lx-chip--replied { color: #2c5d8f; border-color: rgba(44,93,143,0.4); background: #ecf2f9; }
-.lx-chip--offer_sent { color: #6b4fa0; border-color: rgba(107,79,160,0.35); background: #f2eefa; }
-.lx-chip--licensed { color: #1d5d38; border-color: rgba(29,93,56,0.4); background: #e7f3ec; }
+.lx-chip--prospect { color: #8a6d1f; border-color: rgba(138,109,31,0.35); background: #faf6e9; }
+.lx-chip--preview_sent { color: var(--lx-teal); border-color: rgba(63,124,146,0.4); background: #eef4f7; }
+.lx-chip--accepted { color: #6b4fa0; border-color: rgba(107,79,160,0.35); background: #f2eefa; }
+.lx-chip--licensed { color: #2c5d8f; border-color: rgba(44,93,143,0.4); background: #ecf2f9; }
+.lx-chip--paid { color: #1d5d38; border-color: rgba(29,93,56,0.4); background: #e7f3ec; }
 .lx-chip--declined { color: #9c3a3a; border-color: rgba(156,58,58,0.35); background: #faeeee; }
 .lx-chip--role { color: var(--lx-ink); background: #f1f0ec; border-color: transparent; }
 .lx-chip--due { color: #b3541e; border-color: rgba(179,84,30,0.4); background: #fdf1e7; }
@@ -528,7 +528,7 @@ select.lx-input { border-radius: 999px; padding-right: 2rem; }
 
   var state = { clients: [], bookings: [], requests: [], discounts: [], siteProjects: [], proposals: [], licenseLeads: [], sp: null, reqTab: 'pending', loaded: false,
               view: localStorage.getItem('adm-view') || 'pipeline', q: '', clientFilter: '', collapsed: {},
-              licTab: 'all', licProp: '', licResults: null, licSearching: false };
+              licTab: 'active', licProp: '', licResults: null, licSearching: false };
 var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', delivered:'#7a5fb8', completed:'#3f7a4f', paid:'#1d4d2a' };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
   var ADDONS = {
@@ -1232,9 +1232,14 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         '<div class="adm-field full"><label for="dv-msg">Message to client <small style="text-transform:none;letter-spacing:0">(goes in the delivery email)</small></label>' +
           '<textarea id="dv-msg" placeholder="Add a note — e.g. Fixed the TVs!">' + esc(b.delivery_message || '') + '</textarea></div>' +
         fld('dv-cc', 'CC recipients', '<input id="dv-cc" placeholder="Buyer\'s agent, spouse… — comma-separated emails" value="' + esc(b.delivery_cc || '') + '">') +
-        '<div class="adm-field full"><label for="dv-cover">Cover photo URL <small style="text-transform:none;letter-spacing:0">(hero on the delivery page — auto-fills from your Portfolio when the property matches; paste any image address to override)</small></label>' +
-          '<input id="dv-cover" placeholder="https://…/photo.jpg" value="' + esc(!b.delivery_cover_url || b.delivery_cover_url === '-' ? '' : b.delivery_cover_url) + '">' +
-          (b.delivery_cover_url && b.delivery_cover_url !== '-' ? '<img src="' + esc(b.delivery_cover_url) + '" alt="" style="margin-top:0.6rem;max-width:220px;border-radius:10px;display:block">' : '') +
+        '<div class="adm-field full"><label for="dv-cover">Cover photo <small style="text-transform:none;letter-spacing:0">(hero on the delivery page — auto-fills from your Portfolio when the property matches; Upload a photo or paste an image address)</small></label>' +
+          '<div style="display:flex;gap:0.5rem">' +
+            '<input id="dv-cover" placeholder="https://…/photo.jpg" style="flex:1" value="' + esc(!b.delivery_cover_url || b.delivery_cover_url === '-' ? '' : b.delivery_cover_url) + '">' +
+            '<button type="button" class="adm-btn adm-btn--ghost" onclick="document.getElementById(\'dv-coverfile\').click()">Upload</button>' +
+            '<input type="file" id="dv-coverfile" accept="image/*" hidden onchange="ADM.dvCoverUpload(' + b.id + ', this)">' +
+          '</div>' +
+          (b.delivery_cover_url && b.delivery_cover_url !== '-' && /^https?:/.test(b.delivery_cover_url)
+            ? '<img src="' + esc(b.delivery_cover_url) + '" alt="" style="margin-top:0.6rem;max-width:220px;border-radius:10px;display:block">' : '') +
         '</div>' +
       '</div></div>' +
 
@@ -1763,13 +1768,20 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   // ================= licensing =================
   var LIC_ROLES = { architect:'Architect', builder:'Builder', developer:'Developer', interior:'Interior Design',
                     landscape:'Landscape', pool:'Pool & Outdoor', brokerage:'Brokerage', other:'Other' };
-  var LIC_STATUS = { found:'Found', contacted:'Contacted', replied:'Replied', offer_sent:'Offer sent',
-                     licensed:'Licensed', declined:'Declined' };
-  var LIC_BADGE = { found:'pending', contacted:'accepted', replied:'accepted', offer_sent:'accepted',
-                    licensed:'paid', declined:'declined' };
+  // The license pipeline: prospect → preview sent (watermarked gallery)
+  // → accepted (they said yes) → licensed (final gallery + invoice +
+  // terms sent) → paid. Declined parks a lead.
+  var LIC_STATUS = { prospect:'Prospect', preview_sent:'Preview sent', accepted:'Said yes',
+                     licensed:'Licensed', paid:'Paid', declined:'Declined' };
+  var LIC_TABS = {
+    active:   { label: 'Active licenses', set: ['accepted','licensed','paid'] },
+    pipeline: { label: 'Outreach',        set: ['prospect','preview_sent'] },
+    all:      { label: 'All',             set: null },
+    declined: { label: 'Declined',        set: ['declined'] }
+  };
 
   function licDue(l) {
-    if (!l.follow_up || ['licensed','declined'].indexOf(l.status) > -1) return false;
+    if (!l.follow_up || ['licensed','paid','declined'].indexOf(l.status) > -1) return false;
     return new Date(l.follow_up) <= new Date(new Date().toDateString());
   }
   // Suggested license fee from the JCS rate card (tunable defaults —
@@ -1785,21 +1797,25 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   function vLicensing() {
     var leads = state.licenseLeads;
     var props = []; leads.forEach(function (l) { if (props.indexOf(l.property) === -1) props.push(l.property); });
-    var licensedSum = leads.filter(function (l) { return l.status === 'licensed'; })
+
+    var activeCount = leads.filter(function (l) { return ['accepted','licensed','paid'].indexOf(l.status) > -1; }).length;
+    var collected = leads.filter(function (l) { return l.status === 'paid'; })
       .reduce(function (t, l) { return t + (Number(l.fee) || 0); }, 0);
+    var outstanding = leads.filter(function (l) { return l.status === 'licensed'; })
+      .reduce(function (t, l) { return t + (Number(l.fee) || 0); }, 0);
+    var awaiting = leads.filter(function (l) { return l.status === 'preview_sent'; }).length;
     var dueCount = leads.filter(licDue).length;
-    var contactedCount = leads.filter(function (l) { return l.emailed_at; }).length;
 
     var list = leads.filter(function (l) {
       if (state.licProp && l.property !== state.licProp) return false;
-      if (state.licTab === 'all') return true;
       if (state.licTab === 'due') return licDue(l);
-      return l.status === state.licTab;
+      var t = LIC_TABS[state.licTab] || LIC_TABS.all;
+      return !t.set || t.set.indexOf(l.status) > -1;
     });
 
-    var tabs = ['all'].concat(Object.keys(LIC_STATUS)).concat(['due']);
+    var tabs = Object.keys(LIC_TABS).concat(['due']);
     var seg = '<div class="lx-tabs">' + tabs.map(function (t) {
-      var label = t === 'all' ? 'All' : t === 'due' ? 'Follow-ups' + (dueCount ? ' · ' + dueCount : '') : LIC_STATUS[t];
+      var label = t === 'due' ? 'Follow-ups' + (dueCount ? ' · ' + dueCount : '') : LIC_TABS[t].label;
       return '<button class="lx-tab' + (state.licTab === t ? ' on' : '') + '" onclick="ADM.licTab(\'' + t + '\')">' + label + '</button>';
     }).join('') + '</div>';
 
@@ -1841,8 +1857,40 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       }
     }
 
+    // A lead row: company + stage chips, the stage timeline, gallery
+    // link state, and only the actions that make sense at its stage.
     var rows = list.map(function (l) {
       var due = licDue(l);
+      var timeline = [];
+      if (l.emailed_at && l.status !== 'prospect') timeline.push('preview ' + dstr(l.emailed_at) + (l.sends > 1 ? ' ×' + l.sends : ''));
+      if (l.accepted_at) timeline.push('yes ' + dstr(l.accepted_at));
+      if (l.licensed_at) timeline.push('licensed ' + dstr(l.licensed_at));
+      if (l.paid_at) timeline.push('paid ' + dstr(l.paid_at));
+      if (l.follow_up && !l.paid_at) timeline.push('follow up ' + dstr(l.follow_up));
+
+      var galleries =
+        (l.preview_url ? '<a href="' + esc(l.preview_url) + '" target="_blank" rel="noopener">preview &nearr;</a>' : '<i>no preview link</i>') +
+        ' · ' +
+        (l.final_url ? '<a href="' + esc(l.final_url) + '" target="_blank" rel="noopener">final &nearr;</a>' : '<i>no final link</i>');
+
+      var acts = '';
+      if (l.status === 'prospect') {
+        acts = '<button class="lx-btn lx-btn--sm" onclick="ADM.licDraft(' + l.id + ',\'preview\')">Send preview</button>';
+      } else if (l.status === 'preview_sent') {
+        acts = '<button class="lx-btn lx-btn--teal lx-btn--sm" onclick="ADM.licMark(' + l.id + ',\'accepted\')">They said yes</button>' +
+               '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licDraft(' + l.id + ',\'preview\')">Resend preview</button>';
+      } else if (l.status === 'accepted') {
+        acts = '<button class="lx-btn lx-btn--sm" onclick="ADM.licDraft(' + l.id + ',\'license\')">Send license + invoice</button>';
+      } else if (l.status === 'licensed') {
+        acts = '<button class="lx-btn lx-btn--teal lx-btn--sm" onclick="ADM.licMark(' + l.id + ',\'paid\')">Mark paid</button>' +
+               '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licDraft(' + l.id + ',\'license\')">Resend license</button>';
+      }
+      acts += '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licEdit(' + l.id + ')">Edit</button>';
+      if (['paid','declined'].indexOf(l.status) === -1) {
+        acts += '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licMark(' + l.id + ',\'declined\')">Decline</button>';
+      }
+      acts += '<button class="lx-btn lx-btn--danger lx-btn--sm" onclick="ADM.licDelete(' + l.id + ')">Delete</button>';
+
       return '<div class="lx-row">' +
         '<div class="lx-row__top">' +
           '<span class="lx-row__co">' + esc(l.company) + '</span>' +
@@ -1850,42 +1898,50 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           '<span class="lx-chip lx-chip--' + esc(l.status) + '"><span class="d"></span>' + (LIC_STATUS[l.status] || l.status) + '</span>' +
           (due ? '<span class="lx-chip lx-chip--due"><span class="d"></span>Follow up</span>' : '') +
           '<span style="flex:1"></span>' +
-          (l.fee ? '<span class="lx-fee' + (l.status === 'licensed' ? ' lx-fee--paid' : '') + '">' + money(l.fee) + '</span>' : '') +
+          (l.fee ? '<span class="lx-fee' + (l.status === 'paid' ? ' lx-fee--paid' : '') + '">' + money(l.fee) + '</span>' : '') +
         '</div>' +
         '<div class="lx-row__meta">' + esc(l.property) + (l.location ? ' · ' + esc(l.location) : '') + '</div>' +
         '<div class="lx-row__meta" style="margin-top:0.1rem">' +
           (l.contact_name ? esc(l.contact_name) + ' · ' : '') + (l.email ? esc(l.email) : '<i>no email yet</i>') +
-          (l.website ? ' · <a href="' + esc(l.website) + '" target="_blank" rel="noopener">site &nearr;</a>' : '') +
-          (l.emailed_at ? ' · emailed ' + dstr(l.emailed_at) + (l.sends > 1 ? ' ×' + l.sends : '') : '') +
-          (l.follow_up ? ' · follow up ' + dstr(l.follow_up) : '') +
+          ' · ' + galleries +
+          (timeline.length ? ' · ' + timeline.join(' · ') : '') +
         '</div>' +
         (l.notes ? '<div class="adm-notes" style="margin-top:0.5rem">' + esc(l.notes) + '</div>' : '') +
-        '<div class="lx-row__acts">' +
-          '<button class="lx-btn lx-btn--sm" onclick="ADM.licDraft(' + l.id + ')">' + (l.emailed_at ? 'Send again' : 'Outreach') + '</button>' +
-          (l.proposal_id
-            ? '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.go(\'proposal/' + l.proposal_id + '\')">Open offer</button>'
-            : '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licOffer(' + l.id + ')">Create offer</button>') +
-          '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licEdit(' + l.id + ')">Edit</button>' +
-          (l.status !== 'licensed' ? '<button class="lx-btn lx-btn--ghost lx-btn--sm" onclick="ADM.licMark(' + l.id + ',\'licensed\')">Mark licensed</button>' : '') +
-          '<button class="lx-btn lx-btn--danger lx-btn--sm" onclick="ADM.licDelete(' + l.id + ')">Delete</button>' +
-        '</div></div>';
+        '<div class="lx-row__acts">' + acts + '</div></div>';
     }).join('');
 
-    return '<div class="lx-marker" style="margin-top:0.3rem"><span class="dot"></span>(JCS &mdash; 01)<span class="dim">// MEDIA LICENSING</span></div>' +
+    var emptyCopy = state.licTab === 'active'
+      ? 'NO ACTIVE LICENSES YET — run research below, send watermarked previews, and yeses land here.'
+      : state.licTab === 'pipeline'
+      ? 'NO OUTREACH IN FLIGHT — research a property and send the watermarked preview.'
+      : 'NOTHING FOR THIS FILTER.';
+
+    return '<div class="lx-marker" style="margin-top:0.3rem"><span class="dot"></span>(JCS &mdash; 01)<span class="dim">// LICENSE TRACKER</span></div>' +
       '<div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">' +
         '<div><h1 class="lx-h1">License <span class="t">everything.</span></h1>' +
-        '<div class="lx-sub">One shoot &middot; every rightful buyer<span class="lx-cursor"></span></div></div>' +
+        '<div class="lx-sub">Watermarked preview &rarr; yes &rarr; license, invoice &amp; final gallery<span class="lx-cursor"></span></div></div>' +
         '<span style="flex:1"></span>' +
         '<button class="lx-btn" onclick="ADM.licNew()">+ Add lead</button>' +
       '</div>' +
       '<div class="lx-ledger">' +
-        '<div class="cell teal"><b>' + money(licensedSum) + '</b><span>Licensed to date</span></div>' +
-        '<div class="cell"><b>' + leads.length + '</b><span>Leads</span></div>' +
-        '<div class="cell"><b>' + contactedCount + '</b><span>Outreach sent</span></div>' +
+        '<div class="cell teal"><b>' + activeCount + '</b><span>Active licenses</span></div>' +
+        '<div class="cell"><b>' + money(collected) + '</b><span>Collected</span></div>' +
+        '<div class="cell"><b>' + money(outstanding) + '</b><span>Invoiced, unpaid</span></div>' +
+        '<div class="cell"><b>' + awaiting + '</b><span>Awaiting reply</span></div>' +
         '<div class="cell' + (dueCount ? ' click" onclick="ADM.licTab(\'due\')"' : '"') + '><b>' + dueCount + '</b><span>Follow-ups due</span></div>' +
       '</div>' +
       '<div class="lx-card">' +
-        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>001<span class="dim">// RESEARCH A PROPERTY</span></div></div>' +
+        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>001<span class="dim">// TRACKER</span></div>' +
+          '<span class="grow"></span>' +
+          '<select class="lx-input" style="padding:0.45rem 1rem;font-size:0.78rem" onchange="ADM.licProp(this.value)"><option value="">All properties</option>' +
+            props.map(function (p) { return '<option' + (state.licProp === p ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>' +
+        '</div>' + seg +
+        '<div style="margin-top:0.9rem">' +
+        (rows || '<div class="lx-note">' + emptyCopy + '</div>') +
+        '</div>' +
+      '</div>' +
+      '<div class="lx-card">' +
+        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>002<span class="dim">// RESEARCH A PROPERTY</span></div></div>' +
         '<p class="mut" style="font-size:0.82rem;margin:0 0 0.9rem">Everyone who designed, built, landscaped, or sold the home is a rightful buyer of the media. Search by role — results become leads with one click.</p>' +
         '<div style="display:flex;gap:0.55rem;flex-wrap:wrap;align-items:center">' +
           '<input id="lic-q" list="lic-props" class="lx-input" placeholder="8225 Lahontan Drive, Truckee" style="flex:2;min-width:230px" value="' + esc(state.licQ || state.licProp || '') + '">' + datalist +
@@ -1893,18 +1949,6 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           '<button class="lx-btn" onclick="ADM.licSearch()">Run research</button>' +
         '</div>' +
         '<div id="lic-results">' + results + '</div>' +
-      '</div>' +
-      '<div class="lx-card">' +
-        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>002<span class="dim">// PIPELINE</span></div>' +
-          '<span class="grow"></span>' +
-          '<select class="lx-input" style="padding:0.45rem 1rem;font-size:0.78rem" onchange="ADM.licProp(this.value)"><option value="">All properties</option>' +
-            props.map(function (p) { return '<option' + (state.licProp === p ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>' +
-        '</div>' + seg +
-        '<div style="margin-top:0.9rem">' +
-        (rows || '<div class="lx-note">' + (state.licTab === 'all' && !state.licProp
-            ? 'NO LEADS YET — run research above. The architect, builder, designer, landscaper, and brokerage on every shoot already want this work.'
-            : 'NOTHING FOR THIS FILTER.') + '</div>') +
-        '</div>' +
       '</div>';
   }
 
@@ -2562,6 +2606,12 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         fld('f-lic-phone', 'Phone', '<input id="f-lic-phone" value="' + esc(v.phone || '') + '">') +
         fld('f-lic-website', 'Website', '<input id="f-lic-website" value="' + esc(v.website || '') + '">') +
         fld('f-lic-follow', 'Follow up on', '<input id="f-lic-follow" type="date" value="' + esc((v.follow_up || '').toString().slice(0, 10)) + '">') +
+        '<div class="adm-field full"><label for="f-lic-preview">Watermarked preview gallery <small style="text-transform:none;letter-spacing:0">(Pixieset link with watermarks — goes in the outreach email)</small></label>' +
+          '<input id="f-lic-preview" placeholder="https://jacobcschrader.pixieset.com/…" value="' + esc(v.preview_url || '') + '"></div>' +
+        '<div class="adm-field full"><label for="f-lic-final">Final gallery <small style="text-transform:none;letter-spacing:0">(clean, full-res — goes in the license email after the yes)</small></label>' +
+          '<input id="f-lic-final" placeholder="https://jacobcschrader.pixieset.com/…" value="' + esc(v.final_url || '') + '"></div>' +
+        '<div class="adm-field full"><label for="f-lic-payment">Payment link <small style="text-transform:none;letter-spacing:0">(optional — Stripe/PayPal/etc.; otherwise the email says &ldquo;due in 14 days, reply for ACH or check&rdquo;)</small></label>' +
+          '<input id="f-lic-payment" placeholder="optional" value="' + esc(v.payment_url || '') + '"></div>' +
         fld('f-lic-fee', 'License fee ($)', '<input id="f-lic-fee" type="number" min="0" step="25" value="' + (v.fee == null ? '' : esc(v.fee)) + '">') +
         '<div class="adm-field full"><label>Fee helper <small style="text-transform:none;letter-spacing:0">(media &middot; usage &middot; set size &rarr; suggestion from your rate card)</small></label>' +
           '<div style="display:flex;gap:0.7rem;flex-wrap:wrap;align-items:center;font-size:0.85rem">' +
@@ -2578,6 +2628,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
             contact_name: $('f-lic-contact').value, email: $('f-lic-email').value,
             phone: $('f-lic-phone').value, website: $('f-lic-website').value,
             follow_up: $('f-lic-follow').value, fee: $('f-lic-fee').value,
+            preview_url: $('f-lic-preview').value, final_url: $('f-lic-final').value,
+            payment_url: $('f-lic-payment').value,
             notes: $('f-lic-notes').value, source_url: v.source_url || ''
           };
           if (l) { body.id = l.id; await api('licensing', 'PUT', body); }
@@ -2586,61 +2638,56 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         });
       ADM.licSuggestPaint();
     },
-    licDraft: async function (id) {
+    licDraft: async function (id, kind) {
+      kind = kind === 'license' ? 'license' : 'preview';
       try {
-        var j = await api('licensing', 'POST', { action: 'draft', id: id });
+        var j = await api('licensing', 'POST', { action: kind === 'license' ? 'draft_license' : 'draft', id: id });
+        var canSend = !(j.missing && j.missing.length);
+        var title = kind === 'license' ? 'License + invoice email' : 'Watermarked preview email';
         $('modal-root').innerHTML =
           '<div class="adm-modal" id="modal-bg"><div class="adm-modal__card">' +
-          '<h2>Outreach preview</h2>' +
+          '<h2>' + title + '</h2>' +
           '<p class="mut" style="font-size:0.8rem;margin:0.3rem 0 0.8rem">To: <b>' + esc(j.to || '(no email on lead)') + '</b> &middot; Subject: <b>' + esc(j.subject) + '</b></p>' +
-          '<textarea readonly style="width:100%;box-sizing:border-box;min-height:260px;font-family:var(--sans);font-size:0.85rem;line-height:1.6;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.9rem">' + esc(j.text) + '</textarea>' +
-          '<p class="mut" style="font-size:0.75rem;margin-top:0.5rem">Sends as a branded JCS email from enquiry@ — replies go straight to your gmail.</p>' +
+          (canSend ? '' :
+            '<p style="font-size:0.82rem;color:#a03a3a;margin:0 0 0.8rem">Missing before this can send: <b>' + esc(j.missing.join(', ')) + '</b> — add them via Edit.</p>') +
+          '<textarea readonly style="width:100%;box-sizing:border-box;min-height:280px;font-family:var(--sans);font-size:0.85rem;line-height:1.6;color:var(--ink);background:var(--paper-warm);border:1px solid var(--line);padding:0.9rem">' + esc(j.text) + '</textarea>' +
+          '<p class="mut" style="font-size:0.75rem;margin-top:0.5rem">' +
+            (kind === 'license'
+              ? 'Sending marks the lead Licensed and stamps the date. The branded email carries the final gallery, the fee, payment, and the full license terms.'
+              : 'Sends the branded outreach with the watermarked gallery button. Replies go straight to your gmail.') + '</p>' +
           '<div style="margin-top:1rem;display:flex;gap:0.8rem">' +
-            '<button class="adm-btn" onclick="ADM.licSend(' + id + ')">Send outreach</button>' +
+            (canSend
+              ? '<button class="adm-btn" onclick="ADM.licSend(' + id + ',\'' + kind + '\')">' + (kind === 'license' ? 'Send license + invoice' : 'Send preview') + '</button>'
+              : '<button class="adm-btn" onclick="document.getElementById(\'modal-root\').innerHTML=\'\';ADM.licEdit(' + id + ')">Add the missing pieces</button>') +
             '<button class="adm-btn adm-btn--ghost" onclick="document.getElementById(\'modal-root\').innerHTML=\'\'">Cancel</button>' +
           '</div></div></div>';
         $('modal-bg').addEventListener('mousedown', function (e) { if (e.target === this) $('modal-root').innerHTML = ''; });
       } catch (e) { toast(friendly(e), 'err'); }
     },
-    licSend: async function (id) {
+    licSend: async function (id, kind) {
       try {
-        await api('licensing', 'POST', { action: 'send', id: id });
+        await api('licensing', 'POST', { action: kind === 'license' ? 'send_license' : 'send', id: id });
         $('modal-root').innerHTML = '';
         await reload(); render();
-        toast('Outreach sent.');
+        toast(kind === 'license' ? 'License, invoice & final gallery sent.' : 'Watermarked preview sent.');
       } catch (e) {
-        toast(String(e.message) === 'no-email' ? 'Add an email to this lead first (Edit).' : friendly(e), 'err');
+        toast(String(e.message) === 'missing' ? 'Something required is missing — open Edit on the lead.' : friendly(e), 'err');
       }
-    },
-    licOffer: async function (id) {
-      var l = state.licenseLeads.find(function (x) { return x.id == id; }); if (!l) return;
-      var sug = licSuggest(l.role, 'photo', false, false, 'set');
-      try {
-        var j = await api('proposals', 'POST', {
-          title: l.property, location: l.location, client_name: l.company, client_email: l.email,
-          intro: 'A private media-licensing offer for ' + l.company + '.',
-          note: 'Licensed for ' + l.company + '’s own marketing — portfolio, web, social, and print.',
-          items: [
-            { group: 'Media License', name: 'Digital license — web, social & portfolio',
-              desc: 'The delivered editorial set of ' + l.property + ', licensed for ' + l.company + '’s own channels.', price: sug.rec },
-            { group: '', name: 'Print & collateral use', desc: 'Brochures, signage, and printed portfolio.', price: Math.round(sug.rec * 0.3 / 25) * 25 },
-            { group: '', name: 'Paid advertising use', desc: 'Digital and print ad placements.', price: Math.round(sug.rec * 0.5 / 25) * 25 }
-          ]
-        });
-        await api('licensing', 'PUT', { id: id, proposal_id: j.proposal.id, status: l.status === 'found' ? 'offer_sent' : l.status });
-        await reload();
-        toast('Offer page created — review it, then Send to client.');
-        go('proposal/' + j.proposal.id);
-      } catch (e) { toast(friendly(e), 'err'); }
     },
     licMark: async function (id, status) {
       var l = state.licenseLeads.find(function (x) { return x.id == id; }); if (!l) return;
       var body = { id: id, status: status };
-      if (status === 'licensed' && !l.fee) {
-        var fee = prompt('License fee for ' + l.company + '? ($)');
+      if (status === 'accepted' && !l.fee) {
+        var sug = licSuggest(l.role, 'photo', false, false, 'set');
+        var fee = prompt('They said yes — license fee for ' + l.company + '? ($)', sug.rec);
+        if (fee === null) return;
         if (fee) body.fee = fee;
       }
-      try { await api('licensing', 'PUT', body); await reload(); render(); toast(l.company + ' → ' + (LIC_STATUS[status] || status) + '.'); }
+      try {
+        await api('licensing', 'PUT', body); await reload(); render();
+        toast(l.company + ' → ' + (LIC_STATUS[status] || status) + '.' +
+          (status === 'accepted' ? ' Next: Send license + invoice.' : ''));
+      }
       catch (e) { toast(friendly(e), 'err'); }
     },
     licDelete: async function (id) {
@@ -2711,16 +2758,39 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       var rows = box.querySelectorAll('.dv-lrow');
       rows[rows.length - 1].querySelector('.dv-lbl').focus();
     },
+    dvCoverUpload: async function (id, input) {
+      var f = (input.files || [])[0];
+      input.value = '';
+      if (!f) return;
+      toast('Uploading cover…');
+      try {
+        var blob = await ADM.spResize(f, 2400, 0.82);
+        var stamp = Math.random().toString(36).slice(2, 8);
+        var r = await VercelBlobClient.upload('delivery/' + id + '-cover-' + stamp + '.jpg', blob, {
+          access: 'public',
+          handleUploadUrl: '/api/admin/upload',
+          contentType: 'image/jpeg'
+        });
+        if ($('dv-cover')) $('dv-cover').value = r.url;
+        var ok = await ADM.delSave(id);
+        if (ok) toast('Cover set — it\u2019s live on the delivery page.');
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
     delSave: async function (id, quiet) {
       var b = state.bookings.find(function (x) { return x.id == id; }); if (!b) return false;
       if (!$('dv-links')) return true; // not on the editor page — nothing to save
       var links = Array.prototype.map.call(document.querySelectorAll('#dv-links .dv-lrow'), function (r) {
         return { label: r.querySelector('.dv-lbl').value.trim(), url: r.querySelector('.dv-url').value.trim() };
       }).filter(function (l) { return l.url; });
+      var cover = $('dv-cover') ? $('dv-cover').value.trim() : '';
+      if (cover && !/^https?:\/\//i.test(cover)) {
+        toast('That cover is a file on your computer — click Upload next to the field to host it.', 'err');
+        return false;
+      }
       var body = Object.assign({}, b, {
         delivery_message: $('dv-msg').value,
         delivery_cc: $('dv-cc').value,
-        delivery_cover_url: $('dv-cover').value.trim(),
+        delivery_cover_url: cover,
         delivery_links: JSON.stringify(links)
       });
       try {

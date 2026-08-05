@@ -14,7 +14,8 @@ domain www.jacobcschrader.com):
 1. **Public site** — static HTML marketing site (design modeled on
    jacobguthrie.com, JCS navy/Cormorant identity).
 2. **Studio Admin** (`/admin`) — Jacob's back office: booking pipeline,
-   clients, deliveries, invoices, requests inbox, portfolio CMS, settings.
+   clients, deliveries, invoices, requests inbox, portfolio CMS,
+   license tracker, settings.
 3. **Client experience** — magic-link portal (`/portal`), shareable
    delivery pages (`/delivery?t=…`), invoices (`/invoice?t=…`).
 

@@ -218,6 +218,14 @@ function ensureSchema() {
         updated_at   timestamptz NOT NULL DEFAULT now()
       )`;
       await s`CREATE INDEX IF NOT EXISTS license_leads_booking ON license_leads (booking_id)`;
+      // License tracker rebuild (2026-07-31): watermarked preview +
+      // final gallery links, optional payment link, and stage stamps.
+      await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS preview_url text DEFAULT ''`;
+      await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS final_url text DEFAULT ''`;
+      await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS payment_url text DEFAULT ''`;
+      await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS accepted_at timestamptz`;
+      await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS licensed_at timestamptz`;
+      await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS paid_at timestamptz`;
     })();
   }
   return _ready;
