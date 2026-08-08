@@ -102,7 +102,9 @@ portal.html delivery.html invoice.html   Client pages (minimal .mnav chrome).
                            treatment; no photo — Jacob's call) with stats
                            inside it + delivery takeover on ?p=, gallery-
                            cover thumbs on rows (no service names — also
-                           his call), split-panel photo sign-in.
+                           his call), centered-column sign-in (Guthrie
+                           /portal/login pattern: kicker, serif headline,
+                           one email field, navy caps button).
 admin.html                 Entire admin SPA (single file: CSS + views + JS)
 admin-blob.js              Browser bundle of @vercel/blob/client (esbuild IIFE)
 styles.css                 All public-site styles (tokens at top, "v2 layer"

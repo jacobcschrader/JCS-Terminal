@@ -1436,3 +1436,25 @@ title, else a navy JCS monogram tile.
   prompts with the rate-card suggestion. The proposal-offer path was
   retired; research + one-click leads unchanged. Lead editor gained
   the three link fields.
+
+## 2026-08-08 — Portal sign-in restructured to the Guthrie login pattern
+
+Jacob: "restructure client log in page to this:
+https://jacobguthrie.com/portal/login". Measured the reference (560px
+centered column, kicker → 52px Cormorant headline → muted explainer →
+single email field → dark caps button) and rebuilt portal.html's login
+state on it with JCS skin:
+
+- The split-panel photo sign-in (.pt-auth) is gone. New .pt-login:
+  centered 560px column — eyebrow "Client Portal", Cormorant 300
+  headline "Your listings, your media.", muted line ("Enter the email
+  your invoices go to and I'll send you a sign-in link — no password
+  to remember."), full-width square hairline email input, navy
+  btn--solid "Email Me a Sign-In Link →", small device note.
+- Sent state restyled into the same column: italic serif "Check your
+  inbox." + one muted line.
+- All JS contracts untouched: ids pt-form/pt-email/pt-company
+  (honeypot)/pt-submit/pt-sent, wireLogin(), ?email= auto-request
+  with sessionStorage guard, navFlow() chrome switch.
+- Mobile: column gets its own side gutters; headline clamps down to
+  2.1rem. Verified 375px and desktop in the preview.

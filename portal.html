@@ -126,33 +126,24 @@
   font-size: 0.85rem; color: var(--muted); }
 .pt-note a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 
-/* ---- sign in — split panel with site photography -------------------- */
-.pt-auth { display: grid; grid-template-columns: 1.05fr 1fr; max-width: 960px;
-  margin: 0 auto; background: #fff; border: 1px solid var(--line); overflow: hidden; }
-.pt-auth__photo { position: relative; min-height: 520px; display: flex; align-items: flex-end;
-  background:
-    linear-gradient(180deg, rgba(6,13,24,0.12) 30%, rgba(6,13,24,0.66) 100%),
-    var(--navy) url('/images/svc/photography.jpg') center / cover no-repeat;
-  padding: clamp(1.8rem, 4vw, 2.6rem); }
-.pt-auth__photo > div { position: relative; color: #fff; }
-.pt-auth__photo .mono { font-family: var(--serif); font-style: italic; font-weight: 300;
-  font-size: 1.6rem; letter-spacing: 0.01em; display: block; margin-bottom: 0.9rem; }
-.pt-auth__photo h2 { font-family: var(--serif); font-style: italic; font-weight: 400;
-  color: #fff; font-size: clamp(1.5rem, 3vw, 1.9rem); line-height: 1.2; margin: 0 0 0.7rem; }
-.pt-auth__photo .caps { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase;
-  color: rgba(255,255,255,0.65); font-weight: 500; }
-.pt-auth__form { display: flex; flex-direction: column; justify-content: center;
-  padding: clamp(2.2rem, 5vw, 3.2rem); }
-.pt-auth__form label { display: block; font-size: 0.62rem; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 0.55rem; }
-.pt-auth__form input[type=email] { width: 100%; box-sizing: border-box; font-family: var(--sans);
-  font-size: 0.95rem; color: var(--ink); background: var(--paper-warm, #f6f4ef);
-  border: 1px solid var(--line); padding: 0.9rem 0.95rem; outline: none;
-  transition: border-color 0.3s var(--ease); }
-.pt-auth__form input[type=email]:focus { border-color: var(--navy); background: #fff; }
-.pt-auth__form .note { font-size: 0.78rem; color: var(--muted); margin: 1.1rem 0 0; line-height: 1.65; }
-.pt-auth__form .sent h2 { font-family: var(--serif); font-style: italic; font-weight: 400;
-  font-size: 1.5rem; color: var(--navy); margin: 0 0 0.6rem; }
+/* ---- sign in — centered column (jacobguthrie.com/portal/login) ----- */
+.pt-login { max-width: 560px; margin: 0 auto; text-align: center; box-sizing: content-box;
+  padding: clamp(3rem, 9vh, 4.5rem) clamp(1.25rem, 5vw, 2rem) clamp(4rem, 10vh, 6rem); }
+.pt-login .eyebrow { display: inline-flex; }
+.pt-login h1 { font-family: var(--serif); font-weight: 300; color: var(--ink);
+  font-size: clamp(2.1rem, 5.5vw, 3.25rem); line-height: 1.08; margin: 16px 0 0; }
+.pt-login .sub { font-size: 0.97rem; color: var(--muted); line-height: 1.7;
+  margin: 18px auto 0; max-width: 46ch; }
+.pt-login form { margin-top: 34px; }
+.pt-login input[type=email] { width: 100%; box-sizing: border-box; font-family: var(--sans);
+  font-size: 1rem; color: var(--ink); background: #fff; border: 1px solid rgba(15,34,64,0.24);
+  padding: 0.95rem 1.1rem; outline: none; transition: border-color 0.3s var(--ease); }
+.pt-login input[type=email]:focus { border-color: var(--navy); }
+.pt-login input[type=email]::placeholder { color: var(--muted); }
+.pt-login .btn { margin-top: 18px; border: 0; cursor: pointer; }
+.pt-login .note { font-size: 0.78rem; color: var(--muted); margin: 1.2rem 0 0; line-height: 1.65; }
+.pt-login .sent h2 { font-family: var(--serif); font-style: italic; font-weight: 400;
+  font-size: 1.6rem; color: var(--navy); margin: 34px 0 0.6rem; }
 
 .pt-missing { text-align: center; padding: 0 1rem clamp(2rem, 5vw, 3rem); }
 .pt-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400;
@@ -160,10 +151,6 @@
 .pt-missing p { font-size: 0.85rem; color: var(--muted); }
 .pt-missing a { color: var(--navy); }
 
-@media (max-width: 760px) {
-  .pt-auth { grid-template-columns: 1fr; }
-  .pt-auth__photo { min-height: 210px; }
-}
 @media (max-width: 700px) {
   .pt-hero__stats { grid-template-columns: 1fr 1fr; }
   .pt-stat:nth-child(3), .pt-stat:nth-child(4) { border-top: 1px solid rgba(255,255,255,0.12); }
@@ -220,31 +207,21 @@
     <p>Sign in below with your email, or <a href="mailto:jacxbschrader@gmail.com">get in touch</a>.</p>
   </div>
 
-  <div id="pt-login" hidden style="padding-top:clamp(3.5rem,8vh,5rem)">
-    <div class="pt-auth">
-      <div class="pt-auth__photo">
-        <div>
-          <span class="mono">JCS</span>
-          <h2>Your projects, one place.</h2>
-          <span class="caps">Projects &middot; Deliveries &middot; Invoices</span>
-        </div>
-      </div>
-      <div class="pt-auth__form">
-        <form id="pt-form">
-          <label for="pt-email">Your email</label>
-          <input id="pt-email" type="email" required placeholder="you@brokerage.com" autocomplete="email">
-          <input id="pt-company" name="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
-          <button class="btn btn--solid" type="submit" id="pt-submit" style="width:100%;margin-top:1.2rem;border:0;cursor:pointer">Email Me My Portal Link</button>
-          <p class="note">No password needed — if your email is tied to any projects, a sign-in link is on its way.</p>
-        </form>
-        <div id="pt-sent" hidden class="sent" style="text-align:center">
-          <h2>Check your inbox.</h2>
-          <p class="note" style="margin:0">If that email is tied to any projects, a sign-in link is on its way. It signs you in on this device — request a fresh one anytime.</p>
-        </div>
-      </div>
+  <div id="pt-login" hidden class="pt-login">
+    <span class="eyebrow">Client Portal</span>
+    <h1>Your listings, your media.</h1>
+    <p class="sub">Enter the email your invoices go to and I&rsquo;ll send you a sign-in link &mdash; no password to remember.</p>
+    <form id="pt-form">
+      <input id="pt-email" type="email" required placeholder="you@brokerage.com" autocomplete="email">
+      <input id="pt-company" name="company" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+      <button class="btn btn--solid" type="submit" id="pt-submit">Email Me a Sign-In Link &rarr;</button>
+      <p class="note">The link signs you in on this device &mdash; request a fresh one anytime.</p>
+    </form>
+    <div id="pt-sent" hidden class="sent">
+      <h2>Check your inbox.</h2>
+      <p class="sub" style="margin-top:0.2rem">If that email is tied to any projects, a sign-in link is on its way.</p>
     </div>
   </div>
-</div>
 
 <footer class="footer footer--min">
   <div class="wrap footer__center">
