@@ -22,11 +22,6 @@
       "source": "/design",
       "destination": "/services",
       "permanent": true
-    },
-    {
-      "source": "/contact",
-      "destination": "/book",
-      "permanent": false
     }
   ],
   "rewrites": [

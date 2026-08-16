@@ -83,8 +83,14 @@ book.html                  6-step APPLICATION wizard (Guthrie-style) —
                            /book + form.jacobcschrader.com. No live
                            pricing, no signature: info + interest only;
                            Jacob answers with a proposal, and ACCEPTING
-                           the proposal is the contract. Replaced
-                           contact.html (301 /contact → /book).
+                           the proposal is the contract.
+contact.html               Real contact page (2026-08-08): "Let's work
+                           together." + call/text · email · studio ·
+                           Instagram on the left; navy "Ready to book?"
+                           card → /book + "Send a note." form (name,
+                           email, phone, message; honeypot) on the right.
+                           Posts to /api/book with kind:"contact" → email
+                           to Jacob (reply-to sender) + receipt to sender.
 pricing.html               Shareable pricing page — /pricing +
                            pricing.jacobcschrader.com (noindex). Renders 4
                            cards: the two reels merge into one "Social
@@ -155,8 +161,9 @@ vercel.json                cleanUrls, redirects (/architecture,/films,/design
   (headings; weight 400) + Inter. Sizing was measured off the reference
   site (h1 56px hero / 72px page-heads, h2 52px, eyebrows 11px/0.26em
   slate `--accent`, buttons 11px w/ 15×26px padding, container 1420px).
-- **Nav (all pages):** JCS wordmark · Work / Services / About / Contact ·
-  Client Login + navy "Book a Shoot" → /contact. Footer: columned navy
+- **Nav (all pages):** JCS wordmark · Work / Services / About / Contact
+  (→ /contact) · Client Login + navy "Book a Shoot" → /book. Footer:
+  columned navy (Studio col also lists Contact)
   (Studio / Connect + Instagram instagram.com/byjcs_) with
   "© 2026 JCS LLC" bottom bar.
 - **Home hero:** `videos/hero.mp4` (35MB 1080p, silent) with
@@ -245,7 +252,8 @@ toggle, delete (cleans Blob media).
   runs when a listing has no uploaded files).
 - **Invoices:** Generate & send (one click) → /invoice?t=… page; resend;
   paid status flips project to Paid (portal shows green chip).
-- **Requests:** /contact submissions; accept → creates client+project.
+- **Requests:** /book applications; accept → creates client+project.
+  (Contact-page notes are email-only — nothing lands in Requests.)
 - **Toasts** replaced all alert() popups (navy success, red error).
 
 - **Licensing (Resid-style):** Admin → Licensing. Research a property
@@ -331,7 +339,8 @@ unique, items JSON, status draft/sent/accepted), license_leads.
 does NOT count toward the 12-function cap) serves the subdomain roots
 with no path in the URL — form. → /book, pricing. → /pricing,
 proposal./<slug> → /proposal (bare proposal. root redirects to www).
-vercel.json still handles /contact → /book and /proposals/:slug.
+vercel.json handles /proposals/:slug and /portal/:slug rewrites (the
+old /contact → /book redirect is gone — /contact is a page again).
 The three subdomains are attached to the project in Vercel → Domains
 (DNS is Vercel-managed, so that was just "Add Domain" three times).
 
@@ -385,9 +394,10 @@ Google Places key is NOT an env var — stored in admin Settings (DB).
   esp. the payment clause (currently "due on final invoice").
 - **Add subdomains in Vercel** (Settings → Domains): form., pricing.,
   proposal.jacobcschrader.com — redirects/rewrites are already live.
-- Static project share pages still link /contact in their navs — the
-  /contact → /book redirect covers it; regenerate via
-  `node tools/generate-share-pages.mjs` when Node is available locally.
+- Static project share pages were patched by hand (Contact → /contact,
+  Book a Shoot → /book); regenerate via `node tools/generate-share-pages.mjs`
+  when Node is available locally (the generator now keeps the app
+  rewrites in vercel.json — it used to delete them all).
 - About page portrait is still the placeholder ("Portrait · Replace").
 - Google Calendar service account not configured (gcal.js header has steps).
 - CRON_SECRET optional hardening not set.

@@ -1521,3 +1521,23 @@ below mirrors those screens in JCS type/palette.
   listing page (grid, cover state, upload flow with a mocked Blob
   client, derived 2048/640 sizes), portal grid, listing page
   (selection, lightbox, zip validity), mobile layouts.
+
+## 2026-08-08 — Contact is a real page again; Book a Shoot stays /book
+
+Jacob: "make Contact an actual contact page, keeping the booking for
+'book a shoot'".
+
+- New contact.html (pattern: jacobguthrie.com/contact — editorial
+  split): "Let's work together." + lead, Call or Text / Email / Studio /
+  Instagram; right column = navy "Ready to book?" card → /book and a
+  "Send a note." form (name, email, phone optional, message, honeypot).
+- /api/book gained a `kind: "contact"` branch (same function — 12-cap):
+  emails Jacob "{Name} | New Message" with reply-to the sender + a
+  "Message Received" receipt to the sender. Nothing is stored.
+- Nav "Contact" → /contact on every page (index, projects, services,
+  about, project, portal, delivery, admin) + footer Studio column lists
+  Contact; the 9 static share pages patched by hand (their "Book a
+  Shoot" now → /book, Contact → /contact).
+- vercel.json: /contact → /book redirect removed. tools/generate-share-
+  pages.mjs no longer deletes ALL rewrites (would have wiped the
+  proposals/portal rewrites) — it prunes only /project/* ones.

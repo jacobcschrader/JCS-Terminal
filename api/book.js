@@ -3,6 +3,9 @@
 //  1. Stores the request (status: pending) for the admin Requests inbox.
 //  2. Emails Jacob a branded "New application".
 //  3. Emails the applicant a branded "Application received".
+//  Also serves the /contact page: { kind: "contact", name, email, phone,
+//  message } → email to Jacob (reply-to the sender) + a short receipt.
+//  Same function on purpose — Vercel's 12-function cap.
 // =====================================================================
 const { db } = require("./_lib/db.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("./_lib/email.js");
@@ -19,6 +22,7 @@ module.exports = async function handler(req, res) {
   const b = req.body || {};
   // Honeypot: bots fill it, humans never see it.
   if (field(b._honey, 10)) { res.status(200).json({ ok: true }); return; }
+  if (b.kind === "contact") { await contact(b, res); return; }
 
   const f = {
     name: field(b.name, 200),
@@ -161,3 +165,61 @@ module.exports = async function handler(req, res) {
     res.status(502).json({ error: msg });
   }
 };
+
+// ---- /contact: a plain message, no application --------------------
+async function contact(b, res) {
+  const f = {
+    name: field(b.name, 200),
+    email: field(b.email, 200),
+    phone: field(b.phone, 60),
+    message: field(b.message, 5000),
+  };
+  if (!f.name || !f.message || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email)) {
+    res.status(400).json({ error: "missing-fields" });
+    return;
+  }
+  try {
+    await sendEmail({
+      from: SENDERS.admin,
+      to: OWNER,
+      replyTo: f.email,
+      subject: `${f.name} | New Message`,
+      text: `New message from ${f.name} (${f.email}${f.phone ? ", " + f.phone : ""}):\n\n${f.message}`,
+      html: jcsEmail({
+        eyebrow: "New Message",
+        headline: escHtml(f.name),
+        note: `<span style="white-space:pre-line;">&ldquo;${escHtml(f.message)}&rdquo;</span>`,
+        rows: [
+          ["Email", `<a href="mailto:${escHtml(f.email)}" style="color:#33507e;">${escHtml(f.email)}</a>`],
+          ["Phone", f.phone ? escHtml(f.phone) : ""],
+        ],
+        cta: { label: "Reply", url: `mailto:${f.email}` },
+        audience: "admin",
+      }),
+    });
+    // receipt (best effort)
+    try {
+      await sendEmail({
+        from: SENDERS.enquiry,
+        to: f.email,
+        replyTo: OWNER,
+        subject: "Message Received | Jacob Schrader",
+        text: `Hi ${f.name},\n\nThank you for reaching out — I read every message personally and will reply within one business day.\n\n` +
+          "Ready to book a shoot? https://www.jacobcschrader.com/book\n\n— Jacob Schrader · jacobcschrader.com",
+        html: jcsEmail({
+          eyebrow: "Message Received",
+          headline: "Thank you — I have your note.",
+          note: `Hi ${escHtml(f.name.split(" ")[0])} — I read every message personally and will reply within one business day. ` +
+            "If it's a shoot you're after, the booking page takes about three minutes.",
+          rows: [["Your message", `<span style="white-space:pre-line;">${escHtml(f.message)}</span>`]],
+          cta: { label: "Book a Shoot", url: "https://www.jacobcschrader.com/book" },
+          audience: "client",
+        }),
+      });
+    } catch (e) { /* receipt is optional */ }
+    res.status(200).json({ ok: true });
+  } catch (e) {
+    const msg = /RESEND_API_KEY|Resend error/.test(String(e)) ? "send-failed" : "error";
+    res.status(502).json({ error: msg });
+  }
+}

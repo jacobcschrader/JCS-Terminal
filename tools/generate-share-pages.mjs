@@ -90,9 +90,14 @@ for (const p of projects) {
   console.log(`project/${p.slug}.html`);
 }
 
-// --- no rewrites needed: make sure none linger in vercel.json --------
+// --- share pages are static now: drop only OLD /project/* rewrites.
+// (vercel.json also carries app rewrites — /proposals/:slug and
+// /portal/:slug — which must survive a regeneration.)
 const vercelPath = join(root, "vercel.json");
 const vercel = JSON.parse(readFileSync(vercelPath, "utf8"));
-delete vercel.rewrites;
+if (Array.isArray(vercel.rewrites)) {
+  vercel.rewrites = vercel.rewrites.filter((r) => !String(r.source || "").startsWith("/project/"));
+  if (!vercel.rewrites.length) delete vercel.rewrites;
+}
 writeFileSync(vercelPath, JSON.stringify(vercel, null, 2) + "\n");
-console.log("vercel.json: rewrites removed");
+console.log("vercel.json: project rewrites pruned (app rewrites kept)");
