@@ -30,12 +30,13 @@ module.exports = async function handler(req, res) {
 
     } else if (req.method === "PUT") {
       const b = req.body || {};
-      for (const k of KEYS) {
-        if (!(k in b)) continue;
+      const ok = (k) => KEYS.includes(k) || /^(tpl_[a-z_]+_(subject|note)|remind_[a-z_]+)$/.test(k);
+      for (const k of Object.keys(b)) {
+        if (!ok(k)) continue;
         // subdomain: keep it a clean hostname label
         const v = k === "pixieset_subdomain"
           ? field(b[k], 80).toLowerCase().replace(/^https?:\/\//, "").replace(/\.pixieset\.com.*$/, "").replace(/[^a-z0-9-]/g, "")
-          : field(b[k]);
+          : field(b[k], k.startsWith('tpl_') ? 2000 : 200);
         await s`INSERT INTO settings (key, value) VALUES (${k}, ${v})
                 ON CONFLICT (key) DO UPDATE SET value = ${v}`;
       }

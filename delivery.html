@@ -206,6 +206,12 @@ body { background: #f8f7f4; }
       </div>
       <div id="lp-review-approved" hidden>
         <div class="lp-approved">&#10003;&nbsp; Delivery approved<span id="lp-approved-date" style="text-transform:none;letter-spacing:0.04em;font-weight:400"></span></div>
+        <form id="lp-tst" style="margin-top:1.1rem" hidden>
+          <p style="margin:0 0 0.6rem">Would you leave a one-line review? It may appear on jacobcschrader.com with your name and brokerage.</p>
+          <textarea id="lp-tst-q" placeholder="e.g. Fast, beautiful work — the listing sold in a week." style="min-height:72px;margin:0 0 0.6rem"></textarea>
+          <button class="lp-pillbtn" type="submit" id="lp-tst-send">Share review</button>
+        </form>
+        <p id="lp-tst-done" style="margin-top:1rem" hidden>Thank you &mdash; that means a lot.</p>
         <p style="margin-top:1rem">Need something adjusted after all? <a href="#" id="lp-reopen" style="color:var(--navy)">Request changes</a>.</p>
       </div>
       <div id="lp-review-sent" hidden>
@@ -471,7 +477,18 @@ body { background: #f8f7f4; }
   function showApproved(at) {
     $('lp-review-open').hidden = true; $('lp-review-sent').hidden = true; $('lp-review-approved').hidden = false;
     if (at) $('lp-approved-date').textContent = ' · ' + dstr(at);
+    if (!d.has_testimonial && d.via !== 'admin') $('lp-tst').hidden = false;
   }
+  $('lp-tst').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var q = $('lp-tst-q').value.trim(); if (q.length < 8) { $('lp-tst-q').focus(); return; }
+    var btn = $('lp-tst-send'); btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var rr = await post({ action: 'testimonial', quote: q });
+      if (rr.ok) { $('lp-tst').hidden = true; $('lp-tst-done').hidden = false; d.has_testimonial = true; }
+      else { btn.disabled = false; btn.textContent = 'Share review'; }
+    } catch (err) { btn.disabled = false; btn.textContent = 'Share review'; }
+  });
   if (d.approved_at) showApproved(d.approved_at);
   $('lp-approve').addEventListener('click', async function () {
     this.textContent = 'Approving…';
@@ -610,6 +627,10 @@ body { background: #f8f7f4; }
   }
   // exposed for diagnostics (console): JCS_ZIP.writeZip(items, sink, onProgress)
   window.JCS_ZIP = { writeZip: writeZip, makeSink: makeSink };
+  // admin "Download originals" opens /portal/<slug>?dl=full — start the bundle right away
+  if (qs.get('dl') === 'full' && d.via === 'admin' && photos.length) {
+    setTimeout(function () { var b = $('lp-full'); if (b) b.click(); }, 400);
+  }
 })();
 </script>
 </body>

@@ -16,6 +16,7 @@ const { linksOf } = require("./_lib/links.js");
 const { filesOf, publicFile, summarize, logDownload } = require("./_lib/delivery.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("./_lib/email.js");
 const portalAuth = require("./_lib/portal-auth.js");
+const { logEvent } = require("./_lib/events.js");
 const adminAuth = require("./_lib/auth.js");
 
 const escHtml = (s) =>
@@ -81,6 +82,7 @@ async function review(s, req, res, ctx, body) {
         cta: { label: "View Project", url: adminUrl }, audience: "admin",
       }),
     }).catch(() => {});
+    await logEvent(s, b.id, "approved", "Client approved the delivery", "client");
     res.status(200).json({ ok: true, approved_at: row.delivery_approved_at });
     return;
   }
@@ -102,6 +104,7 @@ async function review(s, req, res, ctx, body) {
       cta: { label: "View Project", url: adminUrl }, audience: "admin",
     }),
   }).catch(() => {});
+  await logEvent(s, b.id, "changes", "Client requested changes", "client", message);
   res.status(200).json({ ok: true });
 }
 
@@ -118,6 +121,29 @@ module.exports = async function handler(req, res) {
       const body = req.body || {};
       const action = String(body.action || "");
       if (action === "approve" || action === "changes") { await review(s, req, res, ctx, body); return; }
+      if (action === "testimonial") {
+        const quote = String(body.quote || "").trim().slice(0, 600);
+        if (quote.length < 8) { res.status(400).json({ error: "too-short" }); return; }
+        const [dup] = await s`SELECT id FROM testimonials WHERE booking_id = ${b.id} LIMIT 1`;
+        if (dup) { res.status(200).json({ ok: true }); return; }
+        await s`INSERT INTO testimonials (booking_id, client_name, brokerage, quote)
+                VALUES (${b.id}, ${b.client_name || ""}, ${b.client_brokerage || ""}, ${quote})`;
+        await logEvent(s, b.id, "testimonial", "Client left a testimonial", "client", quote);
+        await sendEmail({
+          from: SENDERS.admin, to: OWNER,
+          subject: `${b.title} | New Testimonial`,
+          text: `${b.client_name || "The client"} left a testimonial on ${b.title}:\n\n"${quote}"\n\nApprove it in the admin (Portfolio → Testimonials) to show it on the site.`,
+          html: jcsEmail({
+            eyebrow: "New Testimonial",
+            headline: `${escHtml(b.client_name || "")}${b.client_name ? " · " : ""}${escHtml(b.title)}`,
+            note: `<span style="white-space:pre-line;">&ldquo;${escHtml(quote)}&rdquo;</span>`,
+            rows: [["Client", escHtml(b.client_name || "")], ["Brokerage", escHtml(b.client_brokerage || "")]],
+            cta: { label: "Review in Admin", url: "https://www.jacobcschrader.com/admin#portfolio" }, audience: "admin",
+          }),
+        }).catch(() => {});
+        res.status(200).json({ ok: true });
+        return;
+      }
       if (action === "download") {
         const locked = !!b.downloads_locked && ctx.via !== "admin";
         if (locked) { res.status(423).json({ error: "locked" }); return; }
@@ -143,6 +169,7 @@ module.exports = async function handler(req, res) {
     const locked = !!b.downloads_locked && ctx.via !== "admin";
     const total = (Number(b.price) || 0) + (Number(b.travel_fee) || 0) - (Number(b.discount_value) || 0);
     const invoiced = !!(b.invoice_token && b.invoice_sent_at);
+    const [tst] = await s`SELECT id FROM testimonials WHERE booking_id = ${b.id} LIMIT 1`;
     if (ctx.via === "client") {
       // a portal view shows in the activity feed as "—" (never a download);
       // one row per client per 6 hours so reloads don't pile up
@@ -166,6 +193,7 @@ module.exports = async function handler(req, res) {
       delivered_at: b.delivered_at || b.delivery_sent_at || null,
       shoot_date: b.shoot_date || null,
       approved_at: b.delivery_approved_at || null,
+      has_testimonial: !!tst,
       deliverables: b.deliverables || "",
       links: linksOf(b),
       files: files.map((f) => publicFile(f, locked)),

@@ -15,6 +15,7 @@ const crypto = require("node:crypto");
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { ensureSlug, filesOf } = require("../delivery.js");
+const { logEvent } = require("../events.js");
 
 let blobDel = null;
 try { blobDel = require("@vercel/blob").del; } catch (e) { blobDel = null; }
@@ -59,8 +60,11 @@ module.exports = async function handler(req, res) {
       const events = await s`
         SELECT id, file_id, kind, label, email, created_at FROM download_events
         WHERE booking_id = ${id} ORDER BY created_at DESC LIMIT 60`;
+      const timeline = await s`
+        SELECT id, kind, label, actor, meta, created_at FROM project_events
+        WHERE booking_id = ${id} ORDER BY created_at DESC LIMIT 120`;
       res.setHeader("Cache-Control", "no-store");
-      res.status(200).json({ booking: shape(b), files, events });
+      res.status(200).json({ booking: shape(b), files, events, timeline });
       return;
     }
 
@@ -98,6 +102,8 @@ module.exports = async function handler(req, res) {
           delivery_cover_url = ${(!hasCover && firstPhoto) ? (firstPhoto.web_url || firstPhoto.url) : (b.delivery_cover_url || "")}
         WHERE id = ${id}`;
       const files = await filesOf(s, id);
+      const nP = clean.filter((f) => f.kind === "photo").length, nF = clean.filter((f) => f.kind === "film").length;
+      await logEvent(s, id, "files", "Uploaded " + [nP ? nP + (nP === 1 ? " photo" : " photos") : "", nF ? nF + (nF === 1 ? " film" : " films") : "", (clean.length - nP - nF) ? (clean.length - nP - nF) + " file(s)" : ""].filter(Boolean).join(", "), "admin");
       res.status(200).json({ ok: true, files, booking: shape(await bookingOf(s, id)) });
       return;
     }
@@ -110,13 +116,38 @@ module.exports = async function handler(req, res) {
         if (!f) { res.status(404).json({ error: "not-found" }); return; }
         const cover = f.web_url || f.thumb_url || f.url;
         await s`UPDATE bookings SET delivery_cover_url = ${cover} WHERE id = ${id}`;
+        await logEvent(s, id, "cover", "Cover set to " + f.name, "admin");
         res.status(200).json({ ok: true, cover_url: cover });
         return;
       }
       if (action === "lock") {
         const locked = body.locked === true || body.locked === "true";
         await s`UPDATE bookings SET downloads_locked = ${locked} WHERE id = ${id}`;
+        await logEvent(s, id, "lock", locked ? "Downloads locked" : "Downloads unlocked", "admin");
         res.status(200).json({ ok: true, locked });
+        return;
+      }
+      if (action === "rename") {
+        const fid = parseInt(body.file_id, 10);
+        const name = field(body.name, 200);
+        if (!fid || !name) { res.status(400).json({ error: "invalid" }); return; }
+        await s`UPDATE delivery_files SET name = ${name} WHERE id = ${fid} AND booking_id = ${id}`;
+        res.status(200).json({ ok: true, files: await filesOf(s, id) });
+        return;
+      }
+      if (action === "note") {
+        const text = field(body.text, 2000);
+        if (!text) { res.status(400).json({ error: "invalid" }); return; }
+        await logEvent(s, id, "note", text, "admin");
+        const timeline = await s`SELECT id, kind, label, actor, meta, created_at FROM project_events WHERE booking_id = ${id} ORDER BY created_at DESC LIMIT 120`;
+        res.status(200).json({ ok: true, timeline });
+        return;
+      }
+      if (action === "delnote") {
+        const eid = parseInt(body.event_id, 10);
+        await s`DELETE FROM project_events WHERE id = ${eid} AND booking_id = ${id} AND kind = 'note'`;
+        const timeline = await s`SELECT id, kind, label, actor, meta, created_at FROM project_events WHERE booking_id = ${id} ORDER BY created_at DESC LIMIT 120`;
+        res.status(200).json({ ok: true, timeline });
         return;
       }
       if (action === "sort") {
@@ -147,6 +178,7 @@ module.exports = async function handler(req, res) {
         const urls = [f.url, f.web_url, f.thumb_url].filter(Boolean);
         try { await blobDel(urls); } catch (e) { /* ignore */ }
       }
+      await logEvent(s, id, "files", "Removed " + f.name, "admin");
       res.status(200).json({ ok: true, files: await filesOf(s, id) });
       return;
     }

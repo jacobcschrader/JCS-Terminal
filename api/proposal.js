@@ -15,6 +15,7 @@
 const { db } = require("./_lib/db.js");
 const { verifySessionToken, readCookie } = require("./_lib/auth.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("./_lib/email.js");
+const { logEvent } = require("./_lib/events.js");
 const { loginUrl } = require("./_lib/portal-auth.js");
 
 const escHtml = (s) =>
@@ -66,6 +67,7 @@ module.exports = async function handler(req, res) {
         UPDATE proposals SET accepted_at = now(), accepted_by = ${name}, status = 'accepted',
           signature = ${name}, signed_at = now(), acceptance = ${acceptance}, updated_at = now()
         WHERE id = ${p.id} RETURNING accepted_at`;
+      if (p.booking_id) await logEvent(s, p.booking_id, "accepted", "Proposal accepted & signed by " + name, "client");
 
       let total = 0, firstService = "";
       try {

@@ -14,6 +14,7 @@ const crypto = require("node:crypto");
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { ensureSlug } = require("../delivery.js");
+const { logEvent } = require("../events.js");
 
 const field = (v, max = 300) => String(v == null ? "" : v).trim().slice(0, max);
 const STATUSES = ["pending", "upcoming", "editing", "revisions", "delivered", "completed", "paid", "canceled"];
@@ -118,6 +119,7 @@ module.exports = async function handler(req, res) {
         INSERT INTO bookings (client_id, title, location, shoot_date, shoot_time, type, price, status, notes, delivery_url, delivered_at, twilight_date, twilight_time, deliverables, city, state, zip, sqft, addons, travel_fee, travel_note, show_price, skip_confirmation, discount_code, discount_value, download_url, delivery_message, delivery_cc, delivery_links, delivery_token)
         VALUES (${f.client_id}, ${f.title}, ${f.location}, ${f.shoot_date}, ${f.shoot_time}, ${f.type}, ${f.price}, ${f.status}, ${f.notes}, ${f.delivery_url}, ${f.delivered_at}, ${f.twilight_date}, ${f.twilight_time}, ${f.deliverables}, ${f.city}, ${f.state}, ${f.zip}, ${f.sqft}, ${f.addons}, ${f.travel_fee}, ${f.travel_note}, ${f.show_price}, ${f.skip_confirmation}, ${f.discount_code}, ${f.discount_value}, ${f.download_url}, ${f.delivery_message}, ${f.delivery_cc}, ${f.delivery_links}, ${token})
         RETURNING *`;
+      await logEvent(s, row.id, "created", "Project created" + (f.status !== "upcoming" ? " · " + f.status : ""), "admin");
       res.status(200).json({ booking: row });
 
     } else if (req.method === "PUT") {
@@ -126,6 +128,7 @@ module.exports = async function handler(req, res) {
       f.location = makeLocation(f, b.location);
       await applyDiscount(s, f);
       if (!id || !f.title) { res.status(400).json({ error: "invalid" }); return; }
+      const [before] = await s`SELECT status FROM bookings WHERE id = ${id}`;
       const [row] = await s`
         UPDATE bookings SET
           client_id = ${f.client_id}, title = ${f.title}, location = ${f.location},
@@ -147,11 +150,13 @@ module.exports = async function handler(req, res) {
           paid_at = CASE WHEN ${f.status} = 'paid' THEN COALESCE(paid_at, now()) ELSE NULL END
         WHERE id = ${id} RETURNING *`;
       if (!row) { res.status(404).json({ error: "not-found" }); return; }
+      if (before && before.status !== row.status) await logEvent(s, id, "stage", "Moved to " + row.status, "admin");
       res.status(200).json({ booking: row });
 
     } else if (req.method === "DELETE") {
       const id = parseInt(b.id, 10);
       if (!id) { res.status(400).json({ error: "invalid" }); return; }
+      await s`DELETE FROM project_events WHERE booking_id = ${id}`;
       await s`DELETE FROM download_events WHERE booking_id = ${id}`;
       await s`DELETE FROM delivery_files WHERE booking_id = ${id}`;
       await s`DELETE FROM bookings WHERE id = ${id}`;

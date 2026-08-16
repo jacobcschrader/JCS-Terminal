@@ -1571,3 +1571,53 @@ service.
 - Verified locally with stubs: dashboard (desktop + mobile), search,
   bell feed, keyboard nav, every view under the new shell, sidebar
   drawer.
+
+## 2026-08-08 — Admin cleanup pass ("remove any extra bs")
+
+Jacob handed over design/function control of the admin. Cleanup, no
+new features:
+- One control language: every button (adm-btn / lx-btn / dz-btn) is the
+  same sentence-case sans button (solid / ghost / danger / sm), every
+  tab strip is the same segmented control, every card the same soft
+  12px card. Old 5-tile stats CSS, Resid-era markers, blinking cursor,
+  "(JCS — 01) // LICENSE TRACKER" copy, kanban leftovers (STAGE_COLOR,
+  wirePipeline, view/collapsed state) removed.
+- Settings: Pixieset card gone; grouped into Integrations (Places key,
+  Google Calendar status + test, licensing research keys) + Discount
+  codes. Router: `covers` (Pixieset og:image unfurl) route removed.
+- Licensing: normal page title + tiles, "Tracker" / "Research a
+  property" cards, sentence-case messages.
+- Requests: request cards with avatar, contact line, fit % + status
+  pills, facts line, services, message, estimated value, actions
+  (tabs show counts). Proposals: a proper table.
+- Project page: Files + upload merged into one section right after the
+  facts; delivery email section only saves (sending stays in the
+  header); order Project → Files → Delivery email → Invoices → Download
+  activity → Additional links.
+- reload() fetches everything in parallel (was 10 sequential calls).
+
+## 2026-08-08 — Eight additions Jacob picked (asked first)
+
+- **Project timeline + notes:** project_events table + logEvent hooks in
+  bookings (create, stage), confirm, deliver, invoice, proposals send,
+  proposal accept, delivery approve/changes, files (upload, cover, lock,
+  remove) and the cron; notes add/delete; ACTIVITY section merges the
+  timeline with the download feed.
+- **Photo management:** drag-reorder, Select mode + bulk delete, rename,
+  Download originals (listing page ?dl=full for admin).
+- **Client health:** Clients table (projects, lifetime value, last shoot,
+  open balance, Active / Check in), client tiles + Statement CSV, bell
+  check-in items.
+- **Bookkeeping export:** Billing CSV by date range.
+- **Calendar view:** month grid, confirmed vs not, twilights.
+- **Automatic reminders:** cron (invoice 14/21d, proposal 3d, delivery
+  approval 5d), Settings toggles (default off), once per milestone,
+  logged, templated.
+- **Editable email templates:** Settings card (subject + note per email
+  incl. reminders, placeholders, reset), templates.js drives confirm /
+  delivery / invoice / proposal / application / reminder emails.
+- **Testimonial collector:** listing page asks after approval →
+  testimonials table + admin email → Portfolio → Testimonials approve →
+  /api/site-projects → home page cards.
+- Fixed a `.ph` class collision (template placeholder hint vs the site's
+  photo placeholder).

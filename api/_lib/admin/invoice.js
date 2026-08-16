@@ -10,6 +10,8 @@ const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { recipientsOf } = require("../links.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
+const { logEvent } = require("../events.js");
+const { loadTemplates, tpl } = require("../templates.js");
 
 const escHtml = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
@@ -53,18 +55,19 @@ module.exports = async function handler(req, res) {
     if (!clientTo.length) { res.status(400).json({ error: "no-client-email" }); return; }
     const first = (b.client_name || "").split(" ")[0] || "there";
 
+    const T = tpl(await loadTemplates(s), "invoice", { first, name: b.client_name || "", property: b.title, location: b.location || "", number, total: money(total) });
     await sendEmail({
       from: SENDERS.billing,
       to: clientTo,
       replyTo: OWNER,
-      subject: `${b.title} | Invoice ${number}`,
+      subject: T.subject,
       text: `Hi ${first},\n\nInvoice ${number} for ${b.title} — total ${money(total)}.\n` +
         `View it here: ${pageUrl}\n\nQuestions? Just reply to this email.\n\n` +
         `— Jacob Schrader · jacobcschrader.com`,
       html: jcsEmail({
         eyebrow: `Invoice ${number}`,
         headline: `${escHtml(b.client_name || "")}${b.client_name ? " · " : ""}${escHtml(b.title)}`,
-        note: `Hi ${escHtml(first)} — here is your invoice. Questions? Just reply.`,
+        note: T.note,
         rows: [
           ["Invoice", escHtml(number)],
           ["Property", escHtml(b.title) + (b.location ? `<br><span style="color:#8a94a6;">${escHtml(b.location)}</span>` : "")],
@@ -84,6 +87,7 @@ module.exports = async function handler(req, res) {
         invoice_sends = COALESCE(invoice_sends, 0) + 1
       WHERE id = ${id} RETURNING *`;
 
+    await logEvent(s, id, "invoice", (b.invoice_sent_at ? "Invoice re-sent" : "Invoice " + number + " sent") + " · " + money(total), "admin");
     res.status(200).json({ ok: true, booking: updated, pageUrl, number, sentTo: clientTo });
   } catch (e) {
     const msg = /DATABASE_URL/.test(String(e)) ? "db-not-configured"

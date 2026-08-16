@@ -34,8 +34,13 @@ module.exports = async function handler(req, res) {
     });
     // no caching — edits, publishes, and reorders from the admin show
     // on the very next page load
+    let testimonials = [];
+    try {
+      const t = await s`SELECT client_name, brokerage, quote FROM testimonials WHERE approved = true ORDER BY created_at DESC LIMIT 12`;
+      testimonials = t.map((x) => ({ name: x.client_name || "", firm: x.brokerage || "", quote: x.quote }));
+    } catch (e) { /* table may not exist yet */ }
     res.setHeader("Cache-Control", "no-store");
-    res.status(200).json({ projects });
+    res.status(200).json({ projects, testimonials });
   } catch (e) {
     res.status(200).json({ projects: [] });   // site falls back to static
   }

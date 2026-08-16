@@ -18,6 +18,8 @@ const { loginUrl } = require("../portal-auth.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
 const { coverFor } = require("./covers.js");
 const { ensureSlug, filesOf, summarize } = require("../delivery.js");
+const { logEvent } = require("../events.js");
+const { loadTemplates, tpl } = require("../templates.js");
 
 const escHtml = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
@@ -67,18 +69,19 @@ module.exports = async function handler(req, res) {
     const headline = `${escHtml(b.client_name || "")}${b.client_name ? " · " : ""}${escHtml(b.title)}`;
     const included = [summarize(files)].concat(links.map((l) => escHtml(l.label))).filter(Boolean).join(" · ");
 
+    const T = tpl(await loadTemplates(s), "delivery", { first, name: b.client_name || "", property: b.title, location: b.location || "" });
     await sendEmail({
       from: SENDERS.delivery,
       to: clientTo,
       cc,
       replyTo: OWNER,
-      subject: `${b.title} | Media Delivery`,
-      text: `Hi ${first},\n\n${note ? note + "\n\n" : ""}Your full delivery for ${b.title} is ready:\n${pageUrl}\n\n` +
+      subject: T.subject,
+      text: `${note ? note + "\n\n" : ""}${T.text}\n${pageUrl}\n\n` +
         `— Jacob Schrader · jacobcschrader.com`,
       html: jcsEmail({
         eyebrow: "Media Delivery",
         headline,
-        note: `Hi ${escHtml(first)} — ${note ? escHtml(note) + " " : ""}your full delivery is ready. View, download individual files, or grab the full-res and MLS bundles from your listing page — always up to date.`,
+        note: (note ? escHtml(note) + " " : "") + T.note,
         rows: [
           ["Client", b.client_name ? escHtml(b.client_name) : ""],
           ["Property", escHtml(b.title) + (b.location ? `<br><span style="color:#8a94a6;">${escHtml(b.location)}</span>` : "")],
@@ -125,6 +128,7 @@ module.exports = async function handler(req, res) {
         status = ${preDelivered ? "delivered" : b.status}
       WHERE id = ${id} RETURNING *`;
 
+    await logEvent(s, id, "delivery", (b.delivery_sent_at ? "Delivery email re-sent" : "Delivery email sent") + " to " + clientTo.join(", "), "admin");
     res.status(200).json({ ok: true, booking: updated, pageUrl });
   } catch (e) {
     const msg = /DATABASE_URL/.test(String(e)) ? "db-not-configured"

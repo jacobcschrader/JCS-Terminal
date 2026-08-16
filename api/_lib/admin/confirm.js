@@ -9,6 +9,8 @@
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
+const { logEvent } = require("../events.js");
+const { loadTemplates, tpl } = require("../templates.js");
 const { buildIcs, fmtTime, gcalLink, ymd } = require("../ics.js");
 const { loginUrl } = require("../portal-auth.js");
 const gcal = require("../gcal.js");
@@ -113,11 +115,12 @@ module.exports = async function handler(req, res) {
       // One-click, already-signed-in portal link — safe because this email
       // itself is the ownership proof (same trust as the magic link).
       const portalUrl = b.client_id ? loginUrl(b.client_id) : "https://www.jacobcschrader.com/portal";
+      const T = tpl(await loadTemplates(s), "confirm", { first: (b.client_name || "").split(" ")[0] || "there", name: b.client_name || "", property: b.title, location: b.location || "", date: whenMain, time: b.shoot_time || "" });
       await sendEmail({
         from: SENDERS.enquiry,
         to: clientTo,
         replyTo: OWNER,
-        subject: `${b.title} | Booking Confirmed`,
+        subject: T.subject,
         text: `Your shoot is confirmed.\n\nProperty: ${b.title}\nShoot: ${whenMain}` +
           (whenTwi ? `\nTwilight: ${whenTwi}` : "") +
           `\n\nAdd to calendar: ${addToCalUrl}` +
@@ -126,9 +129,7 @@ module.exports = async function handler(req, res) {
         html: jcsEmail({
           eyebrow: "Booking Confirmed",
           headline,
-          note: "You're on the calendar. Questions before the shoot? Just reply. " +
-            `Everything about your shoot — schedule, delivery, and invoices — lives in ` +
-            `<a href="${escHtml(portalUrl)}" style="color:#33507e;">your client portal</a> (signs you in automatically).`,
+          note: T.note + ` <a href="${escHtml(portalUrl)}" style="color:#33507e;">Open your client portal</a> (signs you in automatically).`,
           rows: [
             ["Property", propertyVal],
             ["Service", b.type ? escHtml(b.type) : ""],
@@ -187,6 +188,7 @@ module.exports = async function handler(req, res) {
     }
 
     const [updated] = await s`UPDATE bookings SET confirmed_at = now() WHERE id = ${id} RETURNING *`;
+    await logEvent(s, id, "confirmed", (b.confirmed_at ? "Confirmation re-sent" : "Booking confirmed") + (clientSent ? " · emailed client" : " · admin only") + (calendarWritten ? " · on Google Calendar" : ""), "admin");
     res.status(200).json({ ok: true, clientSent, calendarWritten, booking: updated });
   } catch (e) {
     const msg = /DATABASE_URL/.test(String(e)) ? "db-not-configured"

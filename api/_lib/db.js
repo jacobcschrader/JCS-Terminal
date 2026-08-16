@@ -277,6 +277,27 @@ function ensureSchema() {
         done_at     timestamptz
       )`;
       await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS paid_at timestamptz`;
+      // Project timeline (events + notes) and client testimonials.
+      await s`CREATE TABLE IF NOT EXISTS project_events (
+        id          serial PRIMARY KEY,
+        booking_id  integer NOT NULL,
+        kind        text NOT NULL DEFAULT 'note',
+        label       text DEFAULT '',
+        actor       text DEFAULT 'system',
+        meta        text DEFAULT '',
+        created_at  timestamptz NOT NULL DEFAULT now()
+      )`;
+      await s`CREATE INDEX IF NOT EXISTS project_events_booking ON project_events (booking_id, created_at)`;
+      await s`CREATE TABLE IF NOT EXISTS testimonials (
+        id           serial PRIMARY KEY,
+        booking_id   integer,
+        client_name  text DEFAULT '',
+        brokerage    text DEFAULT '',
+        quote        text NOT NULL,
+        approved     boolean NOT NULL DEFAULT false,
+        created_at   timestamptz NOT NULL DEFAULT now()
+      )`;
+      await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS reminded_at timestamptz`;
       await s`UPDATE bookings SET paid_at = COALESCE(paid_at, invoice_sent_at, delivered_at::timestamptz, created_at) WHERE status = 'paid' AND paid_at IS NULL`;
     })();
   }

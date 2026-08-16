@@ -237,7 +237,7 @@
     <div class="center reveal" style="margin-bottom:clamp(2.2rem,4.5vw,3.4rem)">
       <span class="eyebrow">What They Say</span>
     </div>
-    <div class="tcards">
+    <div class="tcards" id="tcards">
       <figure class="tcard reveal" style="margin:0">
         <div class="tcard__mark">&ldquo;</div>
         <blockquote>From the shoot to the final delivery, everything Jacob does is professional — exactly aligned with how I want my business showcased.</blockquote>
@@ -327,5 +327,26 @@
 
 <script src="projects-data.js"></script>
 <script src="site.js"></script>
+<script>
+// Client testimonials approved in the admin ride along with the portfolio
+// feed; when there are any, they lead the "What They Say" cards.
+(function () {
+  var host = document.getElementById('tcards'); if (!host) return;
+  fetch('/api/site-projects').then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
+    var list = (j && j.testimonials) || []; if (!list.length) return;
+    var esc = function (s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+    var ini = function (n) { return String(n || '').split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('') || 'JC'; };
+    var statics = Array.prototype.slice.call(host.children);
+    var cards = list.slice(0, 6).map(function (t) {
+      return '<figure class="tcard reveal in" style="margin:0"><div class="tcard__mark">&ldquo;</div><blockquote>' + esc(t.quote) + '</blockquote>' +
+        '<figcaption class="tcard__who"><span class="tcard__ava">' + esc(ini(t.name)) + '</span><span><span class="tcard__name">' + esc(t.name || 'A client') + '</span>' +
+        (t.firm ? '<br><span class="tcard__firm">' + esc(t.firm) + '</span>' : '') + '</span></figcaption></figure>';
+    }).join('');
+    host.innerHTML = cards;
+    // keep at least three cards on the row
+    statics.slice(0, Math.max(0, 3 - list.length)).forEach(function (el) { el.classList.add('in'); host.appendChild(el); });
+  }).catch(function () {});
+})();
+</script>
 </body>
 </html>

@@ -11,6 +11,8 @@
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
+const { logEvent } = require("../events.js");
+const { loadTemplates, tpl } = require("../templates.js");
 
 const field = (v, max = 300) => String(v == null ? "" : v).trim().slice(0, max);
 const escHtml = (s) =>
@@ -111,17 +113,17 @@ module.exports = async function handler(req, res) {
       const first = (p.client_name || "").split(" ")[0];
       const url = PUBLIC_URL(p.slug);
 
+      const T = tpl(await loadTemplates(s), "proposal", { first: first || "there", name: p.client_name || "", property: p.title, location: p.location || "", total: total ? "$" + total.toLocaleString() : "" });
       await sendEmail({
         from: SENDERS.enquiry,
         to,
         replyTo: OWNER,
-        subject: `${p.title} | Project Proposal`,
-        text: `Hi ${first || "there"},\n\nYour proposal for ${p.title} is ready:\n${url}\n\n— Jacob Schrader · jacobcschrader.com`,
+        subject: T.subject,
+        text: `${T.text}\n${url}\n\n— Jacob Schrader · jacobcschrader.com`,
         html: jcsEmail({
           eyebrow: "Project Proposal",
           headline: escHtml(p.title),
-          note: `Hi ${escHtml(first || "there")} — your bespoke proposal for <b>${escHtml(p.title)}</b> is ready. ` +
-            "Review the scope below, and reserve the dates when you're ready.",
+          note: T.note,
           rows: [
             ["Property", escHtml(p.title) + (p.location ? `<br><span style="color:#8a94a6;">${escHtml(p.location)}</span>` : "")],
             ["Campaign", total ? "$" + total.toLocaleString() : "Custom"],
@@ -139,6 +141,7 @@ module.exports = async function handler(req, res) {
           client_email = ${to},
           updated_at = now()
         WHERE id = ${id} RETURNING *`;
+      if (p.booking_id) await logEvent(s, p.booking_id, "proposal", (p.sent_at ? "Proposal re-sent" : "Proposal sent") + " to " + to, "admin");
       res.status(200).json({ ok: true, proposal: row });
       return;
     }

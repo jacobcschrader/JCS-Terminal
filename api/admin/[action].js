@@ -19,13 +19,13 @@ const routes = {
   portallink: require("../_lib/admin/portal-link.js"),
   proposals: require("../_lib/admin/proposals.js"),
   licensing: require("../_lib/admin/licensing.js"),
-  covers: require("../_lib/admin/covers.js"),
   gcalcheck: require("../_lib/admin/gcal-check.js"),
   siteprojects: require("../_lib/admin/site-projects.js"),
   upload: require("../_lib/admin/upload.js"),
   files: require("../_lib/admin/files.js"),
   downloads: require("../_lib/admin/downloads.js"),
   tasks: require("../_lib/admin/tasks.js"),
+  testimonials: require("../_lib/admin/testimonials.js"),
 };
 
 module.exports = function handler(req, res) {

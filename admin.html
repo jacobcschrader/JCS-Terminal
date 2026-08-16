@@ -95,21 +95,20 @@ body { background: var(--adm-bg); }
 /* ---- View header ---- */
 .adm-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
 .adm-head h1 { font-family: var(--sans); font-weight: 600; font-style: normal; letter-spacing: -0.01em; font-size: 1.05rem; color: var(--ink); margin: 0; line-height: 1.2; }
-.adm-headmark { display: none; }
 .adm-head .grow { flex: 1; }
 .adm-back { display: inline-block; font-size: 0.66rem; color: var(--muted); font-weight: 500; cursor: pointer; margin-bottom: 0.8rem; }
 .adm-back:hover { color: var(--navy); }
 
 /* ---- Buttons / badges / tables ---- */
-.adm-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--navy); color: #fff; border: 1px solid var(--navy); border-radius: var(--adm-r); cursor: pointer;
-  font-family: var(--sans); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; padding: 0.82rem 1.35rem; line-height: 1.2; text-decoration: none; white-space: nowrap;
+.adm-btn, .lx-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.45rem; background: var(--navy); color: #fff; border: 1px solid var(--navy); border-radius: 8px; cursor: pointer;
+  font-family: var(--sans); font-size: 0.74rem; font-weight: 600; letter-spacing: 0; text-transform: none; padding: 0.55rem 0.95rem; line-height: 1.25; text-decoration: none; white-space: nowrap;
   transition: background 0.2s, color 0.2s, border-color 0.2s, opacity 0.2s; }
 .adm-btn:hover { background: var(--navy-deep); border-color: var(--navy-deep); opacity: 1; }
-.adm-btn--ghost { background: #fff; color: var(--ink); border-color: var(--line); }
-.adm-btn--ghost:hover { background: #fff; color: var(--navy); border-color: rgba(15,34,64,0.5); }
-.adm-btn--danger { background: transparent; color: #a33; border-color: rgba(170,51,51,0.35); }
+.adm-btn--ghost, .lx-btn--ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+.adm-btn--ghost:hover, .lx-btn--ghost:hover { background: #fff; color: var(--navy); border-color: rgba(15,34,64,0.5); }
+.adm-btn--danger, .lx-btn--danger { background: #fff; color: #a33; border-color: rgba(170,51,51,0.35); }
 .adm-btn--danger:hover { background: #fdf3f3; border-color: rgba(170,51,51,0.6); }
-.adm-btn--sm { padding: 0.46rem 0.85rem; font-size: 0.54rem; letter-spacing: 0.16em; }
+.adm-btn--sm, .lx-btn--sm { padding: 0.4rem 0.7rem; font-size: 0.68rem; }
 .adm-btn[disabled] { opacity: 0.45; cursor: default; }
 .adm-badge { display: inline-flex; align-items: center; gap: 0.38rem; font-size: 0.54rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; padding: 0.32rem 0.7rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--muted); white-space: nowrap; }
 .adm-badge--live, .adm-badge--completed, .adm-badge--ready { background: #e6f0e8; color: #2f6b3f; border-color: rgba(47,107,63,0.3); }
@@ -123,9 +122,9 @@ body { background: var(--adm-bg); }
 .adm-badge--unpaid { background: #f5e8e8; color: #a03a3a; border-color: rgba(160,58,58,0.3); }
 .adm-badge--locked { background: #f5e8e8; color: #a03a3a; border-color: rgba(160,58,58,0.3); }
 
-.adm-card { background: #fff; border: 1px solid var(--line); border-radius: var(--adm-r); padding: clamp(1.2rem, 2.5vw, 1.6rem); }
+.adm-card, .lx-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: clamp(1.1rem, 2.2vw, 1.4rem); box-shadow: 0 8px 24px rgba(15,34,64,0.045); }
 .adm-card + .adm-card { margin-top: 1.2rem; }
-.adm-card h2 { display: flex; align-items: center; gap: 0.6rem; font-family: var(--sans); font-style: normal; font-weight: 600; font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); margin: 0 0 1rem; }
+.adm-card h2, .lx-card__head h2 { display: flex; align-items: center; gap: 0.6rem; font-family: var(--sans); font-style: normal; font-weight: 600; font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin: 0 0 1rem; }
 .adm-table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
 .adm-table th { text-align: left; font-size: 0.54rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0.7rem 0.9rem 0.7rem 0; border-bottom: 1px solid var(--line); }
 .adm-table td { padding: 0.85rem 0.9rem 0.85rem 0; border-bottom: 1px solid var(--line-soft); color: var(--ink); vertical-align: middle; }
@@ -143,23 +142,16 @@ small.mut { color: var(--muted); }
 .adm-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.78em; color: var(--ink); }
 
 /* ---- Dashboard: five stat cards + recent downloads ---- */
-.adm-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.9rem; margin: 0 0 2rem; }
-.adm-stat { background: #fff; border: 1px solid var(--line); border-radius: var(--adm-r); padding: 1.35rem 1.25rem 1.2rem; }
-.adm-stat b { display: block; font-family: var(--serif); font-weight: 400; font-size: 2.05rem; line-height: 1; color: var(--ink); letter-spacing: 0; font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; }
-.adm-stat span { display: block; margin-top: 0.75rem; font-size: 0.52rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.adm-stat[onclick] { cursor: pointer; } .adm-stat[onclick]:hover { border-color: rgba(15,34,64,0.4); }
 .adm-sec { margin-top: 2.2rem; }
 .adm-sec__lbl { display: flex; align-items: center; gap: 0.6rem; font-size: 0.56rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 0.75rem; }
 .adm-sec__lbl .grow { flex: 1; }
-@media (max-width: 1100px) { .adm-stats { grid-template-columns: repeat(3, 1fr); } }
-@media (max-width: 600px) { .adm-stats { grid-template-columns: 1fr 1fr; gap: 0.6rem; } .adm-stat b { font-size: 1.7rem; } }
 
 /* ---- Toolbar (search / segments) ---- */
 .adm-tools { display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap; margin-bottom: 1.2rem; }
-.adm-seg { display: inline-flex; gap: 0.35rem; flex-wrap: wrap; }
-.adm-seg button { font-family: var(--sans); background: transparent; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; color: var(--muted); padding: 0.5rem 0.9rem; }
-.adm-seg button.on { background: #fff; border-color: rgba(15,34,64,0.55); color: var(--navy); }
-.adm-tools input[type=search], .adm-tools select { font-family: var(--sans); font-size: 0.84rem; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: var(--adm-r); padding: 0.55rem 0.9rem; outline: none; }
+.adm-seg, .lx-tabs { display: inline-flex; gap: 2px; flex-wrap: wrap; background: #eeede8; border-radius: 9px; padding: 2px; }
+.adm-seg button, .lx-tab { font-family: var(--sans); background: transparent; border: 0; border-radius: 7px; cursor: pointer; font-size: 0.7rem; font-weight: 600; color: var(--muted); padding: 0.4rem 0.75rem; letter-spacing: 0; text-transform: none; }
+.adm-seg button.on, .lx-tab.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(15,34,64,0.12); }
+.adm-tools input[type=search], .adm-tools select { font-family: var(--sans); font-size: 0.8rem; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.8rem; outline: none; }
 .adm-tools input[type=search] { min-width: 220px; }
 .adm-tools input[type=search]:focus, .adm-tools select:focus { border-color: var(--navy); }
 
@@ -305,35 +297,14 @@ small.mut { color: var(--muted); }
 .adm-toast--err { background: #6e2f2a; }
 
 /* ================= Licensing (lx-*) — same square language =========== */
-.lx-mono { letter-spacing: 0.12em; text-transform: uppercase; }
-.lx-marker { display: flex; align-items: center; gap: 0.6rem; font-size: 0.58rem; letter-spacing: 0.22em; color: var(--muted); text-transform: uppercase; font-weight: 600; }
-.lx-marker .dot { display: none; }
-.lx-marker .dim { color: var(--muted); font-weight: 400; }
-.lx-h1 { font-family: var(--serif); font-weight: 400; font-style: normal; letter-spacing: -0.01em; color: var(--ink); font-size: clamp(2.1rem, 3.6vw, 2.8rem); line-height: 1.05; margin: 0.6rem 0 0.3rem; }
-.lx-h1 .t { color: var(--ink); font-style: italic; }
-.lx-sub { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.lx-cursor { display: none; }
-.lx-ledger { background: #fff; border: 1px solid var(--line); border-radius: var(--adm-r); padding: 0; margin: 1.2rem 0 1.4rem;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0; }
-.lx-ledger .cell { padding: 1.3rem 1.25rem 1.2rem; border-right: 1px solid var(--line-soft); }
-.lx-ledger .cell:last-child { border-right: 0; }
-.lx-ledger .cell b { display: block; font-family: var(--serif); font-weight: 400; font-size: 1.85rem; color: var(--ink); letter-spacing: 0; font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; }
-.lx-ledger .cell.teal b { color: var(--ink); }
-.lx-ledger .cell span { display: block; margin-top: 0.6rem; font-size: 0.52rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
-.lx-ledger .cell.click { cursor: pointer; }
-.lx-card { background: #fff; border: 1px solid var(--line); border-radius: var(--adm-r); padding: 1.35rem 1.5rem; margin-bottom: 1.3rem; }
+.lx-card { margin-bottom: 1.2rem; }
 .lx-card__head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.9rem; flex-wrap: wrap; }
 .lx-card__head .grow { flex: 1; }
 .lx-input { font-family: var(--sans); font-size: 0.9rem; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: var(--adm-r); padding: 0.62rem 0.9rem; outline: none; }
 .lx-input:focus { border-color: var(--navy); }
 select.lx-input { padding-right: 2rem; }
-.lx-btn { font-family: var(--sans); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: #fff; background: var(--navy); border: 1px solid var(--navy); border-radius: var(--adm-r); padding: 0.78rem 1.3rem; cursor: pointer; transition: opacity 0.2s; }
 .lx-btn:hover { background: var(--navy-deep); }
-.lx-btn--ghost { background: #fff; color: var(--ink); border-color: var(--line); }
-.lx-btn--ghost:hover { background: #fff; color: var(--navy); border-color: rgba(15,34,64,0.5); }
 .lx-btn--teal { background: var(--navy); }
-.lx-btn--sm { padding: 0.46rem 0.85rem; font-size: 0.54rem; letter-spacing: 0.16em; }
-.lx-btn--danger { background: transparent; color: #a33; border-color: rgba(170,51,51,0.35); }
 .lx-chip { display: inline-flex; align-items: center; gap: 0.4rem; font-size: 0.54rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; padding: 0.32rem 0.7rem;
   border-radius: 999px; border: 1px solid var(--line); color: var(--muted); background: #fff; white-space: nowrap; }
 .lx-chip .d { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
@@ -345,9 +316,6 @@ select.lx-input { padding-right: 2rem; }
 .lx-chip--declined { color: #9c3a3a; border-color: rgba(156,58,58,0.35); background: #faeeee; }
 .lx-chip--role { color: var(--ink); background: #f1f0ec; border-color: transparent; }
 .lx-chip--due { color: #b3541e; border-color: rgba(179,84,30,0.4); background: #fdf1e7; }
-.lx-tabs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
-.lx-tab { font-family: var(--sans); font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; color: var(--muted); background: transparent; border: 1px solid var(--line); border-radius: 999px; padding: 0.5rem 0.9rem; cursor: pointer; }
-.lx-tab.on { background: #fff; border-color: rgba(15,34,64,0.55); color: var(--navy); }
 .lx-row { border: 1px solid var(--line); border-radius: var(--adm-r); padding: 0.95rem 1.15rem; margin-bottom: 0.65rem; background: #fff; transition: border-color 0.2s; }
 .lx-row:hover { border-color: rgba(15,34,64,0.42); }
 .lx-row__top { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
@@ -528,6 +496,60 @@ select.lx-input { padding-right: 2rem; }
 /* ---- Billing ---- */
 .bl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.2rem; }
 @media (max-width: 900px) { .bl-stats { grid-template-columns: 1fr 1fr; } }
+
+/* ---- project timeline ---- */
+.tl { }
+.tl__row { display: flex; gap: 0.7rem; padding: 0.5rem 0; border-bottom: 1px solid var(--line-soft); }
+.tl__row:last-child { border-bottom: 0; }
+.tl__dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); margin-top: 0.42rem; flex: none; }
+.tl__dot.grn { background: #2f9e5b; } .tl__dot.amb { background: #c9932a; } .tl__dot.red { background: #c0392b; } .tl__dot.dim { background: rgba(15,34,64,0.2); } .tl__dot.note { background: var(--navy); }
+.tl__body { flex: 1; min-width: 0; }
+.tl__text { font-size: 0.8rem; color: var(--ink); line-height: 1.5; }
+.tl__text.note { background: #faf9f6; border: 1px solid var(--line-soft); border-radius: 8px; padding: 0.45rem 0.65rem; white-space: pre-line; }
+.tl__sub { font-size: 0.74rem; color: var(--muted); margin-top: 0.15rem; white-space: pre-line; }
+.tl__meta { font-size: 0.64rem; color: var(--muted); margin-top: 0.15rem; }
+.tl__meta a { cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+/* ---- files toolbar + tiles ---- */
+.adm-ftools { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.7rem; }
+.adm-cg.picked { outline-color: var(--navy); }
+.adm-cg .pick { position: absolute; left: 6px; top: 6px; width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid #fff; background: rgba(15,34,64,0.35); color: #fff; font-size: 0.6rem; display: inline-flex; align-items: center; justify-content: center; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+.adm-cg.picked .pick { background: var(--navy); }
+.adm-cg .rn { position: absolute; right: 31px; top: 5px; width: 22px; height: 22px; border: 0; border-radius: 50%; background: rgba(15,34,64,0.75); color: #fff; font-size: 0.65rem; cursor: pointer; display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.2s; }
+.adm-cg:hover .rn { opacity: 1; }
+.adm-cg.dragging { opacity: 0.4; }
+.adm-cg.over { outline-color: var(--accent); }
+/* ---- calendar ---- */
+.cal { padding: 0; overflow: hidden; }
+.cal__head { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--line-soft); }
+.cal__head span { font-size: 0.56rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0.6rem 0.7rem; }
+.cal__grid { display: grid; grid-template-columns: repeat(7, 1fr); }
+.cal__cell { min-height: 108px; border-right: 1px solid var(--line-soft); border-bottom: 1px solid var(--line-soft); padding: 0.45rem 0.5rem; }
+.cal__cell:nth-child(7n) { border-right: 0; }
+.cal__cell--pad { background: #faf9f6; }
+.cal__cell.past { background: #fcfbf9; }
+.cal__cell.today { background: #eef2f7; }
+.cal__n { display: block; font-size: 0.68rem; color: var(--muted); font-weight: 600; margin-bottom: 0.3rem; }
+.cal__cell.today .cal__n { color: var(--navy); }
+.cal__ev { display: block; font-size: 0.66rem; line-height: 1.3; color: #fff; background: var(--navy); border-radius: 5px; padding: 0.22rem 0.4rem; margin-bottom: 0.25rem; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal__ev b { font-weight: 600; opacity: 0.85; }
+.cal__ev--twilight { background: #4a4266; }
+.cal__ev.unconf { background: #fff; color: var(--navy); border: 1px dashed rgba(15,34,64,0.45); }
+.cal__ev--twilight.unconf { color: #4a4266; border-color: #4a4266; }
+@media (max-width: 860px) { .cal__cell { min-height: 70px; padding: 0.3rem; } .cal__ev { font-size: 0.58rem; } .cal__ev b { display: none; } }
+/* ---- settings: templates ---- */
+.tpl { border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 0.7rem; }
+.tpl__head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+.tpl__head b { font-size: 0.8rem; font-weight: 600; color: var(--ink); flex: 1; }
+.tpl__head a { font-size: 0.68rem; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.tpl input, .tpl textarea { width: 100%; box-sizing: border-box; font-family: var(--sans); font-size: 0.82rem; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.65rem; outline: none; }
+.tpl input:focus, .tpl textarea:focus { border-color: var(--navy); }
+.tpl textarea { min-height: 64px; resize: vertical; margin-top: 0.4rem; line-height: 1.5; }
+.tpl__ph { font-size: 0.66rem; color: var(--muted); margin-top: 0.35rem; }
+.tpl__ph code { font-family: ui-monospace, Menlo, monospace; font-size: 0.66rem; background: #f4f3ee; padding: 0 4px; border-radius: 4px; }
+.sw { display: flex; align-items: center; gap: 0.7rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line-soft); font-size: 0.82rem; color: var(--ink); }
+.sw:last-of-type { border-bottom: 0; }
+.sw input { width: 16px; height: 16px; accent-color: var(--navy); }
+.sw small { display: block; color: var(--muted); font-size: 0.7rem; }
 </style>
 </head>
 <body>
@@ -560,6 +582,7 @@ select.lx-input { padding-right: 2rem; }
       <a data-r="dash" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
       <a data-r="requests"><svg viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Requests<span class="adm-count adm-hidden" id="req-badge"></span></a>
       <a data-r="pipeline"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Projects</a>
+      <a data-r="calendar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar</a>
       <a data-r="proposals"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Proposals</a>
       <a data-r="clients"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</a>
       <div class="grp">Studio</div>
@@ -612,11 +635,11 @@ select.lx-input { padding-right: 2rem; }
   function dstr(d){ if(!d) return '—'; var t=new Date(d); return isNaN(t)?'—':t.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
 
   var state = { clients: [], bookings: [], requests: [], discounts: [], siteProjects: [], proposals: [], licenseLeads: [], sp: null, reqTab: 'pending', loaded: false,
-              view: localStorage.getItem('adm-view') || 'pipeline', q: '', clientFilter: '', collapsed: {},
+              q: '', clientFilter: '',
               licTab: 'active', licProp: '', licResults: null, licSearching: false,
               stageFilter: 'active', ls: null, downloads: [], dlWeek: 0,
-              tasks: [], taskTab: 'all', billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1 };
-var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', delivered:'#7a5fb8', completed:'#3f7a4f', paid:'#1d4d2a' };
+              tasks: [], taskTab: 'all', billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1,
+              testimonials: [], calMonth: '', fDrag: null };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
   var ADDONS = {
     'Photography': ['Flash / Ambient Photography','Aerial Photography','Vertical / Vignette Images','Twilight Photography','Virtual Staging','Virtual Twilight'],
@@ -624,6 +647,18 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     'Beyond':      ['Zillow 3D Tour','2D Floor Plan','Property Website']
   };
   var STAGES = ['upcoming','editing','revisions','delivered','completed','paid'];   // pipeline order
+  // Mirror of api/_lib/templates.js DEFAULTS — the Settings editor shows
+  // these when nothing has been overridden.
+  var TPL_DEFAULTS = {
+    confirm: { label: 'Booking confirmed', subject: '{property} | Booking Confirmed', note: "You're on the calendar. Questions before the shoot? Just reply. Everything about your shoot — schedule, delivery, and invoices — lives in your client portal." },
+    delivery: { label: 'Media delivery', subject: '{property} | Media Delivery', note: 'Hi {first} — your full delivery is ready. View, download individual files, or grab the full-res and MLS bundles from your listing page — always up to date.' },
+    invoice: { label: 'Invoice', subject: '{property} | Invoice {number}', note: 'Hi {first} — here is your invoice. Questions? Just reply.' },
+    proposal: { label: 'Proposal', subject: '{property} | Project Proposal', note: "Hi {first} — your bespoke proposal for {property} is ready. Review the scope, and reserve the dates when you're ready." },
+    application: { label: 'Application received', subject: '{property} | Application Received', note: 'Hi {first} — your application for {property} has been received. I review every application personally and will reply within 24 hours with availability and your personal proposal — accepting it is what confirms your shoot.' },
+    reminder_invoice: { label: 'Reminder — unpaid invoice', subject: '{property} | A note on invoice {number}', note: 'Hi {first} — a quick note that invoice {number} for {property} ({total}) is still open. The link below has everything; reply if anything needs adjusting.' },
+    reminder_proposal: { label: 'Reminder — proposal waiting', subject: '{property} | Your proposal is waiting', note: "Hi {first} — checking in on the proposal for {property}. The dates are held for now; the link below reserves them whenever you're ready." },
+    reminder_delivery: { label: 'Reminder — approve the delivery', subject: '{property} | Happy with everything?', note: 'Hi {first} — your delivery for {property} has been up for a few days. If everything looks right, an approval on your listing page closes it out; if not, tell me what to adjust — revisions are always included.' }
+  };
   // 'pending' sits BEFORE the pipeline: proposal sent, waiting on the
   // client's acceptance (which flips the project to upcoming).
   var STAGE_LABEL = { pending:'Pending proposal', upcoming:'Upcoming', editing:'Editing', revisions:'Revisions', delivered:'Delivered', completed:'Completed', paid:'Paid' };
@@ -716,14 +751,15 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     render();
   }
   async function reload() {
-    var c = await api('clients'), b = await api('bookings'), r = await api('requests'), d = await api('discounts'), st = await api('settings'), sp = await api('siteprojects'), pr = await api('proposals'), lic = await api('licensing');
+    var all = await Promise.all([api('clients'), api('bookings'), api('requests'), api('discounts'), api('settings'), api('siteprojects'), api('proposals'), api('licensing')]);
+    var c = all[0], b = all[1], r = all[2], d = all[3], st = all[4], sp = all[5], pr = all[6], lic = all[7];
     state.clients = c.clients; state.bookings = b.bookings; state.requests = r.requests; state.discounts = d.discounts;
     state.siteProjects = sp.projects || [];
     state.proposals = pr.proposals || [];
     state.licenseLeads = lic.leads || [];
     state.settings = st.settings || {}; state.loaded = true;
-    try { var dl = await api('downloads?limit=80'); state.downloads = dl.events || []; state.dlWeek = dl.week || 0; } catch (e) {}
-    try { var tk = await api('tasks'); state.tasks = tk.tasks || []; } catch (e) {}
+    var extra = await Promise.all([api('downloads?limit=80').catch(function () { return {}; }), api('tasks').catch(function () { return {}; }), api('testimonials').catch(function () { return {}; })]);
+    state.downloads = extra[0].events || []; state.dlWeek = extra[0].week || 0; state.tasks = extra[1].tasks || []; state.testimonials = extra[2].testimonials || [];
     paintBell();
     var pending = state.requests.filter(function (x) { return x.status === 'pending'; }).length;
     var badge = $('req-badge');
@@ -1601,7 +1637,10 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         uninvoiced.map(function (b) { return '<a style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" onclick="ADM.go(\'project/' + b.id + '\')">' + esc(b.title) + '</a>'; }).join(', ') + '</div>' : '') +
       '<div class="adm-tools"><span class="adm-seg">' + [['all', 'All'], ['unpaid', 'Unpaid'], ['overdue', 'Overdue'], ['paid', 'Paid']].map(function (t) {
         return '<button class="' + (f === t[0] ? 'on' : '') + '" onclick="ADM.billTab(\'' + t[0] + '\')">' + t[1] + '</button>';
-      }).join('') + '</span></div>' +
+      }).join('') + '</span><span style="flex:1"></span>' +
+      '<span class="mut" style="font-size:0.72rem">Export</span><input type="date" id="bl-from" value="' + nowD.getFullYear() + '-01-01" style="font-family:var(--sans);font-size:0.76rem;border:1px solid var(--line);border-radius:8px;padding:0.4rem 0.5rem">' +
+      '<input type="date" id="bl-to" value="' + nowD.toLocaleDateString('en-CA') + '" style="font-family:var(--sans);font-size:0.76rem;border:1px solid var(--line);border-radius:8px;padding:0.4rem 0.5rem">' +
+      '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.billExport()">Download CSV</button></div>' +
       '<div class="dz-card">' + (list.length
         ? '<table class="dz-table"><tr><th>Invoice</th><th>Project</th><th class="hide-m">Client</th><th class="hide-m">Sent</th><th>Total</th><th>Status</th><th></th></tr>' +
           list.map(function (b) {
@@ -1621,49 +1660,141 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         : '<p class="dz-empty" style="padding:1rem 1.1rem">No invoices ' + (f === 'all' ? 'yet — generate one from a project page.' : 'in this view.') + '</p>') + '</div>';
   }
 
+  // ---- Calendar: month grid of shoots + twilights ------------------------
+  function vCalendar() {
+    var ym = state.calMonth || new Date().toISOString().slice(0, 7);
+    var y = parseInt(ym.slice(0, 4), 10), mo = parseInt(ym.slice(5, 7), 10) - 1;
+    var first = new Date(y, mo, 1), last = new Date(y, mo + 1, 0);
+    var todayS = new Date().toLocaleDateString('en-CA');
+    var byDay = {};
+    state.bookings.forEach(function (b) {
+      if (b.status === 'canceled') return;
+      var add = function (d, kind, time) { if (!d) return; var k = String(d).slice(0, 10); (byDay[k] = byDay[k] || []).push({ b: b, kind: kind, time: time }); };
+      add(b.shoot_date, 'shoot', b.shoot_time);
+      if (b.twilight_date || b.twilight_time) add(b.twilight_date || b.shoot_date, 'twilight', b.twilight_time);
+    });
+    var cells = '';
+    var lead = first.getDay();
+    for (var i = 0; i < lead; i++) cells += '<div class="cal__cell cal__cell--pad"></div>';
+    for (var d = 1; d <= last.getDate(); d++) {
+      var key = y + '-' + String(mo + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+      var list = (byDay[key] || []).sort(function (a, c) { return (a.time || '') < (c.time || '') ? -1 : 1; });
+      cells += '<div class="cal__cell' + (key === todayS ? ' today' : '') + (key < todayS ? ' past' : '') + '"><span class="cal__n">' + d + '</span>' +
+        list.map(function (it) {
+          return '<a class="cal__ev cal__ev--' + it.kind + (it.b.confirmed_at ? '' : ' unconf') + '" onclick="ADM.go(\'project/' + it.b.id + '\')" title="' + esc(it.b.title) + (it.b.client_name ? ' · ' + esc(it.b.client_name) : '') + '">' +
+            (it.kind === 'twilight' ? '&#9790; ' : '') + (it.time ? '<b>' + esc(fmtT(it.time)) + '</b> ' : '') + esc(it.b.title) + '</a>';
+        }).join('') + '</div>';
+    }
+    var monthName = first.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+    var count = Object.keys(byDay).filter(function (k) { return k.slice(0, 7) === ym; }).reduce(function (n, k) { return n + byDay[k].length; }, 0);
+    return head('Calendar',
+        '<span class="adm-seg"><button onclick="ADM.calMove(-1)">&lsaquo;</button><button onclick="ADM.calMove(0)">Today</button><button onclick="ADM.calMove(1)">&rsaquo;</button></span>' +
+        '<button class="adm-btn" onclick="ADM.newBooking()">+ New project</button>') +
+      '<div class="dz-sechead" style="margin-bottom:0.6rem"><h2>' + esc(monthName) + '</h2><span class="dz-count">' + count + '</span><span class="grow"></span>' +
+        '<span class="mut" style="font-size:0.7rem">solid = confirmed &middot; outlined = not confirmed &middot; &#9790; twilight</span></div>' +
+      '<div class="dz-card cal"><div class="cal__head">' + ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
+      '<div class="cal__grid">' + cells + '</div></div>';
+  }
+
+  // ---- Clients: roster with health signals -------------------------------
+  function clientStats(c) {
+    var mine = state.bookings.filter(function (b) { return b.client_id == c.id && b.status !== 'canceled'; });
+    var total = function (b) { return net(b) + (Number(b.travel_fee) || 0); };
+    var today = new Date().toLocaleDateString('en-CA');
+    var past = mine.filter(function (b) { return b.shoot_date && String(b.shoot_date).slice(0, 10) <= today; })
+      .sort(function (a, b) { return String(b.shoot_date).localeCompare(String(a.shoot_date)); });
+    var lastShoot = past.length ? String(past[0].shoot_date).slice(0, 10) : null;
+    var active = mine.filter(function (b) { return ['paid'].indexOf(b.status) === -1; }).length;
+    var days = lastShoot ? Math.round((Date.now() - new Date(lastShoot + 'T12:00:00')) / 864e5) : null;
+    return {
+      projects: mine.length,
+      lifetime: mine.filter(function (b) { return b.status === 'paid'; }).reduce(function (s, b) { return s + total(b); }, 0),
+      open: mine.filter(function (b) { return b.invoice_sent_at && b.status !== 'paid'; }).reduce(function (s, b) { return s + total(b); }, 0),
+      lastShoot: lastShoot, days: days, active: active,
+      checkin: !!(lastShoot && days > 90 && !active),
+    };
+  }
+  function vClients() {
+    var rows = state.clients.map(function (c) { return { c: c, s: clientStats(c) }; })
+      .sort(function (a, b) { return (b.s.lifetime + b.s.open) - (a.s.lifetime + a.s.open); });
+    var due = rows.filter(function (r) { return r.s.checkin; }).length;
+    return head('Clients', (due ? '<span class="dz-pill dz-pill--mid" style="align-self:center">' + due + ' due for a check-in</span>' : '') + '<button class="adm-btn" onclick="ADM.newClient()">+ New client</button>') +
+      '<div class="adm-card adm-card--flush">' + (rows.length
+        ? '<table class="dz-table"><tr><th>Client</th><th class="hide-m">Contact</th><th>Projects</th><th>Lifetime value</th><th class="hide-m">Last shoot</th><th>Open balance</th><th></th></tr>' +
+          rows.map(function (r) {
+            var c = r.c, s = r.s;
+            return '<tr class="click" onclick="ADM.go(\'client/' + c.id + '\')">' +
+              '<td><span class="who"><span class="dz-avatar dz-avatar--soft">' + esc(initials(c.name)) + '</span><span><b>' + esc(c.name) + '</b><small>' + esc(c.brokerage || '—') + '</small></span></span></td>' +
+              '<td class="hide-m mut">' + esc(c.email || c.phone || '—') + '</td>' +
+              '<td>' + s.projects + '</td>' +
+              '<td>' + (s.lifetime ? money(s.lifetime) : '<span class="mut">—</span>') + '</td>' +
+              '<td class="hide-m mut">' + (s.lastShoot ? relTime(s.lastShoot) : '—') + '</td>' +
+              '<td>' + (s.open ? '<span style="color:#a03a3a">' + money(s.open) + '</span>' : '<span class="mut">—</span>') + '</td>' +
+              '<td style="text-align:right">' + (s.checkin ? '<span class="dz-pill dz-pill--mid">Check in</span>' : (s.active ? '<span class="dz-pill dz-pill--hi">Active</span>' : '')) + '</td></tr>';
+          }).join('') + '</table>'
+        : '<p class="adm-empty" style="padding:1rem 1.1rem">No clients yet.</p>') + '</div>';
+  }
+
+  // ---- CSV helpers (bookkeeping export + client statements) --------------
+  function csvOf(rows) {
+    return rows.map(function (r) { return r.map(function (v) { v = v == null ? '' : String(v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(','); }).join('\r\n');
+  }
+  function downloadText(name, text) {
+    var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/csv' })); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 2000);
+  }
+  function invoiceRows(list) {
+    var total = function (b) { return net(b) + (Number(b.travel_fee) || 0); };
+    return [['Invoice', 'Project', 'Client', 'Brokerage', 'Location', 'Service', 'Shoot date', 'Invoice sent', 'Paid date', 'Status', 'Subtotal', 'Travel', 'Discount', 'Total']]
+      .concat(list.map(function (b) {
+        var cl = state.clients.find(function (c) { return c.id == b.client_id; }) || {};
+        return ['JCS-' + String(b.id).padStart(4, '0'), b.title, b.client_name || '', cl.brokerage || '', b.location || '', b.type || '',
+          b.shoot_date ? String(b.shoot_date).slice(0, 10) : '', b.invoice_sent_at ? String(b.invoice_sent_at).slice(0, 10) : '',
+          b.paid_at ? String(b.paid_at).slice(0, 10) : '', b.status === 'paid' ? 'paid' : 'unpaid',
+          Number(b.price) || 0, Number(b.travel_fee) || 0, Number(b.discount_value) || 0, total(b)];
+      }));
+  }
+
   function vRequests() {
     var tabs = ['pending', 'accepted', 'declined', 'all'];
-    var list = state.requests.filter(function (r) { return state.reqTab === 'all' || r.status === state.reqTab; });
+    var list = state.requests.filter(function (r) { return state.reqTab === 'all' || r.status === state.reqTab; })
+      .sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
     var seg = '<span class="adm-seg">' + tabs.map(function (t) {
+      var n = t === 'all' ? state.requests.length : state.requests.filter(function (r) { return r.status === t; }).length;
       return '<button class="' + (state.reqTab === t ? 'on' : '') + '" onclick="ADM.reqTab(\'' + t + '\')">' +
-        t.charAt(0).toUpperCase() + t.slice(1) + '</button>';
+        t.charAt(0).toUpperCase() + t.slice(1) + (n ? ' · ' + n : '') + '</button>';
     }).join('') + '</span>';
     return head('Requests') + '<div class="adm-tools">' + seg + '</div>' +
-      '<div class="adm-card">' + (list.length
-        ? list.map(function (r) {
-            var loc = [r.city, r.state].filter(Boolean).join(', ');
-            return '<div id="req-' + r.id + '" style="padding:1.1rem 0;border-bottom:1px solid var(--line-soft);transition:background 0.6s">' +
-              '<div style="display:flex;gap:0.8rem;align-items:baseline;flex-wrap:wrap">' +
-                '<b style="font-weight:700;letter-spacing:-0.01em;font-size:0.95rem;color:var(--ink)">' + esc(r.name) + '</b>' +
-                (r.brokerage ? '<small class="mut">' + esc(r.brokerage) + '</small>' : '') +
-                '<span class="adm-badge adm-badge--' + esc(r.status) + '">' + esc(r.status) + '</span>' +
-                '<span class="grow" style="flex:1"></span><small class="mut">' + dstr(r.created_at) + '</small></div>' +
-              '<div style="margin:0.4rem 0 0.2rem;font-size:0.92rem;color:var(--ink)">' + esc(r.title) +
-                (loc ? ' · ' + esc(loc) : '') + (r.sqft ? ' · ' + Number(r.sqft).toLocaleString() + ' sqft' : '') +
-                (r.target_date ? ' · needed by ' + dstr(r.target_date) : '') + '</div>' +
-              (r.services ? '<div style="font-size:0.82rem;color:var(--muted)">' + esc(r.services) + '</div>' : '') +
-              (r.addons ? '<div style="font-size:0.82rem;color:var(--muted)">Add-ons: ' + esc(r.addons) + '</div>' : '') +
-              (reqDetails(r) ? '<div style="font-size:0.8rem;color:var(--muted);margin-top:0.25rem">' + reqDetails(r) + '</div>' : '') +
-              ((r.estimated_total || r.launch_date || r.signature)
-                ? '<div style="font-size:0.82rem;color:var(--ink);margin-top:0.35rem">' +
-                  (r.estimated_total ? '<b style="font-family:var(--rx-mono);font-size:0.85rem;color:var(--ink)">' + money(r.estimated_total) + '</b> estimated' : '') +
-                  (r.launch_date ? (r.estimated_total ? ' · ' : '') + 'launch ' + dstr(r.launch_date) : '') +
-                  (r.signature ? ((r.estimated_total || r.launch_date) ? ' · ' : '') + '✍ signed ' + esc(r.signature) : '') + '</div>'
-                : '') +
-              (r.message ? '<div class="adm-notes" style="margin-top:0.6rem">' + esc(r.message) + '</div>' : '') +
-              '<div style="margin-top:0.7rem;display:flex;gap:0.6rem;flex-wrap:wrap;align-items:center">' +
-                '<div style="font-size:0.84rem;color:var(--muted)">' + esc(r.email) + (r.phone ? ' · ' + esc(r.phone) : '') + '</div>' +
-                '<span style="flex:1"></span>' +
-                (r.status === 'pending'
-                  ? '<button class="adm-btn" onclick="ADM.reqPropose(' + r.id + ')">Send Proposal</button>' +
-                    '<button class="adm-btn adm-btn--ghost" onclick="ADM.reqAccept(' + r.id + ')">Book directly</button>' +
-                    '<button class="adm-btn--danger adm-btn" onclick="ADM.reqDecline(' + r.id + ')">Decline</button>'
-                  : (r.project_id ? '<button class="adm-btn adm-btn--ghost" onclick="ADM.go(\'project/' + r.project_id + '\')">Open project</button>' : '') +
-                    '<button class="adm-btn--danger adm-btn" onclick="ADM.reqDelete(' + r.id + ')">Delete</button>') +
-              '</div></div>';
-          }).join('')
-        : '<p class="adm-empty">No ' + (state.reqTab === 'all' ? '' : state.reqTab + ' ') + 'requests. Applications from jacobcschrader.com/book land here.</p>') +
-      '</div>';
+      (list.length ? list.map(function (r) {
+        var loc = [r.city, r.state].filter(Boolean).join(', ');
+        var fit = fitScore(r), val = estValue(r);
+        var facts = [r.title, loc, r.sqft ? Number(r.sqft).toLocaleString() + ' sqft' : '', r.target_date ? 'needed by ' + dstr(r.target_date) : '', r.launch_date ? 'launch ' + dstr(r.launch_date) : '']
+          .filter(Boolean).map(esc).join(' &middot; ');
+        return '<div class="dz-card" id="req-' + r.id + '" style="padding:1rem 1.1rem;margin-bottom:0.7rem;transition:background 0.6s">' +
+          '<div class="dz-match__top" style="align-items:flex-start">' +
+            '<span class="dz-avatar">' + esc(initials(r.name)) + '</span>' +
+            '<span class="dz-match__who" style="white-space:normal"><b style="white-space:normal">' + esc(r.name) + (r.brokerage ? ' <span class="mut" style="font-weight:400">&middot; ' + esc(r.brokerage) + '</span>' : '') + '</b>' +
+              '<small style="white-space:normal">' + esc(r.email) + (r.phone ? ' &middot; ' + esc(r.phone) : '') + ' &middot; ' + dstr(r.created_at) + '</small></span>' +
+            '<span class="dz-pill ' + (fit >= 80 ? 'dz-pill--hi' : fit >= 55 ? 'dz-pill--mid' : 'dz-pill--lo') + '" title="Fit: services, sqft on the rate card, lead time, location, business email">' + fit + '% fit</span>' +
+            '<span class="dz-pill ' + (r.status === 'pending' ? 'dz-pill--new' : 'dz-pill--dim') + '">' + esc(r.status.charAt(0).toUpperCase() + r.status.slice(1)) + '</span>' +
+          '</div>' +
+          '<div style="margin:0.7rem 0 0.25rem;font-size:0.88rem;color:var(--ink);font-weight:500">' + (facts || '—') + '</div>' +
+          (r.services || r.addons ? '<div style="font-size:0.78rem;color:var(--muted)">' + esc([r.services, r.addons].filter(Boolean).join(' · ')) + '</div>' : '') +
+          (reqDetails(r) ? '<div style="font-size:0.76rem;color:var(--muted);margin-top:0.2rem">' + reqDetails(r) + '</div>' : '') +
+          (r.message ? '<div class="adm-notes" style="margin-top:0.6rem;font-size:0.82rem">' + esc(r.message) + '</div>' : '') +
+          '<div style="margin-top:0.75rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">' +
+            '<span class="dz-kv"><span>Estimated value:</span> ' + (val != null ? money(val) : 'on review') + '</span>' +
+            (r.signature ? '<span class="dz-kv"><span>Signed:</span> ' + esc(r.signature) + '</span>' : '') +
+            '<span style="flex:1"></span>' +
+            (r.status === 'pending'
+              ? '<button class="adm-btn adm-btn--sm" onclick="ADM.reqPropose(' + r.id + ')">Send proposal</button>' +
+                '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.reqAccept(' + r.id + ')">Book directly</button>' +
+                '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.reqDecline(' + r.id + ')">Decline</button>'
+              : (r.project_id ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.go(\'project/' + r.project_id + '\')">Open project</button>' : '') +
+                '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.reqDelete(' + r.id + ')">Delete</button>') +
+          '</div></div>';
+      }).join('')
+      : '<div class="adm-card"><p class="adm-empty">No ' + (state.reqTab === 'all' ? '' : state.reqTab + ' ') + 'requests. Applications from jacobcschrader.com/book land here.</p></div>');
   }
 
   // ---- Projects: the listings ledger ----------------------------------
@@ -1720,7 +1851,6 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           : '<p class="adm-empty">' + (state.q || state.clientFilter ? 'Nothing matches.' : 'No projects yet — create one to start a listing.') + '</p>') +
       '</div>';
   }
-  function wirePipeline() {}
 
   // ---- Listing page (#project/:id) -------------------------------------
   // The project's home: header (client · files · portal slug · delivery
@@ -1826,8 +1956,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       '<div class="adm-field full"><label for="dv-msg">Message to client <small style="text-transform:none;letter-spacing:0">(goes in the delivery email)</small></label>' +
         '<textarea id="dv-msg" placeholder="Add a note — e.g. Twilights are in the second half.">' + esc(b.delivery_message || '') + '</textarea></div>' +
       fld('dv-cc', 'CC recipients', '<input id="dv-cc" placeholder="Buyer\'s agent, spouse… — comma-separated emails" value="' + esc(b.delivery_cc || '') + '">') +
-      '<div class="adm-field" style="display:flex;align-items:flex-end;gap:0.6rem"><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSaveMail(' + b.id + ')">Save</button>' +
-        '<button type="button" class="adm-btn adm-btn--sm" onclick="ADM.lsSend(' + b.id + ')">' + (b.delivery_sent_at ? 'Re-send delivery email' : 'Send delivery email') + '</button></div>' +
+      '<div class="adm-field" style="display:flex;align-items:flex-end;gap:0.6rem"><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSaveMail(' + b.id + ')">Save message</button>' +
+        '<small class="mut" style="font-size:0.72rem;padding-bottom:0.45rem">Sending happens from the button up top.</small></div>' +
       '</div>' +
       (b.delivery_approved_at
         ? '<div class="adm-confnote ok" style="text-align:left">&#10003; Client approved the delivery ' + dstr(b.delivery_approved_at) + '</div>'
@@ -1836,32 +1966,67 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
             : '')) +
       '</div>';
 
-    // ---- download activity ----
+    // ---- activity: timeline events + notes + downloads, newest first ----
     var events = ls ? ls.events : null;
-    var activity = '<div class="adm-card adm-card--flush">' +
-      (events === null ? '<p class="adm-empty">Loading…</p>'
-        : events.length
-          ? '<table class="adm-table adm-table--ledger">' + events.slice(0, 30).map(function (e) {
-              return '<tr><td class="hide-m" style="white-space:nowrap;color:var(--muted)">' + stamp(e.created_at) + '</td>' +
-                '<td>' + esc(e.email || '—') + '</td>' +
-                '<td>' + (e.kind === 'view' ? '<span class="mut">— viewed listing</span>' : esc(e.label || '—')) + '</td></tr>';
-            }).join('') + '</table>'
-          : '<p class="adm-empty">No downloads yet.</p>') +
+    var items = [];
+    if (ls && ls.timeline) ls.timeline.forEach(function (e) {
+      items.push({ at: e.created_at, kind: e.kind, actor: e.actor, text: e.label, sub: e.kind === 'changes' || e.kind === 'testimonial' ? e.meta : '', id: e.kind === 'note' ? e.id : 0 });
+    });
+    if (events) events.forEach(function (e) {
+      items.push({ at: e.created_at, kind: e.kind === 'view' ? 'view' : 'download', actor: 'client',
+        text: e.kind === 'view' ? 'Viewed the listing' : 'Downloaded ' + (e.label || 'a file'), sub: e.email || '' });
+    });
+    items.sort(function (a, c) { return new Date(c.at) - new Date(a.at); });
+    var DOT = { created: '', stage: '', confirmed: 'grn', files: '', cover: '', lock: 'amb', delivery: 'grn', invoice: 'amb', approved: 'grn', changes: 'red', proposal: '', accepted: 'grn', reminder: 'amb', testimonial: 'grn', note: 'note', download: '', view: 'dim' };
+    var activity = '<div class="adm-card">' +
+      '<form class="dz-add" style="margin:0 0 0.9rem;padding:0;border:0" onsubmit="event.preventDefault();ADM.lsNote(' + b.id + ')">' +
+        '<input id="ls-note" placeholder="Add a note — call summary, access details, what the client asked for…" autocomplete="off">' +
+        '<button class="adm-btn adm-btn--sm" type="submit">Add note</button></form>' +
+      (events === null && !(ls && ls.timeline) ? '<p class="adm-empty">Loading…</p>'
+        : items.length
+          ? '<div class="tl">' + items.slice(0, 60).map(function (it) {
+              return '<div class="tl__row"><i class="tl__dot ' + (DOT[it.kind] || '') + '"></i>' +
+                '<div class="tl__body"><div class="tl__text' + (it.kind === 'note' ? ' note' : '') + '">' + esc(it.text) +
+                  (it.sub ? '<div class="tl__sub">' + esc(it.sub) + '</div>' : '') + '</div>' +
+                '<div class="tl__meta">' + stamp(it.at) + (it.actor && it.actor !== 'system' ? ' &middot; ' + esc(it.actor) : '') +
+                  (it.id ? ' &middot; <a onclick="ADM.lsDelNote(' + b.id + ',' + it.id + ')">delete</a>' : '') + '</div></div></div>';
+            }).join('') + '</div>'
+          : '<p class="adm-empty">Nothing yet — confirmations, deliveries, invoices, client approvals, downloads and your notes will show up here.</p>') +
       '</div>';
 
     // ---- cover photo grid (all files) ----
     var grid;
+    var selMode = !!(ls && ls.selMode), sel = (ls && ls.sel) || {};
+    var nSel = Object.keys(sel).length;
+    var toolbar = files && files.length
+      ? '<div class="adm-ftools">' +
+          (selMode
+            ? '<span class="mut" style="font-size:0.78rem">' + nSel + ' selected</span>' +
+              '<button class="adm-btn adm-btn--danger adm-btn--sm"' + (nSel ? '' : ' disabled') + ' onclick="ADM.lsDelSel(' + b.id + ')">Delete selected</button>' +
+              '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSelAll()">' + (nSel === files.length ? 'Select none' : 'Select all') + '</button>' +
+              '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSelMode(false)">Done</button>'
+            : '<span class="mut" style="font-size:0.74rem">Click a photo to make it the cover &middot; drag to reorder &middot; hover for rename / remove</span>' +
+              '<span style="flex:1"></span>' +
+              '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSelMode(true)">Select</button>' +
+              (slug ? '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/portal/' + esc(slug) + '?dl=full" target="_blank" rel="noopener">Download originals</a>' : '')) +
+        '</div>'
+      : '';
     if (files === null) grid = '<p class="adm-empty">Loading files…</p>';
     else if (!files.length) grid = '<p class="adm-empty">No files yet — drop photos and films below.</p>';
-    else grid = '<div class="adm-cgrid">' + files.map(function (f) {
+    else grid = toolbar + '<div class="adm-cgrid" id="ls-grid">' + files.map(function (f) {
       var isCover = cover && (f.web_url === cover || f.url === cover || f.thumb_url === cover);
       var thumb = f.thumb_url || f.web_url || (f.kind === 'photo' ? f.url : '');
-      return '<div class="adm-cg' + (isCover ? ' on' : '') + '" onclick="ADM.lsCover(' + f.id + ')" title="' + esc(f.name) + '">' +
-        (thumb ? '<img loading="lazy" src="' + esc(thumb) + '" alt="">' : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">' + esc(f.kind) + '</div>') +
+      var picked = !!sel[f.id];
+      return '<div class="adm-cg' + (isCover ? ' on' : '') + (picked ? ' picked' : '') + '" draggable="true" data-fid="' + f.id + '"' +
+          ' ondragstart="ADM.fDragStart(event,' + f.id + ')" ondragover="ADM.fDragOver(event,' + f.id + ')" ondragleave="ADM.fDragLeave(event)" ondrop="ADM.fDrop(event,' + b.id + ',' + f.id + ')" ondragend="ADM.fDragEnd(event)"' +
+          ' onclick="' + (selMode ? 'ADM.lsSelToggle(' + f.id + ')' : 'ADM.lsCover(' + f.id + ')') + '" title="' + esc(f.name) + '">' +
+        (thumb ? '<img loading="lazy" src="' + esc(thumb) + '" alt="" draggable="false">' : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">' + esc(f.kind) + '</div>') +
         (f.kind === 'film' ? '<span class="film">&#9654;</span>' : '') +
-        (isCover ? '<span class="tag">Cover</span>' : '') +
+        (isCover && !selMode ? '<span class="tag">Cover</span>' : '') +
+        (selMode ? '<span class="pick">' + (picked ? '&#10003;' : '') + '</span>' : '') +
         '<span class="nm">' + esc(f.name) + '</span>' +
-        '<button class="x" title="Remove file" onclick="event.stopPropagation();ADM.lsDelete(' + b.id + ',' + f.id + ')">&times;</button>' +
+        (!selMode ? '<button class="rn" title="Rename" onclick="event.stopPropagation();ADM.lsRename(' + b.id + ',' + f.id + ')">&#9998;</button>' +
+                    '<button class="x" title="Remove file" onclick="event.stopPropagation();ADM.lsDelete(' + b.id + ',' + f.id + ')">&times;</button>' : '') +
       '</div>';
     }).join('') + '</div>';
 
@@ -1886,11 +2051,11 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
 
     return html +
       sec('Project', facts) +
-      sec('Invoices', invoices) +
+      sec('Files &mdash; click a photo to set the cover', grid + '<div style="margin-top:0.75rem">' + drop + '</div>',
+          files && files.length ? '<span style="font-weight:400;letter-spacing:0.02em;text-transform:none">' + fileWord(files.length) + (locked ? ' &middot; downloads locked' : '') + '</span>' : '') +
       sec('Delivery email', mail) +
-      sec('Download activity', activity) +
-      sec('Cover photo &mdash; click to set', grid, files && files.length ? '<span style="font-weight:400;letter-spacing:0.02em;text-transform:none">' + fileWord(files.length) + (locked ? ' &middot; downloads locked' : '') + '</span>' : '') +
-      sec('Upload', drop) +
+      sec('Invoices', invoices) +
+      sec('Activity', activity) +
       sec('Additional links', extra);
   }
 
@@ -1918,7 +2083,19 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         (db.length > 1 ? '<p class="adm-empty" style="margin-top:0.9rem;font-size:0.78rem">Drag cards to set the order they appear on the website.</p>' : '')
         : '<p class="adm-empty">No admin-managed projects yet — hit <b>+ New project</b> to create one. It uploads media straight to the site, no GitHub needed.</p>') +
       (statics.length ? '<h2 style="margin:2.2rem 0 1rem">In the repository <small class="mut" style="font-weight:400">(edited via GitHub)</small></h2>' +
-        '<div class="adm-projgrid">' + repo + '</div>' : '');
+        '<div class="adm-projgrid">' + repo + '</div>' : '') +
+      '<div class="adm-card" style="margin-top:2rem"><h2>Testimonials <small style="text-transform:none;letter-spacing:0;font-weight:400">— clients leave these after approving a delivery; approved ones lead &ldquo;What They Say&rdquo; on the home page</small></h2>' +
+      ((state.testimonials || []).length
+        ? (state.testimonials || []).map(function (t) {
+            return '<div class="tl__row" style="align-items:flex-start"><i class="tl__dot ' + (t.approved ? 'grn' : 'dim') + '"></i><div class="tl__body">' +
+              '<div class="tl__text">&ldquo;' + esc(t.quote) + '&rdquo;</div>' +
+              '<div class="tl__meta">' + esc(t.client_name || 'Client') + (t.brokerage ? ' · ' + esc(t.brokerage) : '') + (t.property ? ' · ' + esc(t.property) : '') + ' · ' + dstr(t.created_at) + '</div></div>' +
+              '<div style="display:flex;gap:0.4rem;flex:none">' +
+                (t.approved ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.tstApprove(' + t.id + ',false)">Hide</button>' : '<button class="adm-btn adm-btn--sm" onclick="ADM.tstApprove(' + t.id + ',true)">Approve</button>') +
+                '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.tstDelete(' + t.id + ')">Delete</button></div></div>';
+          }).join('')
+        : '<p class="adm-empty">None yet — the ask appears on the client\'s listing page right after they approve a delivery.</p>') +
+      '</div>';
   }
 
   // ---- portfolio editor ------------------------------------------------
@@ -2020,18 +2197,19 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   function vProposals() {
     var list = state.proposals;
     return head('Proposals', '<button class="adm-btn" onclick="ADM.propNew()">+ New proposal</button>') +
-      '<div class="adm-card">' + (list.length
-        ? list.map(function (p) {
+      '<div class="adm-card adm-card--flush">' + (list.length
+        ? '<table class="dz-table"><tr><th>Property</th><th class="hide-m">Client</th><th>Status</th><th>Total</th><th class="hide-m">Created</th><th></th></tr>' +
+          list.map(function (p) {
             var t = propTotal(p);
-            return '<div style="padding:1.05rem 0;border-bottom:1px solid var(--line-soft);display:flex;gap:0.9rem;align-items:baseline;flex-wrap:wrap;cursor:pointer" onclick="ADM.go(\'proposal/' + p.id + '\')">' +
-              '<b style="font-weight:700;letter-spacing:-0.01em;font-size:0.98rem;color:var(--ink)">' + esc(p.title) + '</b>' +
-              (p.client_name ? '<small class="mut">' + esc(p.client_name) + '</small>' : '') +
-              propBadge(p) +
-              '<span style="flex:1"></span>' +
-              (t ? '<span style="font-family:var(--rx-mono);font-weight:700;font-size:0.9rem;color:var(--ink)">' + money(t) + '</span>' : '') +
-              '<small class="mut">' + dstr(p.created_at) + '</small></div>';
-          }).join('')
-        : '<p class="adm-empty">No proposals yet. Create one, add the scope, then send your client their private link — proposal.jacobcschrader.com/&lt;property&gt;.</p>') +
+            return '<tr class="click" onclick="ADM.go(\'proposal/' + p.id + '\')">' +
+              '<td><b style="font-weight:600">' + esc(p.title) + '</b>' + (p.location ? '<br><small class="mut">' + esc(p.location) + '</small>' : '') + '</td>' +
+              '<td class="hide-m">' + esc(p.client_name || '—') + '</td>' +
+              '<td>' + propBadge(p) + '</td>' +
+              '<td>' + (t ? money(t) : '<span class="mut">—</span>') + '</td>' +
+              '<td class="hide-m mut">' + dstr(p.created_at) + (p.sent_at ? '<br><small>sent ' + dstr(p.sent_at) + (p.sends > 1 ? ' · ×' + p.sends : '') + '</small>' : '') + '</td>' +
+              '<td style="text-align:right"><span class="mut">&rsaquo;</span></td></tr>';
+          }).join('') + '</table>'
+        : '<p class="adm-empty" style="padding:1rem 1.1rem">No proposals yet. Create one, add the scope, then send your client their private link — proposal.jacobcschrader.com/&lt;property&gt;.</p>') +
       '</div>';
   }
 
@@ -2162,21 +2340,21 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
 
     var results = '';
     if (state.licSearching) {
-      results = '<div class="lx-note" style="margin-top:0.9rem">Running research<span class="lx-cursor"></span></div>';
+      results = '<div class="lx-note" style="margin-top:0.9rem">Running research&hellip;</div>';
     } else if (state.licResults) {
       if (state.licResults.needsKey) {
-        results = '<div class="lx-note" style="margin-top:0.9rem">NO SEARCH KEY — grab a free key at <a href="https://serper.dev" target="_blank" rel="noopener">SERPER.DEV</a> ' +
-          '(2,500 searches, no card) and paste it in <a href="#settings">SETTINGS</a>. Quick links meanwhile: ' +
+        results = '<div class="lx-note" style="margin-top:0.9rem">No search key yet — grab a free one at <a href="https://serper.dev" target="_blank" rel="noopener">serper.dev</a> ' +
+          '(2,500 searches, no card) and paste it in <a href="#settings">Settings</a>. Quick links meanwhile: ' +
           Object.keys(LIC_ROLES).slice(0, 7).map(function (r) {
             return '<a href="https://www.google.com/search?q=' + encodeURIComponent('"' + (state.licQ || '') + '" ' + LIC_ROLES[r]) + '" target="_blank" rel="noopener">' + LIC_ROLES[r] + ' &nearr;</a>';
           }).join(' &nbsp;·&nbsp; ') + '</div>';
       } else if (state.licResults.searchError) {
-        results = '<div class="lx-note" style="margin-top:0.9rem">SEARCH FAILED — ' + esc(state.licResults.searchError) + '</div>';
+        results = '<div class="lx-note" style="margin-top:0.9rem">Search failed — ' + esc(state.licResults.searchError) + '</div>';
       } else if (!state.licResults.results.length) {
-        results = '<div class="lx-note" style="margin-top:0.9rem">0 RESULTS for ' + esc(state.licResults.q || '') + ' — try another role or a broader address.</div>';
+        results = '<div class="lx-note" style="margin-top:0.9rem">No results for ' + esc(state.licResults.q || '') + ' — try another role or a broader address.</div>';
       } else {
         results = '<div style="margin-top:0.6rem">' +
-          '<div class="lx-marker" style="margin:0.7rem 0 0.2rem"><span class="dot"></span>OUTPUT: ' + state.licResults.results.length + ' PARTIES<span class="dim">// CLICK + LEAD TO TRACK</span></div>' +
+          '<div class="adm-sec__lbl" style="margin:0.9rem 0 0.3rem">' + state.licResults.results.length + ' results &middot; click + Lead to track</div>' +
           state.licResults.results.map(function (r, i) {
             return '<div class="lx-result">' +
               '<div class="lx-result__t">' +
@@ -2245,27 +2423,20 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     }).join('');
 
     var emptyCopy = state.licTab === 'active'
-      ? 'NO ACTIVE LICENSES YET — run research below, send watermarked previews, and yeses land here.'
+      ? 'No active licenses yet — run research below, send watermarked previews, and the yeses land here.'
       : state.licTab === 'pipeline'
-      ? 'NO OUTREACH IN FLIGHT — research a property and send the watermarked preview.'
-      : 'NOTHING FOR THIS FILTER.';
+      ? 'No outreach in flight — research a property and send the watermarked preview.'
+      : 'Nothing for this filter.';
+    function tile(n, label, click) { return '<div class="dz-stat"' + (click ? ' style="cursor:pointer" onclick="ADM.licTab(\'due\')"' : '') + '><div class="lbl">' + label + '</div><b>' + n + '</b></div>'; }
 
-    return '<div class="lx-marker" style="margin-top:0.3rem"><span class="dot"></span>(JCS &mdash; 01)<span class="dim">// LICENSE TRACKER</span></div>' +
-      '<div style="display:flex;align-items:flex-end;gap:1rem;flex-wrap:wrap">' +
-        '<div><h1 class="lx-h1">License <span class="t">everything.</span></h1>' +
-        '<div class="lx-sub">Watermarked preview &rarr; yes &rarr; license, invoice &amp; final gallery<span class="lx-cursor"></span></div></div>' +
-        '<span style="flex:1"></span>' +
-        '<button class="lx-btn" onclick="ADM.licNew()">+ Add lead</button>' +
-      '</div>' +
-      '<div class="lx-ledger">' +
-        '<div class="cell teal"><b>' + activeCount + '</b><span>Active licenses</span></div>' +
-        '<div class="cell"><b>' + money(collected) + '</b><span>Collected</span></div>' +
-        '<div class="cell"><b>' + money(outstanding) + '</b><span>Invoiced, unpaid</span></div>' +
-        '<div class="cell"><b>' + awaiting + '</b><span>Awaiting reply</span></div>' +
-        '<div class="cell' + (dueCount ? ' click" onclick="ADM.licTab(\'due\')"' : '"') + '><b>' + dueCount + '</b><span>Follow-ups due</span></div>' +
+    return head('Licensing', '<button class="adm-btn" onclick="ADM.licNew()">+ Add lead</button>') +
+      '<p class="mut" style="font-size:0.8rem;margin:-0.6rem 0 1rem">Watermarked preview &rarr; yes &rarr; license, invoice &amp; final gallery. Everyone who designed, built, landscaped, or sold a home is a rightful buyer of the media.</p>' +
+      '<div class="bl-stats" style="grid-template-columns:repeat(5,1fr)">' +
+        tile(activeCount, 'Active licenses') + tile(money(collected), 'Collected') + tile(money(outstanding), 'Invoiced, unpaid') +
+        tile(awaiting, 'Awaiting reply') + tile(dueCount, 'Follow-ups due', dueCount > 0) +
       '</div>' +
       '<div class="lx-card">' +
-        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>001<span class="dim">// TRACKER</span></div>' +
+        '<div class="lx-card__head"><h2 style="margin:0">Tracker</h2>' +
           '<span class="grow"></span>' +
           '<select class="lx-input" style="padding:0.45rem 1rem;font-size:0.78rem" onchange="ADM.licProp(this.value)"><option value="">All properties</option>' +
             props.map(function (p) { return '<option' + (state.licProp === p ? ' selected' : '') + '>' + esc(p) + '</option>'; }).join('') + '</select>' +
@@ -2275,8 +2446,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
         '</div>' +
       '</div>' +
       '<div class="lx-card">' +
-        '<div class="lx-card__head"><div class="lx-marker"><span class="dot"></span>002<span class="dim">// RESEARCH A PROPERTY</span></div></div>' +
-        '<p class="mut" style="font-size:0.82rem;margin:0 0 0.9rem">Everyone who designed, built, landscaped, or sold the home is a rightful buyer of the media. Search by role — results become leads with one click.</p>' +
+        '<div class="lx-card__head"><h2 style="margin:0">Research a property</h2></div>' +
+        '<p class="mut" style="font-size:0.82rem;margin:0 0 0.9rem">Search by role — results become leads with one click.</p>' +
         '<div style="display:flex;gap:0.55rem;flex-wrap:wrap;align-items:center">' +
           '<input id="lic-q" list="lic-props" class="lx-input" placeholder="8225 Lahontan Drive, Truckee" style="flex:2;min-width:230px" value="' + esc(state.licQ || state.licProp || '') + '">' + datalist +
           '<select id="lic-role" class="lx-input" style="flex:1;min-width:150px">' + roleOpts + '</select>' +
@@ -2287,63 +2458,61 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   }
 
   function vSettings() {
-    var list = state.discounts;
-    var sub = (state.settings || {}).pixieset_subdomain || '';
+    var list = state.discounts, st = state.settings || {};
     return head('Settings') +
-      '<div class="adm-card"><h2>Pixieset</h2>' +
-      '<div class="adm-confnote" style="margin:0 0 1rem">When a project moves to <b>Editing</b>, a delivery draft is created automatically with the predicted gallery link — ' +
-        'name the Pixieset collection the same as the property (e.g. &ldquo;123 Main St&rdquo; &rarr; ' +
-        (sub ? esc(sub) : 'yourstudio') + '.pixieset.com/123-main-st) and the link just works. Pixieset has no public API, so the collection itself is created in Pixieset or via their Lightroom plugin.</div>' +
+      '<div class="adm-card"><h2>Integrations</h2>' +
       '<form class="adm-form" onsubmit="ADM.settingsSave(event)">' +
-        fld('s-pixieset', 'Pixieset subdomain', '<input id="s-pixieset" placeholder="yourstudio" value="' + esc(sub) + '">') +
-        fld('s-gplaces', 'Google Places API key <small style="text-transform:none;letter-spacing:0">(address autocomplete)</small>', '<input id="s-gplaces" placeholder="AIza\u2026" value="' + esc((state.settings || {}).google_places_key || '') + '">') +
-        fld('s-serper', 'Serper API key <small style="text-transform:none;letter-spacing:0">(Licensing research, recommended \u2014 free 2,500 searches at serper.dev)</small>', '<input id="s-serper" placeholder="paste key from serper.dev" value="' + esc((state.settings || {}).serper_key || '') + '">') +
-        fld('s-brave', 'Brave Search key <small style="text-transform:none;letter-spacing:0">(alternative \u2014 api-dashboard.search.brave.com)</small>', '<input id="s-brave" placeholder="optional" value="' + esc((state.settings || {}).brave_search_key || '') + '">') +
-        fld('s-cse-key', 'Google Search key <small style="text-transform:none;letter-spacing:0">(alternative \u2014 needs Programmable Search)</small>', '<input id="s-cse-key" placeholder="optional" value="' + esc((state.settings || {}).google_cse_key || '') + '">') +
-        fld('s-cse-cx', 'Google engine ID <small style="text-transform:none;letter-spacing:0">(cx \u2014 pairs with the Google key)</small>', '<input id="s-cse-cx" placeholder="optional" value="' + esc((state.settings || {}).google_cse_cx || '') + '">') +
-        '<div class="adm-field"><label>&nbsp;</label><button class="adm-btn" type="submit">Save</button></div>' +
-      '</form>' +
-      (sub ? '<div class="adm-confnote ok">&#10003; Predicted links use ' + esc(sub) + '.pixieset.com &mdash; <a href="https://' + esc(sub) + '.pixieset.com" target="_blank" rel="noopener" style="color:inherit">open your gallery home &rarr;</a></div>' : '') +
+        fld('s-gplaces', 'Google Places API key <small style="text-transform:none;letter-spacing:0">(address autocomplete in the project form)</small>', '<input id="s-gplaces" placeholder="AIza\u2026" value="' + esc(st.google_places_key || '') + '">') +
+        '<div class="adm-field"><label>Google Calendar</label><div id="gcal-status" class="mut" style="font-size:0.84rem;line-height:1.6;padding-top:0.3rem">Checking&hellip;</div>' +
+          '<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" style="margin-top:0.5rem" onclick="ADM.gcalCheck()">Run test</button></div>' +
+        '<div class="adm-field full"><small class="mut" style="font-size:0.76rem;line-height:1.6">Confirming a project writes the shoot (and twilight) onto your calendar; re-confirming updates the same event. Setup lives in Vercel env vars <b>GCAL_CALENDAR_ID</b> + <b>GOOGLE_SA_KEY</b> (service-account JSON), then redeploy.</small></div>' +
+        '<div class="adm-field full" style="margin-top:0.4rem"><label>Licensing research <small style="text-transform:none;letter-spacing:0">(one key is enough &mdash; Serper is free for 2,500 searches at serper.dev)</small></label></div>' +
+        fld('s-serper', 'Serper API key', '<input id="s-serper" placeholder="paste key from serper.dev" value="' + esc(st.serper_key || '') + '">') +
+        fld('s-brave', 'Brave Search key <small style="text-transform:none;letter-spacing:0">(alternative)</small>', '<input id="s-brave" placeholder="optional" value="' + esc(st.brave_search_key || '') + '">') +
+        fld('s-cse-key', 'Google Search key <small style="text-transform:none;letter-spacing:0">(alternative)</small>', '<input id="s-cse-key" placeholder="optional" value="' + esc(st.google_cse_key || '') + '">') +
+        fld('s-cse-cx', 'Google engine ID <small style="text-transform:none;letter-spacing:0">(pairs with the Google key)</small>', '<input id="s-cse-cx" placeholder="optional" value="' + esc(st.google_cse_cx || '') + '">') +
+        '<div class="adm-field full"><button class="adm-btn" type="submit">Save settings</button></div>' +
+      '</form></div>' +
+      '<div class="adm-card"><h2>Automatic reminders <small style="text-transform:none;letter-spacing:0;font-weight:400">— sent by the daily cron, once per milestone, logged on the project</small></h2>' +
+        [['invoice', 'Unpaid invoice', 'A friendly note at 14 days, another at 21 — links to the invoice.'],
+         ['proposal', 'Unanswered proposal', 'One nudge 3 days after a proposal is sent and still waiting.'],
+         ['delivery', 'Delivery not approved', 'One nudge 5 days after delivery if the client hasn\'t approved or requested changes.']].map(function (r) {
+          return '<label class="sw"><input type="checkbox" id="rm-' + r[0] + '"' + (st['remind_' + r[0]] === '1' ? ' checked' : '') + ' onchange="ADM.remindSave()"><span><span>' + r[1] + '</span><small>' + r[2] + '</small></span></label>';
+        }).join('') +
       '</div>' +
-      '<div class="adm-card" style="margin-top:1.2rem"><h2>Google Calendar</h2>' +
-      '<div class="adm-confnote" style="margin:0 0 0.9rem">Confirming a project writes the shoot (and twilight) straight onto your calendar &mdash; re-confirming updates the same event. Setup lives in Vercel env vars <b>GCAL_CALENDAR_ID</b> + <b>GOOGLE_SA_KEY</b> (service-account JSON), then redeploy.</div>' +
-      '<div id="gcal-status" class="mut" style="font-size:0.86rem;line-height:1.6">Checking&hellip;</div>' +
-      '<button class="adm-btn adm-btn--ghost" style="margin-top:0.8rem" onclick="ADM.gcalCheck()">Run test</button>' +
+      '<div class="adm-card"><h2>Email templates <small style="text-transform:none;letter-spacing:0;font-weight:400">— the subject line and opening paragraph of each client email; details, buttons and signature stay branded</small></h2>' +
+        Object.keys(TPL_DEFAULTS).map(function (k) {
+          var d = TPL_DEFAULTS[k];
+          return '<div class="tpl"><div class="tpl__head"><b>' + esc(d.label) + '</b><a onclick="ADM.tplReset(\'' + k + '\')">Reset to default</a></div>' +
+            '<input id="tpl-' + k + '-subject" value="' + esc(st['tpl_' + k + '_subject'] || d.subject) + '" placeholder="Subject">' +
+            '<textarea id="tpl-' + k + '-note" placeholder="Opening paragraph">' + esc(st['tpl_' + k + '_note'] || d.note) + '</textarea>' +
+            '<div class="tpl__ph">Placeholders: <code>{first}</code> <code>{name}</code> <code>{property}</code> <code>{location}</code>' + (/invoice/.test(k) ? ' <code>{number}</code> <code>{total}</code>' : k === 'confirm' ? ' <code>{date}</code>' : k === 'proposal' ? ' <code>{total}</code>' : '') + '</div></div>';
+        }).join('') +
+        '<button class="adm-btn" onclick="ADM.tplSave()">Save templates</button>' +
       '</div>' +
       '<div class="adm-card"><h2>Discount codes</h2>' +
-      '<form class="adm-form" onsubmit="ADM.discCreate(event)" style="margin-bottom:1.4rem">' +
+      '<form class="adm-form" onsubmit="ADM.discCreate(event)" style="margin-bottom:1.2rem">' +
         fld('d-code', 'Code *', '<input id="d-code" required placeholder="SPRING10" style="text-transform:uppercase">') +
         fld('d-kind', 'Type', '<select id="d-kind"><option value="percent">Percent off</option><option value="amount">Dollar amount off</option></select>') +
         fld('d-value', 'Value *', '<input id="d-value" type="number" min="1" step="0.01" required placeholder="10">') +
         fld('d-note', 'Note', '<input id="d-note" placeholder="e.g. Returning client">') +
-        '<div class="full"><button class="adm-btn" type="submit">Create code</button></div>' +
+        '<div class="full"><button class="adm-btn adm-btn--ghost" type="submit">Create code</button></div>' +
       '</form>' +
       (list.length
         ? '<table class="adm-table"><tr><th>Code</th><th>Discount</th><th class="hide-m">Note</th><th>Status</th><th></th></tr>' +
           list.map(function (d) {
-            return '<tr><td style="letter-spacing:0.08em;font-weight:600">' + esc(d.code) + '</td>' +
+            return '<tr><td style="letter-spacing:0.06em;font-weight:600">' + esc(d.code) + '</td>' +
               '<td>' + (d.kind === 'percent' ? Number(d.value) + '%' : '$' + Number(d.value).toLocaleString()) + '</td>' +
               '<td class="hide-m">' + esc(d.note || '—') + '</td>' +
               '<td><span class="adm-badge adm-badge--' + (d.active ? 'live">Active' : 'canceled">Inactive') + '</span></td>' +
-              '<td class="adm-row-act" style="white-space:nowrap">' +
-                '<button style="background:none;border:0;cursor:pointer;font-size:0.75rem;color:var(--navy);text-decoration:underline;text-underline-offset:3px;padding:0 0.4rem" onclick="ADM.discToggle(' + d.id + ')">' + (d.active ? 'Deactivate' : 'Activate') + '</button>' +
-                '<button style="background:none;border:0;cursor:pointer;font-size:0.75rem;color:#a33;text-decoration:underline;text-underline-offset:3px;padding:0 0.4rem" onclick="ADM.discDelete(' + d.id + ')">Delete</button>' +
+              '<td style="white-space:nowrap;text-align:right">' +
+                '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.discToggle(' + d.id + ')">' + (d.active ? 'Deactivate' : 'Activate') + '</button> ' +
+                '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.discDelete(' + d.id + ')">Delete</button>' +
               '</td></tr>';
           }).join('') + '</table>'
         : '<p class="adm-empty">No discount codes yet.</p>') +
       '<p class="adm-msg" style="color:var(--muted)">Applying a code to a project locks in the dollar amount at save time — editing a code later never changes existing projects.</p>' +
       '</div>';
-  }
-
-  function vClients() {
-    return head('Clients', '<button class="adm-btn" onclick="ADM.newClient()">+ New client</button>') +
-      '<div class="adm-card">' + (state.clients.length
-        ? '<table class="adm-table"><tr><th>Name</th><th class="hide-m">Brokerage</th><th>Contact</th><th class="hide-m">Projects</th></tr>' +
-          state.clients.map(function (c) {
-            return '<tr class="click" onclick="ADM.go(\'client/' + c.id + '\')"><td>' + esc(c.name) + '</td><td class="hide-m">' +
-              esc(c.brokerage || '—') + '</td><td>' + esc(c.email || c.phone || '—') + '</td><td class="hide-m">' + (c.booking_count || 0) + '</td></tr>';
-          }).join('') + '</table>'
-        : '<p class="adm-empty">No clients yet.</p>') + '</div>';
   }
 
   // Extra (co-recipient) emails on a client — stored as a JSON array.
@@ -2372,9 +2541,18 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
           esc(c.email || '') + (c.email && c.phone ? ' · ' : '') + esc(c.phone || '') +
         '</div></div></div>' +
         '<div class="acts">' +
+          '<button class="adm-btn adm-btn--ghost" onclick="ADM.clientStatement(' + c.id + ')">Statement (CSV)</button>' +
           '<button class="adm-btn adm-btn--ghost" onclick="ADM.editClient(' + c.id + ')">Edit client</button>' +
           '<button class="adm-btn--danger adm-btn" onclick="ADM.delClient(' + c.id + ')">Delete</button>' +
         '</div></div>';
+    var cs = clientStats(c);
+    html += '<div class="bl-stats" style="margin-bottom:1.2rem">' +
+      '<div class="dz-stat"><div class="lbl">Lifetime value</div><b>' + compact(cs.lifetime) + '</b><span class="d"><span class="mut">' + cs.projects + ' project' + (cs.projects === 1 ? '' : 's') + '</span></span></div>' +
+      '<div class="dz-stat"><div class="lbl">Open balance</div><b>' + compact(cs.open) + '</b></div>' +
+      '<div class="dz-stat"><div class="lbl">Last shoot</div><b style="font-size:1.1rem">' + (cs.lastShoot ? esc(dstr(cs.lastShoot)) : '—') + '</b>' + (cs.days != null ? '<span class="d"><span class="mut">' + relTime(cs.lastShoot) + '</span></span>' : '') + '</div>' +
+      '<div class="dz-stat"><div class="lbl">Status</div><b style="font-size:1rem">' + (cs.checkin ? '<span class="dz-pill dz-pill--mid">Due for a check-in</span>' : cs.active ? '<span class="dz-pill dz-pill--hi">Active project</span>' : '<span class="dz-pill dz-pill--dim">Quiet</span>') + '</b>' +
+        (cs.checkin ? '<span class="d"><span class="mut">no shoot in ' + cs.days + ' days</span></span>' : '') + '</div>' +
+      '</div>';
 
     // ---- main: projects ----
     var main = '<div><div class="adm-card">' +
@@ -2449,6 +2627,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       if (b.invoice_sent_at && now - new Date(b.invoice_sent_at) > 14 * day)
         out.push({ t: 'Invoice overdue: ' + b.title, s: money(tot) + ' — sent ' + relTime(b.invoice_sent_at).toLowerCase(), r: 'project/' + b.id, c: 'red' });
     });
+    var due = state.clients.filter(function (c) { return clientStats(c).checkin; }).slice(0, 3);
+    due.forEach(function (c) { out.push({ t: 'Due for a check-in: ' + c.name, s: 'No shoot in 90+ days and nothing on the books', r: 'client/' + c.id, c: '' }); });
     return out.slice(0, 40);
   }
   function paintBell() {
@@ -2472,7 +2652,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     // legacy routes from older emails/bookmarks
     if (section === 'deliveries') { location.replace('#pipeline'); return; }
     if (section === 'delivery') { location.replace('#project/' + (r.split('/')[1] || '')); return; }
-    var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline',
+    var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline', calendar:'calendar',
                  proposals:'proposals', proposal:'proposals', licensing:'licensing', billing:'billing',
                  clients:'clients', client:'clients', portfolio:'portfolio', siteproject:'portfolio', settings:'settings' }[section] || 'dash';
     document.querySelectorAll('#nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.r === owns); });
@@ -2482,7 +2662,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     paintBell(); paintSide();
     if (section === 'requests') m.innerHTML = vRequests();
     else if (section === 'billing') m.innerHTML = vBilling();
-    else if (section === 'pipeline') { m.innerHTML = vPipeline(); wirePipeline(); }
+    else if (section === 'calendar') m.innerHTML = vCalendar();
+    else if (section === 'pipeline') m.innerHTML = vPipeline();
     else if (section === 'project') {
       var pid = r.split('/')[1];
       m.innerHTML = vBookingDetail(pid);
@@ -2508,6 +2689,123 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   // exposed for inline handlers
   window.ADM = {
     go: go,
+    // ---- calendar ----
+    calMove: function (dir) {
+      if (dir === 0) { state.calMonth = new Date().toISOString().slice(0, 7); render(); return; }
+      var ym = state.calMonth || new Date().toISOString().slice(0, 7);
+      var d = new Date(parseInt(ym.slice(0, 4), 10), parseInt(ym.slice(5, 7), 10) - 1 + dir, 1);
+      state.calMonth = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); render();
+    },
+    // ---- notes on the project timeline ----
+    lsNote: async function (id) {
+      var inp = $('ls-note'); if (!inp) return;
+      var text = inp.value.trim(); if (!text) { inp.focus(); return; }
+      try {
+        var j = await api('files', 'PUT', { id: id, action: 'note', text: text });
+        if (state.ls && state.ls.id == id) state.ls.timeline = j.timeline || [];
+        inp.value = ''; render();
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
+    lsDelNote: async function (id, eid) {
+      if (!confirm('Delete this note?')) return;
+      try {
+        var j = await api('files', 'PUT', { id: id, action: 'delnote', event_id: eid });
+        if (state.ls && state.ls.id == id) state.ls.timeline = j.timeline || [];
+        render();
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
+    // ---- photo management: rename, select, bulk delete, drag-reorder ----
+    lsRename: async function (id, fid) {
+      var f = state.ls && state.ls.files ? state.ls.files.find(function (x) { return x.id == fid; }) : null; if (!f) return;
+      var name = prompt('File name (this is what the client downloads):', f.name);
+      if (name == null) return; name = name.trim(); if (!name || name === f.name) return;
+      try {
+        var j = await api('files', 'PUT', { id: id, action: 'rename', file_id: fid, name: name });
+        state.ls.files = j.files || state.ls.files; render();
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
+    lsSelMode: function (on) { if (!state.ls) return; state.ls.selMode = !!on; state.ls.sel = {}; render(); },
+    lsSelToggle: function (fid) { if (!state.ls) return; var s = state.ls.sel = state.ls.sel || {}; if (s[fid]) delete s[fid]; else s[fid] = true; render(); },
+    lsSelAll: function () {
+      if (!state.ls || !state.ls.files) return;
+      var all = Object.keys(state.ls.sel || {}).length === state.ls.files.length;
+      state.ls.sel = {}; if (!all) state.ls.files.forEach(function (f) { state.ls.sel[f.id] = true; }); render();
+    },
+    lsDelSel: async function (id) {
+      var ids = Object.keys((state.ls && state.ls.sel) || {}); if (!ids.length) return;
+      if (!confirm('Remove ' + ids.length + ' file' + (ids.length > 1 ? 's' : '') + ' from the listing?\n\nThe client loses access immediately.')) return;
+      var failed = 0;
+      for (var i = 0; i < ids.length; i++) {
+        try { var j = await api('files', 'DELETE', { id: id, file_id: ids[i] }); state.ls.files = j.files || state.ls.files; }
+        catch (e) { failed++; }
+      }
+      state.ls.sel = {}; state.ls.selMode = false;
+      await reload(); render();
+      toast(failed ? failed + ' could not be removed.' : ids.length + ' removed.', failed ? 'err' : '');
+    },
+    fDragStart: function (e, fid) { state.fDrag = fid; e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', String(fid)); } catch (err) {} e.currentTarget.classList.add('dragging'); },
+    fDragOver: function (e, fid) { if (!state.fDrag || state.fDrag === fid) return; e.preventDefault(); e.currentTarget.classList.add('over'); },
+    fDragLeave: function (e) { e.currentTarget.classList.remove('over'); },
+    fDragEnd: function (e) { e.currentTarget.classList.remove('dragging'); document.querySelectorAll('.adm-cg.over').forEach(function (el) { el.classList.remove('over'); }); },
+    fDrop: async function (e, id, targetFid) {
+      e.preventDefault(); e.currentTarget.classList.remove('over');
+      var from = state.fDrag; state.fDrag = null;
+      if (!from || from === targetFid || !state.ls || !state.ls.files) return;
+      var files = state.ls.files.slice();
+      var fi = files.findIndex(function (f) { return f.id == from; }), ti = files.findIndex(function (f) { return f.id == targetFid; });
+      if (fi < 0 || ti < 0) return;
+      var moved = files.splice(fi, 1)[0]; files.splice(ti, 0, moved);
+      state.ls.files = files; render();
+      try { await api('files', 'PUT', { id: id, action: 'sort', order: files.map(function (f) { return f.id; }) }); }
+      catch (err) { toast(friendly(err), 'err'); }
+    },
+    // ---- bookkeeping ----
+    billExport: function () {
+      var from = ($('bl-from') || {}).value || '', to = ($('bl-to') || {}).value || '';
+      var list = state.bookings.filter(function (b) {
+        if (b.status === 'canceled' || !(b.invoice_sent_at || b.status === 'paid')) return false;
+        var d = String(b.paid_at || b.invoice_sent_at || '').slice(0, 10);
+        return (!from || d >= from) && (!to || d <= to);
+      });
+      if (!list.length) { toast('No invoices in that range.', 'err'); return; }
+      downloadText('jcs-invoices' + (from ? '-' + from : '') + (to ? '-' + to : '') + '.csv', csvOf(invoiceRows(list)));
+    },
+    clientStatement: function (id) {
+      var c = state.clients.find(function (x) { return x.id == id; }); if (!c) return;
+      var list = state.bookings.filter(function (b) { return b.client_id == id && b.status !== 'canceled' && (b.invoice_sent_at || b.status === 'paid'); });
+      if (!list.length) { toast('No invoices for this client yet.', 'err'); return; }
+      downloadText('statement-' + c.name.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '.csv', csvOf(invoiceRows(list)));
+    },
+    // ---- testimonials ----
+    tstApprove: async function (id, on) {
+      try { await api('testimonials', 'PUT', { id: id, approved: !!on }); await reload(); render(); toast(on ? 'Live on the site.' : 'Hidden from the site.'); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    tstDelete: async function (id) {
+      if (!confirm('Delete this testimonial?')) return;
+      try { await api('testimonials', 'DELETE', { id: id }); await reload(); render(); } catch (e) { toast(friendly(e), 'err'); }
+    },
+    // ---- reminders + templates (Settings) ----
+    remindSave: async function () {
+      var body = {};
+      ['invoice', 'proposal', 'delivery'].forEach(function (k) { var el = $('rm-' + k); if (el) body['remind_' + k] = el.checked ? '1' : '0'; });
+      try { var j = await api('settings', 'PUT', body); state.settings = j.settings || state.settings; toast('Reminder settings saved.'); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    tplSave: async function () {
+      var body = {};
+      Object.keys(TPL_DEFAULTS).forEach(function (k) {
+        var s = $('tpl-' + k + '-subject'), n = $('tpl-' + k + '-note'); if (!s || !n) return;
+        body['tpl_' + k + '_subject'] = s.value.trim() === TPL_DEFAULTS[k].subject ? '' : s.value.trim();
+        body['tpl_' + k + '_note'] = n.value.trim() === TPL_DEFAULTS[k].note ? '' : n.value.trim();
+      });
+      try { var j = await api('settings', 'PUT', body); state.settings = j.settings || state.settings; render(); toast('Email templates saved.'); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    tplReset: function (k) {
+      var s = $('tpl-' + k + '-subject'), n = $('tpl-' + k + '-note'); if (!s || !n) return;
+      s.value = TPL_DEFAULTS[k].subject; n.value = TPL_DEFAULTS[k].note;
+    },
     // ---- shell: sidebar, global search, needs-attention feed -----------
     menu: function () { $('side').classList.toggle('open'); },
     dzScroll: function (dir) { var row = $('dz-row'); if (row) row.scrollBy({ left: dir * 360, behavior: 'smooth' }); },
@@ -3072,7 +3370,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       try {
         var j = await api('files?id=' + id);
         if (!state.ls || state.ls.id != id) return;   // navigated away
-        state.ls.files = j.files || []; state.ls.events = j.events || []; state.ls.booking = j.booking || null;
+        state.ls.files = j.files || []; state.ls.events = j.events || []; state.ls.timeline = j.timeline || []; state.ls.booking = j.booking || null;
         if (route() === 'project/' + id) render();
       } catch (e) {
         if (state.ls && state.ls.id == id) { state.ls.files = []; state.ls.events = []; }
@@ -3083,7 +3381,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       try {
         var j = await api('files?id=' + id);
         if (!state.ls || state.ls.id != id) state.ls = { id: id, files: [], events: [], busy: null };
-        state.ls.files = j.files || []; state.ls.events = j.events || []; state.ls.booking = j.booking || null;
+        state.ls.files = j.files || []; state.ls.events = j.events || []; state.ls.timeline = j.timeline || []; state.ls.booking = j.booking || null;
       } catch (e) {}
     },
     // Decode a photo once, derive the 2048px web copy + ~640px thumb.
@@ -3502,7 +3800,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     settingsSave: async function (e) {
       e.preventDefault();
       try {
-        var j = await api('settings', 'PUT', { pixieset_subdomain: $('s-pixieset').value, google_places_key: $('s-gplaces').value,
+        var j = await api('settings', 'PUT', { google_places_key: $('s-gplaces').value,
           google_cse_key: $('s-cse-key').value, google_cse_cx: $('s-cse-cx').value,
           serper_key: $('s-serper').value, brave_search_key: $('s-brave').value });
         state.settings = j.settings || {}; render();

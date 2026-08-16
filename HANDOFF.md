@@ -245,8 +245,42 @@ toggle, delete (cleans Blob media).
 - **Billing (new view):** Outstanding / Overdue 14+ / Collected this
   month / this year tiles, "delivered but not invoiced" strip, tabs
   All/Unpaid/Overdue/Paid, ledger (number, project, client, sent, total,
-  status, View / Resend / Mark paid). bookings.paid_at is stamped when
-  a project flips to Paid (backfilled for old rows).
+  status, View / Resend / Mark paid), CSV export by date range (invoice
+  number, project, client, brokerage, dates, status, subtotal/travel/
+  discount/total). bookings.paid_at is stamped when a project flips to
+  Paid (backfilled for old rows).
+- **Calendar (new view):** month grid of shoots + twilights (solid =
+  confirmed, dashed = not), click → project.
+- **Clients:** roster with projects · lifetime value (paid) · last shoot
+  · open balance · Active / "Check in" pill (no shoot in 90+ days and
+  nothing active — also in the bell, top 3); client page has the same
+  tiles + Statement (CSV).
+- **Project timeline:** project_events (created, stage moves incl. the
+  cron's, confirmations, uploads/removals, cover, lock, delivery and
+  invoice sends, proposal sent/accepted, client approvals / change
+  requests, reminders, testimonials) + free-text notes, merged with the
+  download feed in the project page's ACTIVITY section (add note /
+  delete note via files.js PUT actions note / delnote).
+- **Photo tools on the project page:** drag tiles to reorder (persisted
+  via files sort), Select mode (multi-select + Delete selected), hover
+  ✎ rename (the client's download filename), Download originals (opens
+  /portal/<slug>?dl=full — the listing page auto-starts the full-res
+  bundle for an admin session).
+- **Automatic reminders (Settings toggles remind_invoice / _proposal /
+  _delivery, default OFF):** the daily cron sends unpaid-invoice notes at
+  14 + 21 days, a proposal nudge at 3 days (proposals.reminded_at), a
+  delivery-approval nudge at 5 days — once each (dedup via
+  project_events kind reminder + meta tag), templated, logged.
+- **Email templates (Settings):** subject + opening paragraph for
+  confirm / delivery / invoice / proposal / application + the three
+  reminders; stored as settings tpl_<key>_subject|_note (blank = default),
+  placeholders {first} {name} {property} {location} {number} {total}
+  {date}; api/_lib/templates.js DEFAULTS mirrored in admin TPL_DEFAULTS.
+- **Testimonials:** after a client approves a delivery the listing page
+  asks for a one-line review → testimonials table + admin email;
+  Portfolio → Testimonials card approves/hides/deletes; approved quotes
+  ride along in /api/site-projects and lead the home page's "What They
+  Say" cards (index.html script, static three fill in).
 - **Projects:** a listings ledger — Address · Client · Stage · Files ·
   Invoice · Downloads (LOCKED/UNLOCKED) · Lock/Unlock — with stage
   segments + search + client filter. Stages: pending → upcoming →
@@ -350,13 +384,17 @@ first use), email.js, auth.js, portal-auth.js, ics.js, gcal.js, links.js,
 delivery.js (slugs, files, publicFile, logDownload).
 Admin router additions: `files` (GET list+events / POST add / PUT
 cover|lock|sort / DELETE + blob del), `downloads` (feed + 7-day count),
-`tasks` (GET / POST / PUT / DELETE — dashboard to-dos).
+`tasks` (GET / POST / PUT / DELETE — dashboard to-dos), `testimonials`
+(GET / PUT approve / DELETE). Shared: events.js (logEvent), templates.js
+(DEFAULTS, loadTemplates, tpl).
 `upload.js` broker: delivery/<id>/… paths get addRandomSuffix:false and
 a 4GB cap; everything else unchanged.
 
 **DB tables:** clients, bookings (~46 cols incl. delivery_*/invoice_*,
 delivery_slug unique, downloads_locked, paid_at), tasks (title, priority
-low|normal|medium|high, done, due, booking_id), delivery_files (booking_id,
+low|normal|medium|high, done, due, booking_id), project_events
+(booking_id, kind, label, actor, meta), testimonials (booking_id,
+client_name, brokerage, quote, approved), proposals.reminded_at, delivery_files (booking_id,
 kind photo|film|file, name, url, web_url, thumb_url, size, w/h,
 sort_order), download_events (booking_id, file_id, kind
 file|full|mls|selected|view, label, email, ip, ua), site_projects,
@@ -407,8 +445,9 @@ Google Places key is NOT an env var — stored in admin Settings (DB).
 - **`.footer a` specificity** can override .footer__brand — keep the
   compound selector.
 - **Pixieset is retired for delivery** (custom system since 2026-08-08);
-  settings.pixieset_subdomain + covers.js unfurl only serve legacy
-  link-only deliveries.
+  the Settings card and the admin `covers` route are gone — covers.js is
+  only used by deliver.js for legacy link-only deliveries; the
+  pixieset_subdomain settings key is inert.
 - **Blob deletes** need BLOB_READ_WRITE_TOKEN in the function env; if
   the store is OIDC-only the DB row still goes and the blob is orphaned
   (harmless).

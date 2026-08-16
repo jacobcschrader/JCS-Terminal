@@ -10,6 +10,7 @@
 const { db } = require("./_lib/db.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("./_lib/email.js");
 const { loginUrl, makeToken } = require("./_lib/portal-auth.js");
+const { loadTemplates, tpl } = require("./_lib/templates.js");
 
 const field = (v, max = 300) => String(v == null ? "" : v).trim().slice(0, max);
 const escHtml = (s) =>
@@ -129,11 +130,12 @@ module.exports = async function handler(req, res) {
 
     // ---- to applicant (best effort) ------------------------------------
     try {
+      const T = tpl(await loadTemplates(s), "application", { first: f.name.split(" ")[0] || "there", name: f.name, property: f.title, location: loc });
       await sendEmail({
         from: SENDERS.enquiry,
         to: f.email,
         replyTo: OWNER,
-        subject: `${f.title} | Application Received`,
+        subject: T.subject,
         text: `Hi ${f.name},\n\nThank you — your application for ${f.title} has been received. ` +
           "I review every application personally and will reply within 24 hours with availability and your personal proposal. " +
           "Accepting the proposal is what confirms and signs your shoot.\n\n" +
@@ -142,8 +144,7 @@ module.exports = async function handler(req, res) {
         html: jcsEmail({
           eyebrow: "Application Received",
           headline: "Thank you — I have your application.",
-          note: `Hi ${escHtml(f.name)} — your application for <b>${escHtml(f.title)}</b> has been received. ` +
-            "I review every application personally and will reply within 24&nbsp;hours with availability and your personal proposal — accepting it is what confirms your shoot.",
+          note: T.note,
           rows: [
             ["Property", escHtml(f.title) + (loc ? `<br><span style="color:#8a94a6;">${escHtml(loc)}</span>` : "")],
             ["Services", f.services ? escHtml(f.services) : ""],
