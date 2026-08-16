@@ -25,6 +25,7 @@ const routes = {
   upload: require("../_lib/admin/upload.js"),
   files: require("../_lib/admin/files.js"),
   downloads: require("../_lib/admin/downloads.js"),
+  tasks: require("../_lib/admin/tasks.js"),
 };
 
 module.exports = function handler(req, res) {

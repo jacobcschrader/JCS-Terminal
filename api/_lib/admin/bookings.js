@@ -143,7 +143,8 @@ module.exports = async function handler(req, res) {
           delivery_links = ${f.delivery_links},
           delivery_cover_url = ${f.delivery_cover_url},
           delivery_created_at = COALESCE(delivery_created_at, ${f.delivery_created_at}),
-          delivery_token = COALESCE(NULLIF(delivery_token, ''), ${(f.delivery_links || f.delivery_url) ? crypto.randomBytes(12).toString("base64url") : null})
+          delivery_token = COALESCE(NULLIF(delivery_token, ''), ${(f.delivery_links || f.delivery_url) ? crypto.randomBytes(12).toString("base64url") : null}),
+          paid_at = CASE WHEN ${f.status} = 'paid' THEN COALESCE(paid_at, now()) ELSE NULL END
         WHERE id = ${id} RETURNING *`;
       if (!row) { res.status(404).json({ error: "not-found" }); return; }
       res.status(200).json({ booking: row });

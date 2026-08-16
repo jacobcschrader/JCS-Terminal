@@ -1541,3 +1541,33 @@ Jacob: "make Contact an actual contact page, keeping the booking for
 - vercel.json: /contact → /book redirect removed. tools/generate-share-
   pages.mjs no longer deletes ALL rewrites (would have wiped the
   proposals/portal rewrites) — it prunes only /project/* ones.
+
+## 2026-08-08 — Admin portal upgrade: deal-desk shell, new dashboard, Billing
+
+Jacob sent a DealSpace-style dashboard mock: "upgrade our admin portal,
+also add in anything you think could be useful or we need". Mapping:
+matches → requests, mandates → projects, seller → client, sector →
+service.
+
+- **Shell:** sidebar app layout replaces the site-chrome + pill tabs
+  (Work / Studio / Other groups with icons, account block, calendar
+  status + date + sign out in the footer), top bar with global search
+  ("/" shortcut, keyboard nav; projects, clients, requests, proposals)
+  and a needs-attention bell (derived alerts, count badge) + quick
+  "+ New project". 10px corners across the admin; sans page titles.
+- **Dashboard:** profile ring (studio-setup checklist) + Update settings
+  / View requests; Requests reviewed / accepted (30d with Δ), Average
+  turnaround, Current pipeline value; Latest requests cards with fit %,
+  message, deal overview (sheet-priced estimate, target date, sqft,
+  property); Active projects table (last update / next update derived
+  from the pipeline) beside Today's tasks (persisted, priorities,
+  All/Open/Closed), This week (shoots), Money (awaiting / collected this
+  month / booked this year); Recent downloads kept below.
+- **Billing view (new):** outstanding / overdue / collected tiles,
+  uninvoiced-deliveries strip, filterable ledger with View / Resend /
+  Mark paid. bookings.paid_at added + backfilled.
+- **Backend:** tasks table + `tasks` admin route; paid_at stamped on the
+  Paid transition.
+- Verified locally with stubs: dashboard (desktop + mobile), search,
+  bell feed, keyboard nav, every view under the new shell, sidebar
+  drawer.

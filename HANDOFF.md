@@ -213,13 +213,40 @@ toggle, delete (cleans Blob media).
 
 - **Auth:** ADMIN_EMAIL + PBKDF2 hash (ADMIN_PASSWORD_HASH) → HMAC session
   cookie `jcs_session` (SESSION_SECRET). All data handlers requireAuth.
-- **Shell (2026-08-08):** the admin lives inside the public site chrome
-  (site nav + footer), pill tabs "ADMIN · Dashboard · Requests · Projects
-  · Proposals · Licensing · Clients · Portfolio · Settings · Sign out",
-  Cormorant "Dashboard." titles, hairline square cards, navy caps
-  buttons. Dashboard = 5 stat cards (Clients / Listings / Locked / Open
-  invoices / Downloads 7d) + Recent downloads ledger (time · email ·
-  item · listing → project page).
+- **Shell (2026-08-08, deal-desk pattern from Jacob's DealSpace
+  reference):** left sidebar (JCS wordmark, account block, groups Work:
+  Dashboard / Requests (badge) / Projects / Proposals / Clients; Studio:
+  Billing / Licensing / Portfolio / Settings; Other: Client portal ↗ /
+  Website ↗; footer = Google Calendar status + date + Sign out), top bar
+  with GLOBAL SEARCH (projects, clients, requests, proposals — "/" to
+  focus, arrows + Enter) and a NEEDS-ATTENTION bell (derived: new
+  requests, proposals sent 3+ days, unconfirmed shoots within 3 days,
+  deliveries 3+ days after the shoot with nothing sent, changes
+  requested, delivered-but-uninvoiced, invoices 14+ days unpaid, paid but
+  downloads still locked) + a "+" new-project button. Soft 10px corners
+  everywhere; page titles are small sans (no more serif "Dashboard.").
+  Mobile: sidebar slides in from the hamburger.
+- **Dashboard:** PROFILE card = studio-setup ring (6 checks: 8+ portfolio
+  projects, Google Calendar, Places key, licensing key, first client,
+  first delivery — % + next step link) + Update settings / View requests,
+  then 4 stat tiles: Requests reviewed (30d, Δ vs prior 30d), Requests
+  accepted, Average turnaround (shoot → delivery email, 90d), Current
+  pipeline value (active projects). LATEST REQUESTS cards (avatar,
+  name, brokerage · city, FIT % — services 30 / sqft on rate card 20 /
+  lead time 20 / California 15 / business email 15 — New/Accepted pill,
+  message or services, "Deal overview": estimated value priced from the
+  sheet, target date, sqft, property; click → Requests row). ACTIVE
+  PROJECTS table (project+client · service · stage · last update ·
+  next update: shoot / delivery due (+2d) / payment due (+14d) /
+  proposal follow-up) beside TODAY'S TASKS (All/Open/Closed, add w/
+  priority, tick, delete — `tasks` table via admin `tasks` route), THIS
+  WEEK (shoots in 7 days, confirmed pill), MONEY (awaiting payment /
+  collected this month / booked this year), then RECENT DOWNLOADS.
+- **Billing (new view):** Outstanding / Overdue 14+ / Collected this
+  month / this year tiles, "delivered but not invoiced" strip, tabs
+  All/Unpaid/Overdue/Paid, ledger (number, project, client, sent, total,
+  status, View / Resend / Mark paid). bookings.paid_at is stamped when
+  a project flips to Paid (backfilled for old rows).
 - **Projects:** a listings ledger — Address · Client · Stage · Files ·
   Invoice · Downloads (LOCKED/UNLOCKED) · Lock/Unlock — with stage
   segments + search + client filter. Stages: pending → upcoming →
@@ -322,12 +349,14 @@ api/site-projects.js    Public published projects (Cache-Control: no-store)
 first use), email.js, auth.js, portal-auth.js, ics.js, gcal.js, links.js,
 delivery.js (slugs, files, publicFile, logDownload).
 Admin router additions: `files` (GET list+events / POST add / PUT
-cover|lock|sort / DELETE + blob del), `downloads` (feed + 7-day count).
+cover|lock|sort / DELETE + blob del), `downloads` (feed + 7-day count),
+`tasks` (GET / POST / PUT / DELETE — dashboard to-dos).
 `upload.js` broker: delivery/<id>/… paths get addRandomSuffix:false and
 a 4GB cap; everything else unchanged.
 
-**DB tables:** clients, bookings (~45 cols incl. delivery_*/invoice_*,
-delivery_slug unique, downloads_locked), delivery_files (booking_id,
+**DB tables:** clients, bookings (~46 cols incl. delivery_*/invoice_*,
+delivery_slug unique, downloads_locked, paid_at), tasks (title, priority
+low|normal|medium|high, done, due, booking_id), delivery_files (booking_id,
 kind photo|film|file, name, url, web_url, thumb_url, size, w/h,
 sort_order), download_events (booking_id, file_id, kind
 file|full|mls|selected|view, label, email, ip, ua), site_projects,

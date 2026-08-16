@@ -18,7 +18,7 @@
    variable names stay aliased so every rule below reads them. ======= */
 :root { --rx-teal: var(--accent); --rx-dark: var(--navy); --rx-line: var(--line); --rx-mono: var(--sans);
         --lx-teal: var(--accent); --lx-dark: var(--navy); --lx-ink: var(--ink); --lx-line: var(--line);
-        --adm-bg: #f8f7f4; --adm-r: 2px; }
+        --adm-bg: #f8f7f4; --adm-r: 10px; }
 body { background: var(--adm-bg); }
 .adm-hidden { display: none !important; }
 
@@ -28,31 +28,76 @@ body { background: var(--adm-bg); }
 .adm-login__brand { font-family: var(--serif); font-style: italic; font-weight: 300; font-size: 2.2rem; color: var(--navy); }
 .adm-login__sub { font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0.6rem 0 2rem; }
 
-/* ---- Shell: site nav + admin pill tabs + content + footer ---- */
-.adm-app { display: block; min-height: 100vh; }
-.nav.adm-nav { position: static; background: #fff; box-shadow: 0 1px 0 var(--line-soft); }
-.nav.adm-nav::before { display: none; }
-@media (max-width: 760px) { .nav.adm-nav .nav__cta { display: none; } }
-.adm-sub { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; padding: 2.4rem 0 0; }
-.adm-sub__lbl { font-size: 0.58rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-right: 0.35rem; }
-.adm-tab { font-family: var(--sans); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--ink);
-  border: 1px solid var(--line); border-radius: 999px; padding: 0.66rem 1.1rem; cursor: pointer; background: transparent;
-  transition: border-color 0.2s, background 0.2s, color 0.2s; white-space: nowrap; display: inline-flex; align-items: center; gap: 0.4rem; }
-.adm-tab:hover { border-color: rgba(15,34,64,0.42); }
-.adm-tab.on { background: #fff; border-color: rgba(15,34,64,0.55); color: var(--navy); }
-.adm-sub .grow { flex: 1; }
-.adm-signout { font-family: var(--sans); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--muted);
-  border: 1px solid var(--line); border-radius: var(--adm-r); padding: 0.62rem 1rem; cursor: pointer; background: transparent; }
-.adm-signout:hover { color: var(--navy); border-color: rgba(15,34,64,0.42); }
-.adm-main { padding: 2.2rem 0 5.5rem; }
-.adm-count { display: inline-block; min-width: 16px; text-align: center; background: var(--navy); color: #fff; font-size: 0.55rem; font-weight: 700; border-radius: 9px; padding: 0.08rem 0.35rem; letter-spacing: 0; }
+/* ---- Shell: sidebar + top bar (deal-desk pattern, 2026-08-08) ---- */
+.adm-app { display: flex; min-height: 100vh; }
+.adm-side { width: 236px; flex: 0 0 236px; background: #fff; border-right: 1px solid var(--line); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; overflow-y: auto; z-index: 70; }
+.adm-side__brand { display: flex; align-items: baseline; gap: 0.5rem; padding: 1.25rem 1.25rem 0.9rem; }
+.adm-side__brand b { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.5rem; color: var(--navy); line-height: 1; }
+.adm-side__brand span { font-size: 0.54rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.adm-side__acct { display: flex; align-items: center; gap: 0.6rem; margin: 0 0.85rem 0.4rem; padding: 0.55rem 0.6rem; border: 1px solid var(--line); border-radius: 10px; }
+.adm-side__acct .av { width: 28px; height: 28px; border-radius: 8px; background: var(--navy); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-family: var(--serif); font-style: italic; font-size: 0.82rem; flex: none; }
+.adm-side__acct b { display: block; font-size: 0.74rem; font-weight: 600; color: var(--ink); line-height: 1.2; }
+.adm-side__acct b i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #2f9e5b; margin-left: 0.35rem; vertical-align: middle; }
+.adm-side__acct small { display: block; font-size: 0.6rem; color: var(--muted); }
+.adm-side nav { flex: 1; padding: 0.2rem 0.85rem 0.6rem; }
+.adm-side .grp { font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 1rem 0.6rem 0.35rem; }
+.adm-side nav a { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.6rem; border-radius: 8px; color: var(--ink); font-size: 0.8rem; cursor: pointer; text-decoration: none; }
+.adm-side nav a svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0.7; flex: none; }
+.adm-side nav a:hover { background: #f5f4f0; }
+.adm-side nav a.on { background: #eef2f7; color: var(--navy); font-weight: 600; }
+.adm-side nav a.on svg { opacity: 1; }
+.adm-side nav a .adm-count { margin-left: auto; }
+.adm-side nav a .ext { margin-left: auto; font-size: 0.7rem; color: var(--muted); }
+.adm-side__foot { padding: 0.9rem 1.25rem 1.1rem; border-top: 1px solid var(--line-soft); font-size: 0.68rem; color: var(--muted); }
+.adm-side__foot .st { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.45rem; }
+.adm-side__foot .st b { font-size: 0.68rem; color: var(--ink); font-weight: 600; }
+.adm-side__foot .st b.ok { color: #2f6b3f; } .adm-side__foot .st b.warn { color: #8a6d1f; }
+.adm-side__foot a { color: var(--muted); cursor: pointer; text-decoration: none; }
+.adm-side__foot a:hover { color: var(--navy); }
+.adm-body { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.adm-top { display: flex; align-items: center; gap: 0.8rem; padding: 0.75rem 1.6rem; background: #fff; border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 60; }
+.adm-menu { display: none; width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: #fff; cursor: pointer; align-items: center; justify-content: center; }
+.adm-menu span { display: block; width: 14px; height: 1.5px; background: var(--ink); margin: 2px 0; }
+.adm-search { position: relative; flex: 1; max-width: 480px; }
+.adm-search input { width: 100%; box-sizing: border-box; font-family: var(--sans); font-size: 0.8rem; color: var(--ink); background: #f6f5f1; border: 1px solid transparent; border-radius: 10px; padding: 0.55rem 2.4rem 0.55rem 2.1rem; outline: none; }
+.adm-search input:focus { background: #fff; border-color: var(--line); }
+.adm-search > svg { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); width: 14px; height: 14px; stroke: var(--muted); fill: none; stroke-width: 1.8; stroke-linecap: round; }
+.adm-search kbd { position: absolute; right: 0.6rem; top: 50%; transform: translateY(-50%); font-family: var(--sans); font-size: 0.56rem; color: var(--muted); border: 1px solid var(--line); border-radius: 5px; padding: 0.1rem 0.35rem; }
+.adm-qres { position: absolute; top: calc(100% + 6px); left: 0; right: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 16px 40px rgba(15,34,64,0.14); overflow: hidden; z-index: 65; max-height: 60vh; overflow-y: auto; }
+.adm-qres .g { font-size: 0.54rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0.6rem 0.9rem 0.2rem; }
+.adm-qres a { display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.9rem; font-size: 0.8rem; color: var(--ink); cursor: pointer; text-decoration: none; }
+.adm-qres a:hover, .adm-qres a.sel { background: #f5f4f0; }
+.adm-qres a small { color: var(--muted); font-size: 0.66rem; margin-left: auto; white-space: nowrap; }
+.adm-qres .none { padding: 0.8rem 0.9rem; font-size: 0.78rem; color: var(--muted); }
+.adm-top__acts { margin-left: auto; display: flex; gap: 0.5rem; align-items: center; position: relative; }
+.adm-icon { position: relative; width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: #fff; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: var(--ink); text-decoration: none; }
+.adm-icon svg { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.adm-icon:hover { border-color: rgba(15,34,64,0.45); }
+.adm-icon .n { position: absolute; top: -5px; right: -5px; min-width: 16px; height: 16px; border-radius: 8px; background: #c0392b; color: #fff; font-size: 0.55rem; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; padding: 0 4px; }
+.adm-notif { position: absolute; top: calc(100% + 8px); right: 0; width: min(400px, 92vw); background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 16px 40px rgba(15,34,64,0.14); z-index: 65; overflow: hidden; }
+.adm-notif h4 { font-family: var(--sans); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; padding: 0.85rem 1rem 0.5rem; }
+.adm-notif a { display: flex; gap: 0.7rem; align-items: flex-start; padding: 0.62rem 1rem; border-top: 1px solid var(--line-soft); font-size: 0.78rem; color: var(--ink); cursor: pointer; text-decoration: none; }
+.adm-notif a:hover { background: #f5f4f0; }
+.adm-notif a i { width: 8px; height: 8px; border-radius: 50%; margin-top: 0.4rem; flex: none; background: var(--accent); }
+.adm-notif a i.red { background: #c0392b; } .adm-notif a i.amb { background: #c9932a; } .adm-notif a i.grn { background: #2f9e5b; }
+.adm-notif a small { display: block; color: var(--muted); font-size: 0.66rem; margin-top: 0.1rem; }
+.adm-notif .empty { padding: 0.9rem 1rem 1rem; font-size: 0.78rem; color: var(--muted); }
+.adm-main { padding: 1.5rem 1.6rem 4rem; max-width: 1380px; width: 100%; box-sizing: border-box; }
+@media (max-width: 860px) {
+  .adm-side { position: fixed; left: 0; top: 0; bottom: 0; transform: translateX(-102%); transition: transform 0.3s var(--ease); box-shadow: 0 20px 60px rgba(9,22,39,0.25); }
+  .adm-side.open { transform: none; }
+  .adm-menu { display: inline-flex; }
+  .adm-top { padding: 0.65rem 0.9rem; }
+  .adm-search kbd { display: none; }
+  .adm-main { padding: 1rem 0.9rem 3rem; }
+}
 
 /* ---- View header ---- */
-.adm-head { display: flex; align-items: flex-end; gap: 1rem; margin-bottom: 1.6rem; flex-wrap: wrap; }
-.adm-head h1 { font-family: var(--serif); font-weight: 400; font-style: normal; letter-spacing: -0.01em; font-size: clamp(2.2rem, 4vw, 2.9rem); color: var(--ink); margin: 0; line-height: 1.05; }
+.adm-head { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; flex-wrap: wrap; }
+.adm-head h1 { font-family: var(--sans); font-weight: 600; font-style: normal; letter-spacing: -0.01em; font-size: 1.05rem; color: var(--ink); margin: 0; line-height: 1.2; }
 .adm-headmark { display: none; }
 .adm-head .grow { flex: 1; }
-.adm-back { display: inline-block; font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; cursor: pointer; margin-bottom: 1.1rem; }
+.adm-back { display: inline-block; font-size: 0.66rem; color: var(--muted); font-weight: 500; cursor: pointer; margin-bottom: 0.8rem; }
 .adm-back:hover { color: var(--navy); }
 
 /* ---- Buttons / badges / tables ---- */
@@ -120,7 +165,7 @@ small.mut { color: var(--muted); }
 
 /* ---- Listing page (project detail) ---- */
 .adm-lhead { display: flex; align-items: flex-start; gap: 1.4rem; flex-wrap: wrap; margin: 0.2rem 0 1.8rem; }
-.adm-lhead h1 { font-family: var(--serif); font-weight: 400; font-style: normal; letter-spacing: -0.01em; font-size: clamp(2.1rem, 3.6vw, 2.9rem); color: var(--ink); margin: 0 0 0.35rem; line-height: 1.05; }
+.adm-lhead h1 { font-family: var(--serif); font-weight: 400; font-style: normal; letter-spacing: -0.01em; font-size: clamp(1.7rem, 2.6vw, 2.2rem); color: var(--ink); margin: 0 0 0.3rem; line-height: 1.08; }
 .adm-lhead .meta { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
 .adm-lhead .meta a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .adm-lhead .sent { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
@@ -170,7 +215,7 @@ small.mut { color: var(--muted); }
 .adm-kv a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .adm-notes { background: #faf9f6; border: 1px solid var(--line-soft); border-radius: var(--adm-r); padding: 1rem 1.2rem; font-size: 0.88rem; color: var(--ink); white-space: pre-line; margin-top: 1rem; }
 .adm-phead { display: flex; align-items: flex-start; gap: 1.2rem; flex-wrap: wrap; margin: 0.4rem 0 1.6rem; }
-.adm-phead h1 { font-family: var(--serif); font-style: normal; font-weight: 400; letter-spacing: -0.01em; font-size: clamp(1.9rem, 3vw, 2.5rem); color: var(--ink); margin: 0 0 0.35rem; line-height: 1.1; }
+.adm-phead h1 { font-family: var(--serif); font-style: normal; font-weight: 400; letter-spacing: -0.01em; font-size: clamp(1.6rem, 2.4vw, 2rem); color: var(--ink); margin: 0 0 0.3rem; line-height: 1.1; }
 .adm-phead .sub { font-size: 0.86rem; color: var(--muted); }
 .adm-phead .sub a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .adm-phead .acts { margin-left: auto; display: flex; gap: 0.6rem; flex-wrap: wrap; }
@@ -355,12 +400,11 @@ select.lx-input { padding-right: 2rem; }
 /* ---- Mobile ---- */
 @media (max-width: 760px) {
   .adm-table .hide-m { display: none; }
-  .adm-sub { padding-top: 1.4rem; }
 }
 @media (max-width: 520px) {
-  .adm-main { padding: 1.4rem 0 4rem; }
-  .adm-head h1 { font-size: 1.9rem; }
-  .adm-head { gap: 0.7rem; margin-bottom: 1.2rem; }
+  .adm-main { padding: 1rem 0.9rem 3rem; }
+  .adm-head h1 { font-size: 1rem; }
+  .adm-head { gap: 0.7rem; margin-bottom: 1rem; }
   .adm-head .adm-btn { padding: 0.6rem 0.9rem; font-size: 0.56rem; }
   .adm-card { padding: 1rem 0.9rem; }
   .adm-modal { padding: 0; align-items: stretch; }
@@ -371,6 +415,119 @@ select.lx-input { padding-right: 2rem; }
   #adm-toasts { left: 0.8rem; right: 0.8rem; transform: none; }
   .adm-toast { max-width: none; }
 }
+
+/* ================= Dashboard — deal-desk layout (2026-08-08) ==========
+   Reference: the "DealSpace" dashboard mock Jacob sent (profile ring +
+   4 stat tiles, latest-matches cards, active-mandates table + tasks).
+   JCS mapping: matches = requests, mandates = projects, seller = client,
+   sector = service. Soft SaaS card language in JCS navy. ============ */
+.dz-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px rgba(15,34,64,0.045); }
+.dz-profile { padding: 1.35rem 1.5rem 1.4rem; }
+.dz-profile__top { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
+.dz-ring { position: relative; width: 74px; height: 74px; flex: none; }
+.dz-ring svg { width: 74px; height: 74px; transform: rotate(-90deg); }
+.dz-ring i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.05rem; color: var(--navy); }
+.dz-pct b { display: block; font-family: var(--sans); font-weight: 600; font-size: 1.7rem; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
+.dz-pct b small { font-size: 0.75rem; font-weight: 500; color: var(--muted); margin-left: 2px; }
+.dz-pct span { display: block; margin-top: 0.35rem; font-size: 0.74rem; color: var(--muted); }
+.dz-pct span a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.dz-lbl { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--muted); margin-bottom: 0.7rem; }
+.dz-acts { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.dz-btn { font-family: var(--sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.01em; border-radius: 8px; padding: 0.55rem 0.9rem; cursor: pointer; border: 1px solid var(--navy); background: var(--navy); color: #fff; white-space: nowrap; }
+.dz-btn:hover { background: var(--navy-deep); }
+.dz-btn--ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+.dz-btn--ghost:hover { border-color: rgba(15,34,64,0.5); color: var(--navy); background: #fff; }
+.dz-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1.25rem; }
+@media (max-width: 1000px) { .dz-stats { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 520px) { .dz-stats { grid-template-columns: 1fr; } }
+.dz-stat { border: 1px solid var(--line); border-radius: 12px; padding: 0.95rem 1.05rem 1rem; background: #fff; }
+.dz-stat .lbl { display: flex; align-items: center; gap: 0.5rem; font-size: 0.72rem; color: var(--muted); font-weight: 500; }
+.dz-stat .lbl i { width: 20px; height: 20px; border-radius: 6px; background: #eef2f7; color: var(--navy); display: inline-flex; align-items: center; justify-content: center; font-style: normal; font-size: 0.6rem; flex: none; }
+.dz-stat b { display: block; margin-top: 0.55rem; font-family: var(--sans); font-weight: 600; font-size: 1.5rem; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
+.dz-stat b small { font-size: 0.7rem; font-weight: 500; color: var(--muted); margin-left: 3px; letter-spacing: 0; }
+.dz-stat .d { display: inline-block; margin-top: 0.45rem; font-size: 0.66rem; color: var(--muted); }
+.dz-stat .d em { font-style: normal; font-weight: 600; color: #2f6b3f; }
+.dz-stat .d em.down { color: #a03a3a; }
+.dz-stat .d em::before { content: "\2197\00a0"; }
+.dz-stat .d em.down::before { content: "\2198\00a0"; }
+
+.dz-sec { margin-top: 1.5rem; }
+.dz-sechead { display: flex; align-items: center; gap: 0.55rem; margin-bottom: 0.7rem; }
+.dz-sechead h2 { font-family: var(--sans); font-size: 0.86rem; font-weight: 600; color: var(--ink); margin: 0; letter-spacing: -0.01em; }
+.dz-count { display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 6px; background: var(--navy); color: #fff; font-size: 0.62rem; font-weight: 600; }
+.dz-sechead .grow { flex: 1; }
+.dz-sechead a.more { font-size: 0.7rem; color: var(--muted); cursor: pointer; }
+.dz-sechead a.more:hover { color: var(--navy); }
+.dz-arrows { display: flex; gap: 0.3rem; }
+.dz-arrows button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid var(--line); background: #fff; color: var(--ink); cursor: pointer; font-size: 0.8rem; line-height: 1; }
+.dz-arrows button:hover { border-color: rgba(15,34,64,0.5); }
+.dz-row { display: flex; gap: 0.75rem; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 0.3rem; scrollbar-width: none; }
+.dz-row::-webkit-scrollbar { display: none; }
+.dz-match { flex: 0 0 min(340px, 88vw); scroll-snap-align: start; padding: 1rem 1.05rem 1rem; cursor: pointer; transition: border-color 0.2s, transform 0.2s; }
+.dz-match:hover { border-color: rgba(15,34,64,0.35); }
+.dz-match__top { display: flex; align-items: center; gap: 0.6rem; }
+.dz-avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--navy); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em; flex: none; }
+.dz-avatar--soft { background: #eef2f7; color: var(--navy); }
+.dz-match__who { flex: 1; min-width: 0; }
+.dz-match__who b { display: block; font-size: 0.82rem; font-weight: 600; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-match__who small { display: block; font-size: 0.66rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dz-pill { display: inline-flex; align-items: center; font-size: 0.6rem; font-weight: 600; padding: 0.22rem 0.5rem; border-radius: 6px; white-space: nowrap; }
+.dz-pill--hi { background: #e6f0e8; color: #2f6b3f; }
+.dz-pill--mid { background: #faf6e9; color: #8a6d1f; }
+.dz-pill--lo { background: #f5e8e8; color: #a03a3a; }
+.dz-pill--new { background: #ecf1f8; color: #2c5d8f; }
+.dz-pill--dim { background: #f1f0ec; color: var(--muted); }
+.dz-match__chev { color: var(--muted); font-size: 0.9rem; }
+.dz-match p { font-size: 0.76rem; color: var(--muted); line-height: 1.55; margin: 0.75rem 0 0.8rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.35em; }
+.dz-match .ov { font-size: 0.58rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 600; color: var(--muted); margin-bottom: 0.4rem; }
+.dz-kvs { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+.dz-kv { font-size: 0.64rem; color: var(--ink); background: #f6f5f1; border-radius: 6px; padding: 0.3rem 0.55rem; }
+.dz-kv span { color: var(--muted); }
+
+.dz-two { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(280px, 1fr); gap: 0.9rem; align-items: start; }
+@media (max-width: 1000px) { .dz-two { grid-template-columns: 1fr; } }
+.dz-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.dz-table th { text-align: left; font-size: 0.6rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0.85rem 0.9rem 0.6rem; border-bottom: 1px solid var(--line-soft); white-space: nowrap; }
+.dz-table td { padding: 0.72rem 0.9rem; border-bottom: 1px solid var(--line-soft); color: var(--ink); vertical-align: middle; }
+.dz-table tr:last-child td { border-bottom: 0; }
+.dz-table tr.click { cursor: pointer; }
+.dz-table tr.click:hover td { background: #faf9f6; }
+.dz-table .who { display: flex; align-items: center; gap: 0.6rem; }
+.dz-table .who b { display: block; font-weight: 600; font-size: 0.8rem; }
+.dz-table .who small { display: block; color: var(--muted); font-size: 0.66rem; }
+.dz-table .mut { color: var(--muted); }
+.dz-table .nx small { display: block; color: var(--muted); font-size: 0.62rem; }
+.dz-tasks { padding: 1rem 1.05rem 0.9rem; }
+.dz-tasks__head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.7rem; }
+.dz-tasks__head h2 { font-family: var(--sans); font-size: 0.86rem; font-weight: 600; color: var(--ink); margin: 0; flex: 1; }
+.dz-tabs { display: inline-flex; background: #f3f2ee; border-radius: 8px; padding: 2px; }
+.dz-tabs button { font-family: var(--sans); font-size: 0.64rem; font-weight: 600; color: var(--muted); background: transparent; border: 0; border-radius: 6px; padding: 0.3rem 0.65rem; cursor: pointer; }
+.dz-tabs button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 3px rgba(15,34,64,0.12); }
+.dz-task { display: flex; align-items: center; gap: 0.6rem; padding: 0.55rem 0; border-bottom: 1px solid var(--line-soft); }
+.dz-task:last-of-type { border-bottom: 0; }
+.dz-task .chk { width: 17px; height: 17px; border-radius: 50%; border: 1.5px solid rgba(15,34,64,0.35); background: #fff; cursor: pointer; flex: none; display: inline-flex; align-items: center; justify-content: center; font-size: 0.55rem; color: #fff; }
+.dz-task.done .chk { background: #2f6b3f; border-color: #2f6b3f; }
+.dz-task .t { flex: 1; font-size: 0.78rem; color: var(--ink); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dz-task.done .t { color: var(--muted); text-decoration: line-through; }
+.dz-task .t small { color: var(--muted); font-size: 0.64rem; margin-left: 0.4rem; text-decoration: none; }
+.dz-task .x { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 0.85rem; opacity: 0; padding: 0 0.2rem; }
+.dz-task:hover .x { opacity: 1; } .dz-task .x:hover { color: #a03a3a; }
+.dz-add { display: flex; gap: 0.4rem; margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid var(--line-soft); }
+.dz-add input { flex: 1; min-width: 0; font-family: var(--sans); font-size: 0.78rem; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 0.5rem 0.65rem; outline: none; }
+.dz-add input:focus, .dz-add select:focus { border-color: var(--navy); }
+.dz-add select { font-family: var(--sans); font-size: 0.7rem; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 0.45rem 0.4rem; outline: none; }
+.dz-empty { font-size: 0.78rem; color: var(--muted); padding: 0.9rem 0.2rem; }
+.dz-dl { margin-top: 1.5rem; }
+.dz-day { flex: none; width: 34px; text-align: center; }
+.dz-day b { display: block; font-family: var(--serif); font-size: 1.15rem; font-weight: 500; line-height: 1; color: var(--ink); font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; }
+.dz-day small { display: block; font-size: 0.5rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin-top: 2px; }
+.dz-money { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+.dz-money div { border: 1px solid var(--line); border-radius: 10px; padding: 0.7rem 0.75rem; }
+.dz-money small { display: block; font-size: 0.6rem; color: var(--muted); }
+.dz-money b { display: block; margin-top: 0.3rem; font-family: var(--sans); font-weight: 600; font-size: 1.05rem; letter-spacing: -0.02em; color: var(--ink); }
+/* ---- Billing ---- */
+.bl-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-bottom: 1.2rem; }
+@media (max-width: 900px) { .bl-stats { grid-template-columns: 1fr 1fr; } }
 </style>
 </head>
 <body>
@@ -395,64 +552,47 @@ select.lx-input { padding-right: 2rem; }
 
 <!-- ================= APP ================= -->
 <div id="app" class="adm-app adm-hidden">
-  <nav class="nav adm-nav">
-    <a class="nav__brand" href="/">JCS</a>
-    <button class="nav__toggle" aria-label="Menu"><span></span><span></span><span></span></button>
-    <div class="nav__links">
-      <a href="/projects">Work</a>
-      <a href="/services">Services</a>
-      <a href="/about">About</a>
-      <a href="/contact">Contact</a>
+  <aside class="adm-side" id="side">
+    <div class="adm-side__brand"><b>JCS</b><span>Studio Admin</span></div>
+    <div class="adm-side__acct"><span class="av">JS</span><div><b>Jacob Schrader<i></i></b><small>Studio owner</small></div></div>
+    <nav id="nav">
+      <div class="grp">Work</div>
+      <a data-r="dash" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
+      <a data-r="requests"><svg viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Requests<span class="adm-count adm-hidden" id="req-badge"></span></a>
+      <a data-r="pipeline"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Projects</a>
+      <a data-r="proposals"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Proposals</a>
+      <a data-r="clients"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</a>
+      <div class="grp">Studio</div>
+      <a data-r="billing"><svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>Billing</a>
+      <a data-r="licensing"><svg viewBox="0 0 24 24"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Licensing</a>
+      <a data-r="portfolio"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Portfolio</a>
+      <a data-r="settings"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>Settings</a>
+      <div class="grp">Other</div>
+      <a href="/portal" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>Client portal<span class="ext">&nearr;</span></a>
+      <a href="/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Website<span class="ext">&nearr;</span></a>
+    </nav>
+    <div class="adm-side__foot">
+      <div class="st"><span>Google Calendar</span><b id="side-gcal">Checking&hellip;</b></div>
+      <div class="st"><span id="side-date"></span><a id="logout">Sign out</a></div>
     </div>
-    <div class="nav__side">
-      <a class="nav__login" href="/portal">Client Login</a>
-      <a class="nav__cta" href="/book">Book a Shoot</a>
-    </div>
-  </nav>
-  <div class="wrap">
-    <div class="adm-sub" id="nav">
-      <span class="adm-sub__lbl">Admin</span>
-      <a class="adm-tab on" data-r="dash">Dashboard</a>
-      <a class="adm-tab" data-r="requests">Requests<span class="adm-count adm-hidden" id="req-badge"></span></a>
-      <a class="adm-tab" data-r="pipeline">Projects</a>
-      <a class="adm-tab" data-r="proposals">Proposals</a>
-      <a class="adm-tab" data-r="licensing">Licensing</a>
-      <a class="adm-tab" data-r="clients">Clients</a>
-      <a class="adm-tab" data-r="portfolio">Portfolio</a>
-      <a class="adm-tab" data-r="settings">Settings</a>
-      <span class="grow"></span>
-      <a class="adm-signout" id="logout">Sign out</a>
-    </div>
+  </aside>
+  <div class="adm-body">
+    <header class="adm-top">
+      <button class="adm-menu" id="adm-menu" aria-label="Menu" onclick="ADM.menu()"><span></span><span></span><span></span></button>
+      <div class="adm-search">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="adm-q" placeholder="Search projects, clients, requests, proposals…" autocomplete="off" oninput="ADM.qInput(this.value)" onkeydown="ADM.qKey(event)" onfocus="ADM.qInput(this.value)">
+        <kbd>/</kbd>
+        <div id="adm-qres" class="adm-qres" hidden></div>
+      </div>
+      <div class="adm-top__acts">
+        <button class="adm-icon" id="adm-bell" title="Needs attention" onclick="ADM.bell()"><svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="n adm-hidden" id="adm-bell-n"></span></button>
+        <button class="adm-icon" title="New project" onclick="ADM.newBooking()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+        <div id="adm-notif" class="adm-notif" hidden></div>
+      </div>
+    </header>
     <main class="adm-main" id="main"></main>
   </div>
-  <footer class="footer">
-    <div class="wrap">
-      <div class="footer__top">
-        <div>
-          <a class="footer__brand" href="/" style="display:inline-block">JCS</a>
-          <p style="max-width:26ch;font-family:var(--serif);font-weight:300;font-size:1.19rem;line-height:1.45;color:rgba(255,255,255,0.65)">Luxury real estate photography &amp; film. Danville, California &mdash; available worldwide.</p>
-        </div>
-        <div>
-          <h4>Studio</h4>
-          <a href="/projects">Work</a>
-          <a href="/services">Services</a>
-          <a href="/about">About</a>
-        </div>
-        <div>
-          <h4>Connect</h4>
-          <a href="/book">Book a Shoot</a>
-          <a href="https://www.instagram.com/byjcs_/" target="_blank" rel="noopener">Instagram</a>
-          <a href="/portal">Client Portal</a>
-          <a href="mailto:jacxbschrader@gmail.com">Email</a>
-          <a href="tel:+14088248719">(408) 824-8719</a>
-        </div>
-      </div>
-      <div class="footer__bottom">
-        <span>&copy; 2026 JCS LLC. All rights reserved.</span>
-        <span><a href="tel:+14088248719" style="display:inline;padding:0;font-size:inherit">408.824.8719</a> &middot; <a href="mailto:jacxbschrader@gmail.com" style="display:inline;padding:0;font-size:inherit">JacxbSchrader@gmail.com</a></span>
-      </div>
-    </div>
-  </footer>
 </div>
 
 <!-- Modal root -->
@@ -461,7 +601,6 @@ select.lx-input { padding-right: 2rem; }
 <script src="projects-data.js"></script>
 <script src="pricing-data.js"></script>
 <script src="admin-blob.js"></script>
-<script src="site.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -475,7 +614,8 @@ select.lx-input { padding-right: 2rem; }
   var state = { clients: [], bookings: [], requests: [], discounts: [], siteProjects: [], proposals: [], licenseLeads: [], sp: null, reqTab: 'pending', loaded: false,
               view: localStorage.getItem('adm-view') || 'pipeline', q: '', clientFilter: '', collapsed: {},
               licTab: 'active', licProp: '', licResults: null, licSearching: false,
-              stageFilter: 'active', ls: null, downloads: [], dlWeek: 0 };
+              stageFilter: 'active', ls: null, downloads: [], dlWeek: 0,
+              tasks: [], taskTab: 'all', billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1 };
 var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', delivered:'#7a5fb8', completed:'#3f7a4f', paid:'#1d4d2a' };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
   var ADDONS = {
@@ -583,6 +723,8 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     state.licenseLeads = lic.leads || [];
     state.settings = st.settings || {}; state.loaded = true;
     try { var dl = await api('downloads?limit=80'); state.downloads = dl.events || []; state.dlWeek = dl.week || 0; } catch (e) {}
+    try { var tk = await api('tasks'); state.tasks = tk.tasks || []; } catch (e) {}
+    paintBell();
     var pending = state.requests.filter(function (x) { return x.status === 'pending'; }).length;
     var badge = $('req-badge');
     if (badge) { badge.textContent = pending; badge.classList.toggle('adm-hidden', !pending); }
@@ -1168,7 +1310,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   // part of the pattern (jacobguthrie.com/admin).
   function head(title, extra, back) {
     return (back ? '<span class="adm-back" onclick="history.back()">&larr; Back</span>' : '') +
-      '<div class="adm-head"><h1>' + esc(title) + '.</h1><span class="grow"></span>' + (extra || '') + '</div>';
+      '<div class="adm-head"><h1>' + esc(title) + '</h1><span class="grow"></span>' + (extra || '') + '</div>';
   }
   // "2026-08-06 23:54" — the activity-feed timestamp format
   function stamp(iso) {
@@ -1184,38 +1326,240 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     return '';
   }
 
-  // ---- Dashboard: five stat cards + recent downloads ----------------
-  function vDash() {
-    var active = state.bookings.filter(function (b) { return b.status !== 'canceled'; });
-    var locked = active.filter(function (b) { return b.downloads_locked; }).length;
-    var openInv = active.filter(function (b) { return b.invoice_sent_at && b.status !== 'paid'; }).length;
-    var pendingReq = state.requests.filter(function (x) { return x.status === 'pending'; }).length;
-    var dl = state.downloads || [];
-    function stat(n, label, r) {
-      return '<div class="adm-stat"' + (r ? ' onclick="ADM.go(\'' + r + '\')"' : '') + '><b>' + n + '</b><span>' + label + '</span></div>';
+  // ---- Dashboard: profile ring + stats · latest requests · active
+  //      projects + tasks · recent downloads -------------------------------
+  // Deal-desk pattern (Jacob's reference): "matches" are requests,
+  // "mandates" are projects, "seller" is the client, "sector" the service.
+  function relTime(d) {
+    if (!d) return '—';
+    var t = new Date(String(d).length === 10 ? d + 'T12:00:00' : d); if (isNaN(t)) return '—';
+    var today = new Date(); today.setHours(12, 0, 0, 0);
+    var days = Math.round((new Date(t.getFullYear(), t.getMonth(), t.getDate(), 12) - today) / 864e5);
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Tomorrow';
+    if (days === -1) return 'Yesterday';
+    if (days > 0) return days < 7 ? 'In ' + days + ' days' : days < 30 ? 'In ' + Math.round(days / 7) + ' week' + (Math.round(days / 7) > 1 ? 's' : '') : 'In ' + Math.round(days / 30) + ' mo';
+    var a = -days;
+    return a < 7 ? a + ' days ago' : a < 30 ? Math.round(a / 7) + ' week' + (Math.round(a / 7) > 1 ? 's' : '') + ' ago' : Math.round(a / 30) + ' mo ago';
+  }
+  function compact(n) {
+    n = Number(n) || 0;
+    if (n >= 1e6) return '$' + (n / 1e6).toFixed(1).replace(/\.0$/, '') + 'm';
+    if (n >= 1e4) return '$' + (n / 1e3).toFixed(1).replace(/\.0$/, '') + 'k';
+    return '$' + Math.round(n).toLocaleString();
+  }
+  function initials(name) {
+    return String(name || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (w) { return w[0].toUpperCase(); }).join('') || '?';
+  }
+  // Fit score for a request — five honest signals, 100 points:
+  //   services picked 30 · sqft on the rate card 20 · lead time ≥ 3 days
+  //   20 · California 15 · business (non-freemail) address 15
+  function fitScore(r) {
+    var s = 0;
+    if ((r.services || '').trim()) s += 30;
+    var sq = parseInt(r.sqft, 10) || 0;
+    if (sq && sq <= 6000) s += 20; else if (sq) s += 8;
+    var td = r.target_date || r.launch_date;
+    if (td) { var lead = (new Date(String(td).slice(0, 10) + 'T12:00:00') - new Date()) / 864e5; s += lead >= 3 ? 20 : 8; }
+    if (/^ca$/i.test(r.state || '') || /california/i.test((r.city || '') + ' ' + (r.state || ''))) s += 15;
+    if (r.email && !/@(gmail|yahoo|hotmail|icloud|outlook|aol|me)\./i.test(r.email)) s += 15;
+    return Math.min(100, s);
+  }
+  // Estimated value: the request's own estimate, else priced from the
+  // sheet (services + add-ons at the given sqft).
+  function estValue(r) {
+    if (r.estimated_total) return Number(r.estimated_total);
+    var names = String(r.services || '').split(/,\s*/).concat(String(r.addons || '').split(/,\s*/)).filter(Boolean);
+    var sum = 0, any = false;
+    names.forEach(function (nm) { var q = svcQuote(nm.trim(), r.sqft); if (typeof q.price === 'number') { sum += q.price; any = true; } });
+    return any ? sum : null;
+  }
+  function lastUpdate(b) {
+    return [b.created_at, b.confirmed_at, b.delivery_created_at, b.delivery_sent_at, b.invoice_sent_at, b.delivery_approved_at]
+      .filter(Boolean).map(function (x) { return new Date(x); }).filter(function (d) { return !isNaN(d); })
+      .sort(function (a, c) { return c - a; })[0] || null;
+  }
+  function nextUpdate(b) {
+    var addDays = function (d, n) { var t = new Date(String(d).slice(0, 10) + 'T12:00:00'); t.setDate(t.getDate() + n); return t; };
+    if (b.status === 'pending') {
+      var p = state.proposals.find(function (x) { return x.booking_id == b.id; });
+      return p && p.sent_at ? { when: addDays(p.sent_at, 3), what: 'Proposal follow-up' } : { when: null, what: 'Send proposal' };
     }
-    return head('Dashboard',
-        (pendingReq ? '<button class="adm-btn adm-btn--ghost" onclick="ADM.go(\'requests\')">' + pendingReq + ' new request' + (pendingReq > 1 ? 's' : '') + '</button>' : '') +
-        '<button class="adm-btn" onclick="ADM.newBooking()">+ New project</button>') +
-      '<div class="adm-stats">' +
-        stat(state.clients.length, 'Clients', 'clients') +
-        stat(active.length, 'Listings', 'pipeline') +
-        stat(locked, 'Locked', 'pipeline') +
-        stat(openInv, 'Open invoices', 'pipeline') +
-        stat(state.dlWeek || 0, 'Downloads &nbsp;7d') +
+    if (b.status === 'upcoming') return b.shoot_date ? { when: new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00'), what: 'Shoot' } : { when: null, what: 'Set shoot date' };
+    if (b.status === 'editing' || b.status === 'revisions') return b.shoot_date ? { when: addDays(b.shoot_date, b.status === 'revisions' ? 1 : 2), what: 'Delivery due' } : { when: null, what: 'Delivery' };
+    if (b.status === 'delivered' || b.status === 'completed') {
+      return b.invoice_sent_at ? { when: addDays(b.invoice_sent_at, 14), what: 'Payment due' } : { when: new Date(), what: 'Send invoice' };
+    }
+    return { when: null, what: '' };
+  }
+
+  function vDash() {
+    var now = Date.now(), d30 = 30 * 864e5;
+    var reqs = state.requests || [];
+    var inWin = function (r, from, to) { var t = new Date(r.created_at).getTime(); return t >= from && t < to; };
+    var reviewed = function (r) { return r.status !== 'pending'; };
+    var rev30 = reqs.filter(function (r) { return inWin(r, now - d30, now + 1) && reviewed(r); }).length;
+    var revPrev = reqs.filter(function (r) { return inWin(r, now - 2 * d30, now - d30) && reviewed(r); }).length;
+    var acc30 = reqs.filter(function (r) { return inWin(r, now - d30, now + 1) && r.status === 'accepted'; }).length;
+    var accPrev = reqs.filter(function (r) { return inWin(r, now - 2 * d30, now - d30) && r.status === 'accepted'; }).length;
+    var delta = function (cur, prev) {
+      if (!prev) return cur ? '<em>new</em> vs last month' : '<span class="mut">no change vs last month</span>';
+      var pct = Math.round(100 * (cur - prev) / prev);
+      return '<em' + (pct < 0 ? ' class="down"' : '') + '>' + (pct >= 0 ? '+' : '') + pct + '%</em> vs last month';
+    };
+    // average turnaround: shoot → delivery email, last 90 days
+    var turns = state.bookings.filter(function (b) { return b.shoot_date && b.delivery_sent_at && (now - new Date(b.delivery_sent_at)) < 90 * 864e5; })
+      .map(function (b) { return (new Date(b.delivery_sent_at) - new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00')) / 864e5; })
+      .filter(function (x) { return x >= 0 && x < 60; });
+    var avgTurn = turns.length ? (turns.reduce(function (a, c) { return a + c; }, 0) / turns.length) : null;
+    var active = state.bookings.filter(function (b) { return ['canceled', 'paid'].indexOf(b.status) === -1; });
+    var pipeline = active.reduce(function (s, b) { return s + (b.price ? net(b) + (Number(b.travel_fee) || 0) : 0); }, 0);
+
+    // ---- profile ring: studio setup steps ----
+    var st = state.settings || {};
+    var live = (window.PROJECTS_DATA || []).length + (state.siteProjects || []).filter(function (p) { return !p.draft; }).length;
+    var checks = [
+      { t: 'Portfolio published (8+ projects)', ok: live >= 8, r: 'portfolio' },
+      { t: 'Google Calendar connected', ok: !!(state.gcal && state.gcal.ok), r: 'settings' },
+      { t: 'Address autocomplete key', ok: !!st.google_places_key, r: 'settings' },
+      { t: 'Licensing research key', ok: !!(st.serper_key || st.brave_search_key || st.google_cse_key), r: 'settings' },
+      { t: 'First client on file', ok: state.clients.length > 0, r: 'clients' },
+      { t: 'First delivery sent', ok: state.bookings.some(function (b) { return b.delivery_sent_at; }), r: 'pipeline' },
+    ];
+    var doneN = checks.filter(function (c) { return c.ok; }).length;
+    var pct = Math.round(100 * doneN / checks.length);
+    var nextStep = checks.find(function (c) { return !c.ok; });
+    var C = 2 * Math.PI * 30;
+    var ring = '<div class="dz-ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="30" fill="none" stroke="rgba(15,34,64,0.1)" stroke-width="5"/>' +
+      '<circle cx="37" cy="37" r="30" fill="none" stroke="var(--navy)" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + (C * pct / 100).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><i>JCS</i></div>';
+
+    function stat(icon, label, big, small, deltaHtml) {
+      return '<div class="dz-stat"><div class="lbl"><i>' + icon + '</i>' + label + '</div><b>' + big + (small ? '<small>' + small + '</small>' : '') + '</b>' +
+        (deltaHtml ? '<span class="d">' + deltaHtml + '</span>' : '') + '</div>';
+    }
+    var profile = '<div class="dz-card dz-profile">' +
+      '<div class="dz-lbl">Profile</div>' +
+      '<div class="dz-profile__top">' + ring +
+        '<div class="dz-pct"><b>' + pct + '<small>%</small></b><span>' + doneN + ' of ' + checks.length + ' setup steps done' +
+          (nextStep ? ' &middot; next: <a onclick="ADM.go(\'' + nextStep.r + '\')">' + esc(nextStep.t) + '</a>' : ' &middot; the studio runs itself') + '</span></div>' +
+        '<div class="dz-acts"><button class="dz-btn" onclick="ADM.go(\'settings\')">Update settings</button>' +
+          '<button class="dz-btn dz-btn--ghost" onclick="ADM.go(\'requests\')">View requests</button></div>' +
       '</div>' +
-      '<div class="adm-sec__lbl">Recent downloads</div>' +
-      '<div class="adm-card adm-card--flush">' +
-        (dl.length
-          ? '<table class="adm-table adm-table--ledger">' + dl.slice(0, 40).map(function (e) {
-              return '<tr class="click" onclick="ADM.go(\'project/' + e.booking_id + '\')">' +
-                '<td class="hide-m" style="white-space:nowrap;color:var(--muted)">' + stamp(e.created_at) + '</td>' +
-                '<td>' + esc(e.email || '—') + '</td>' +
-                '<td>' + (e.kind === 'view' ? '<span class="mut">—</span>' : esc(e.label || '—')) + '</td>' +
-                '<td>' + esc(e.title || '') + '</td></tr>';
-            }).join('') + '</table>'
-          : '<p class="adm-empty">No downloads yet — every file, bundle, and portal visit shows up here the moment a client opens their listing.</p>') +
+      '<div class="dz-stats">' +
+        stat('&#9634;', 'Requests reviewed', rev30, '', delta(rev30, revPrev)) +
+        stat('&#10003;', 'Requests accepted', acc30, '', delta(acc30, accPrev)) +
+        stat('&#9719;', 'Average turnaround', avgTurn == null ? '—' : (avgTurn < 1 ? '<1' : avgTurn.toFixed(1)), avgTurn == null ? '' : 'days', turns.length ? '<span class="mut">shoot &rarr; delivery, last 90 days</span>' : '<span class="mut">no deliveries yet</span>') +
+        stat('$', 'Current pipeline value', compact(pipeline), '', '<span class="mut">' + active.length + ' active project' + (active.length === 1 ? '' : 's') + '</span>') +
+      '</div></div>';
+
+    // ---- latest requests (matches) ----
+    var latest = reqs.slice().sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); }).slice(0, 8);
+    var cards = latest.map(function (r) {
+      var fit = fitScore(r);
+      var val = estValue(r);
+      var loc = [r.city, r.state].filter(Boolean).join(', ');
+      var desc = (r.message || '').trim() || [r.services, r.addons].filter(Boolean).join(' · ') || 'No details yet.';
+      var badge = r.status === 'pending' ? '<span class="dz-pill dz-pill--new">New</span>'
+        : '<span class="dz-pill dz-pill--dim">' + esc(r.status.charAt(0).toUpperCase() + r.status.slice(1)) + '</span>';
+      var td = r.target_date || r.launch_date;
+      return '<div class="dz-card dz-match" onclick="ADM.reqOpen(' + r.id + ')">' +
+        '<div class="dz-match__top"><span class="dz-avatar">' + esc(initials(r.name)) + '</span>' +
+          '<span class="dz-match__who"><b>' + esc(r.name) + '</b><small>' + esc([r.brokerage, loc].filter(Boolean).join(' · ') || r.email) + '</small></span>' +
+          '<span class="dz-pill ' + (fit >= 80 ? 'dz-pill--hi' : fit >= 55 ? 'dz-pill--mid' : 'dz-pill--lo') + '" title="Fit: services, sqft on the rate card, lead time, location, business email">' + fit + '% fit</span>' + badge +
+          '<span class="dz-match__chev">&rsaquo;</span></div>' +
+        '<p>' + esc(desc) + '</p>' +
+        '<div class="ov">Deal overview</div>' +
+        '<div class="dz-kvs">' +
+          '<span class="dz-kv"><span>Estimated value:</span> ' + (val != null ? money(val) : 'on review') + '</span>' +
+          '<span class="dz-kv"><span>Target date:</span> ' + (td ? dstr(td) : 'flexible') + '</span>' +
+          (r.sqft ? '<span class="dz-kv"><span>Sqft:</span> ' + Number(r.sqft).toLocaleString() + '</span>' : '') +
+          (r.title ? '<span class="dz-kv"><span>Property:</span> ' + esc(r.title) + '</span>' : '') +
+        '</div></div>';
+    }).join('');
+    var pendingN = reqs.filter(function (r) { return r.status === 'pending'; }).length;
+    var matches = '<div class="dz-sec"><div class="dz-sechead"><h2>Latest requests</h2><span class="dz-count">' + pendingN + '</span><span class="grow"></span>' +
+      '<a class="more" onclick="ADM.go(\'requests\')">View all</a>' +
+      '<span class="dz-arrows"><button onclick="ADM.dzScroll(-1)">&lsaquo;</button><button onclick="ADM.dzScroll(1)">&rsaquo;</button></span></div>' +
+      (cards ? '<div class="dz-row" id="dz-row">' + cards + '</div>' : '<div class="dz-card dz-empty" style="padding:1rem 1.1rem">No requests yet — applications from /book land here with a fit score and a priced overview.</div>') +
       '</div>';
+
+    // ---- active projects (mandates) ----
+    var rows = active.map(function (b) { return { b: b, last: lastUpdate(b), next: nextUpdate(b) }; })
+      .sort(function (x, y) { return (y.last || 0) - (x.last || 0); }).slice(0, 8);
+    var table = '<div class="dz-card">' + (rows.length
+      ? '<table class="dz-table"><tr><th>Project</th><th>Service</th><th>Stage</th><th>Last update</th><th>Next update</th></tr>' +
+        rows.map(function (x) {
+          var b = x.b, nx = x.next;
+          var overdue = nx.when && (nx.when - Date.now()) < -864e5;
+          return '<tr class="click" onclick="ADM.go(\'project/' + b.id + '\')">' +
+            '<td><span class="who"><span class="dz-avatar dz-avatar--soft">' + esc(initials(b.client_name || b.title)) + '</span><span><b>' + esc(b.title) + '</b><small>' + esc(b.client_name || (b.location || '—')) + '</small></span></span></td>' +
+            '<td>' + esc(b.type || 'Photography') + '</td>' +
+            '<td><span class="adm-badge adm-badge--' + esc(b.status) + '">' + esc(STAGE_LABEL[b.status] || b.status) + '</span></td>' +
+            '<td class="mut">' + relTime(x.last) + '</td>' +
+            '<td class="nx"' + (overdue ? ' style="color:#a03a3a"' : '') + '>' + (nx.when ? relTime(nx.when) : '—') + '<small>' + esc(nx.what) + '</small></td></tr>';
+        }).join('') + '</table>'
+      : '<p class="dz-empty" style="padding:1rem 1.1rem">Nothing in progress.</p>') + '</div>';
+    var projects = '<div><div class="dz-sechead"><h2>Active projects</h2><span class="dz-count">' + active.length + '</span><span class="grow"></span><a class="more" onclick="ADM.go(\'pipeline\')">View all</a></div>' + table + '</div>';
+
+    // ---- tasks ----
+    var tasks = state.tasks || [];
+    var tab = state.taskTab || 'all';
+    var shown = tasks.filter(function (t) { return tab === 'all' ? true : tab === 'open' ? !t.done : t.done; });
+    var PRI = { high: 'High', medium: 'Medium', normal: 'Normal', low: 'Low' };
+    var PRICLS = { high: 'dz-pill--lo', medium: 'dz-pill--mid', normal: 'dz-pill--new', low: 'dz-pill--dim' };
+    var taskList = shown.length ? shown.slice(0, 12).map(function (t) {
+      return '<div class="dz-task' + (t.done ? ' done' : '') + '"><span class="chk" onclick="ADM.taskToggle(' + t.id + ')">' + (t.done ? '&#10003;' : '') + '</span>' +
+        '<span class="t">' + esc(t.title) + (t.due ? '<small>' + relTime(t.due) + '</small>' : '') + '</span>' +
+        '<span class="dz-pill ' + PRICLS[t.priority] + '">' + PRI[t.priority] + '</span>' +
+        '<button class="x" title="Delete" onclick="ADM.taskDel(' + t.id + ')">&#128465;</button></div>';
+    }).join('') : '<div class="dz-empty">' + (tab === 'closed' ? 'Nothing closed yet.' : 'No tasks — add one below.') + '</div>';
+    var tasksHtml = '<div class="dz-card dz-tasks"><div class="dz-tasks__head"><h2>Today’s tasks</h2>' +
+      '<span class="dz-tabs">' + ['all', 'open', 'closed'].map(function (t) {
+        return '<button class="' + (tab === t ? 'on' : '') + '" onclick="ADM.taskTab(\'' + t + '\')">' + t.charAt(0).toUpperCase() + t.slice(1) + '</button>';
+      }).join('') + '</span></div>' + taskList +
+      '<form class="dz-add" onsubmit="event.preventDefault();ADM.taskAdd()">' +
+        '<input id="dz-task-title" placeholder="Add a task…" autocomplete="off">' +
+        '<select id="dz-task-pri"><option value="normal">Normal</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>' +
+        '<button class="dz-btn" type="submit">Add</button></form></div>';
+
+    // ---- recent downloads (delivery activity) ----
+    var dl = state.downloads || [];
+    var downloads = '<div class="dz-dl"><div class="dz-sechead"><h2>Recent downloads</h2><span class="dz-count">' + (state.dlWeek || 0) + '</span><span class="grow"></span><span style="font-size:0.66rem;color:var(--muted)">last 7 days</span></div>' +
+      '<div class="dz-card">' + (dl.length
+        ? '<table class="dz-table">' + dl.slice(0, 8).map(function (e) {
+            return '<tr class="click" onclick="ADM.go(\'project/' + e.booking_id + '\')"><td class="mut hide-m" style="white-space:nowrap">' + stamp(e.created_at) + '</td><td>' + esc(e.email || '—') + '</td>' +
+              '<td>' + (e.kind === 'view' ? '<span class="mut">—</span>' : esc(e.label || '—')) + '</td><td>' + esc(e.title || '') + '</td></tr>';
+          }).join('') + '</table>'
+        : '<p class="dz-empty" style="padding:1rem 1.1rem">No downloads yet.</p>') + '</div></div>';
+
+    // ---- this week (shoots in the next 7 days) + money snapshot ----
+    var startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+    var weekEnd = new Date(startToday.getTime() + 7 * 864e5);
+    var week = state.bookings.filter(function (b) {
+      if (['canceled', 'paid'].indexOf(b.status) > -1 || !b.shoot_date) return false;
+      var d = new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00'); return d >= startToday && d < weekEnd;
+    }).sort(function (a, b) { return new Date(a.shoot_date) - new Date(b.shoot_date); });
+    var weekHtml = '<div class="dz-card dz-tasks" style="margin-top:0.9rem"><div class="dz-tasks__head"><h2>This week</h2><span class="dz-count">' + week.length + '</span></div>' +
+      (week.length ? week.map(function (b) {
+        var d = new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00');
+        return '<div class="dz-task" style="cursor:pointer" onclick="ADM.go(\'project/' + b.id + '\')"><span class="dz-day"><b>' + d.getDate() + '</b><small>' + d.toLocaleDateString(undefined, { weekday: 'short' }) + '</small></span>' +
+          '<span class="t">' + esc(b.title) + '<small>' + (b.shoot_time ? fmtT(b.shoot_time) : '') + (b.client_name ? ' &middot; ' + esc(b.client_name) : '') + '</small></span>' +
+          (b.confirmed_at ? '<span class="dz-pill dz-pill--hi">Confirmed</span>' : '<span class="dz-pill dz-pill--mid">Unconfirmed</span>') + '</div>';
+      }).join('') : '<div class="dz-empty">No shoots in the next 7 days.</div>') + '</div>';
+    var nowD = new Date();
+    var paidThisMonth = state.bookings.filter(function (b) { if (b.status !== 'paid') return false; var d = new Date(b.paid_at || b.invoice_sent_at || b.delivered_at || b.created_at); return d.getMonth() === nowD.getMonth() && d.getFullYear() === nowD.getFullYear(); })
+      .reduce(function (s, b) { return s + net(b) + (Number(b.travel_fee) || 0); }, 0);
+    var awaiting = state.bookings.filter(function (b) { return b.invoice_sent_at && b.status !== 'paid' && b.status !== 'canceled'; })
+      .reduce(function (s, b) { return s + net(b) + (Number(b.travel_fee) || 0); }, 0);
+    var bookedYear = state.bookings.filter(function (b) { return b.status !== 'canceled' && b.shoot_date && new Date(b.shoot_date).getFullYear() === nowD.getFullYear(); })
+      .reduce(function (s, b) { return s + net(b) + (Number(b.travel_fee) || 0); }, 0);
+    var moneyHtml = '<div class="dz-card dz-tasks" style="margin-top:0.9rem"><div class="dz-tasks__head"><h2>Money</h2><span class="grow"></span><a class="more" style="font-size:0.7rem;color:var(--muted);cursor:pointer" onclick="ADM.go(\'billing\')">Billing &rarr;</a></div>' +
+      '<div class="dz-money"><div><small>Awaiting payment</small><b>' + compact(awaiting) + '</b></div><div><small>Collected this month</small><b>' + compact(paidThisMonth) + '</b></div><div><small>Booked this year</small><b>' + compact(bookedYear) + '</b></div></div></div>';
+
+    if (!state.gcal && !state.gcalBusy) ADM.dzGcal();
+    return head('Dashboard', '<button class="adm-btn" onclick="ADM.newBooking()">+ New project</button>') +
+      profile + matches +
+      '<div class="dz-sec dz-two">' + projects + '<div>' + tasksHtml + weekHtml + moneyHtml + '</div></div>' + downloads;
   }
 
   // "Status: Vacant · Listing: For Sale · …" from the wizard's details JSON.
@@ -1229,6 +1573,54 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     } catch (e) { return ''; }
   }
 
+  // ---- Billing: every invoice in one ledger + collections ---------------
+  function vBilling() {
+    var nowD = new Date();
+    var total = function (b) { return net(b) + (Number(b.travel_fee) || 0); };
+    var rows = state.bookings.filter(function (b) { return b.status !== 'canceled' && (b.invoice_sent_at || b.status === 'paid'); })
+      .sort(function (a, b) { return new Date(b.paid_at || b.invoice_sent_at || 0) - new Date(a.paid_at || a.invoice_sent_at || 0); });
+    var unpaid = rows.filter(function (b) { return b.status !== 'paid'; });
+    var outstanding = unpaid.reduce(function (s, b) { return s + total(b); }, 0);
+    var overdue = unpaid.filter(function (b) { return b.invoice_sent_at && (Date.now() - new Date(b.invoice_sent_at)) > 14 * 864e5; });
+    var paidD = function (b) { return new Date(b.paid_at || b.invoice_sent_at || b.delivered_at || b.created_at); };
+    var month = rows.filter(function (b) { return b.status === 'paid' && paidD(b).getMonth() === nowD.getMonth() && paidD(b).getFullYear() === nowD.getFullYear(); }).reduce(function (s, b) { return s + total(b); }, 0);
+    var year = rows.filter(function (b) { return b.status === 'paid' && paidD(b).getFullYear() === nowD.getFullYear(); }).reduce(function (s, b) { return s + total(b); }, 0);
+    var uninvoiced = state.bookings.filter(function (b) { return ['delivered', 'completed'].indexOf(b.status) > -1 && !b.invoice_sent_at && b.price; });
+    function stat(label, big, sub) { return '<div class="dz-stat"><div class="lbl">' + label + '</div><b>' + big + '</b>' + (sub ? '<span class="d">' + sub + '</span>' : '') + '</div>'; }
+    var f = state.billTab || 'all';
+    var list = rows.filter(function (b) { return f === 'all' ? true : f === 'unpaid' ? b.status !== 'paid' : f === 'overdue' ? overdue.indexOf(b) > -1 : b.status === 'paid'; });
+    return head('Billing') +
+      '<div class="bl-stats">' +
+        stat('Outstanding', compact(outstanding), unpaid.length + ' unpaid invoice' + (unpaid.length === 1 ? '' : 's')) +
+        stat('Overdue (14+ days)', compact(overdue.reduce(function (s, b) { return s + total(b); }, 0)), overdue.length ? '<em class="down">' + overdue.length + ' to chase</em>' : '<span class="mut">nothing overdue</span>') +
+        stat('Collected this month', compact(month), '') +
+        stat('Collected this year', compact(year), '') +
+      '</div>' +
+      (uninvoiced.length ? '<div class="dz-card" style="padding:0.8rem 1rem;margin-bottom:1rem;font-size:0.8rem;color:var(--ink)">' +
+        '<b>' + uninvoiced.length + ' delivered project' + (uninvoiced.length > 1 ? 's' : '') + ' not invoiced yet:</b> ' +
+        uninvoiced.map(function (b) { return '<a style="cursor:pointer;text-decoration:underline;text-underline-offset:3px" onclick="ADM.go(\'project/' + b.id + '\')">' + esc(b.title) + '</a>'; }).join(', ') + '</div>' : '') +
+      '<div class="adm-tools"><span class="adm-seg">' + [['all', 'All'], ['unpaid', 'Unpaid'], ['overdue', 'Overdue'], ['paid', 'Paid']].map(function (t) {
+        return '<button class="' + (f === t[0] ? 'on' : '') + '" onclick="ADM.billTab(\'' + t[0] + '\')">' + t[1] + '</button>';
+      }).join('') + '</span></div>' +
+      '<div class="dz-card">' + (list.length
+        ? '<table class="dz-table"><tr><th>Invoice</th><th>Project</th><th class="hide-m">Client</th><th class="hide-m">Sent</th><th>Total</th><th>Status</th><th></th></tr>' +
+          list.map(function (b) {
+            var num = 'JCS-' + String(b.id).padStart(4, '0');
+            var isOver = overdue.indexOf(b) > -1;
+            return '<tr><td><span class="adm-mono">' + num + '</span></td>' +
+              '<td><a style="cursor:pointer;color:var(--ink);text-decoration:underline;text-underline-offset:3px" onclick="ADM.go(\'project/' + b.id + '\')">' + esc(b.title) + '</a></td>' +
+              '<td class="hide-m">' + esc(b.client_name || '—') + '</td>' +
+              '<td class="hide-m mut">' + (b.invoice_sent_at ? dstr(b.invoice_sent_at) + (b.invoice_sends > 1 ? ' · ×' + b.invoice_sends : '') : '—') + '</td>' +
+              '<td>' + money(total(b)) + '</td>' +
+              '<td>' + (b.status === 'paid' ? '<span class="dz-pill dz-pill--hi">Paid' + (b.paid_at ? ' · ' + dstr(b.paid_at) : '') + '</span>' : isOver ? '<span class="dz-pill dz-pill--lo">Overdue</span>' : '<span class="dz-pill dz-pill--mid">Unpaid</span>') + '</td>' +
+              '<td style="text-align:right;white-space:nowrap">' +
+                (b.invoice_token ? '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/invoice?t=' + esc(b.invoice_token) + '" target="_blank" rel="noopener">View</a> ' : '') +
+                (b.status !== 'paid' ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invSend(' + b.id + ')">Resend</button> <button class="adm-btn adm-btn--sm" onclick="ADM.stage(' + b.id + ',\'paid\')">Mark paid</button>' : '') +
+              '</td></tr>';
+          }).join('') + '</table>'
+        : '<p class="dz-empty" style="padding:1rem 1.1rem">No invoices ' + (f === 'all' ? 'yet — generate one from a project page.' : 'in this view.') + '</p>') + '</div>';
+  }
+
   function vRequests() {
     var tabs = ['pending', 'accepted', 'declined', 'all'];
     var list = state.requests.filter(function (r) { return state.reqTab === 'all' || r.status === state.reqTab; });
@@ -1240,7 +1632,7 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       '<div class="adm-card">' + (list.length
         ? list.map(function (r) {
             var loc = [r.city, r.state].filter(Boolean).join(', ');
-            return '<div style="padding:1.1rem 0;border-bottom:1px solid var(--line-soft)">' +
+            return '<div id="req-' + r.id + '" style="padding:1.1rem 0;border-bottom:1px solid var(--line-soft);transition:background 0.6s">' +
               '<div style="display:flex;gap:0.8rem;align-items:baseline;flex-wrap:wrap">' +
                 '<b style="font-weight:700;letter-spacing:-0.01em;font-size:0.95rem;color:var(--ink)">' + esc(r.name) + '</b>' +
                 (r.brokerage ? '<small class="mut">' + esc(r.brokerage) + '</small>' : '') +
@@ -2033,6 +2425,46 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       '<div class="adm-rail">' + emails + info + '</div></div>';
   }
 
+  // ---- shell helpers: needs-attention feed, sidebar status, bell ------
+  function notifItems() {
+    var out = [], now = Date.now(), day = 864e5;
+    var pend = state.requests.filter(function (r) { return r.status === 'pending'; });
+    if (pend.length) out.push({ t: pend.length + ' new request' + (pend.length > 1 ? 's' : '') + ' to review', s: pend.slice(0, 3).map(function (r) { return r.name; }).join(', '), r: 'requests', c: 'amb' });
+    state.proposals.forEach(function (p) {
+      if (p.status === 'sent' && p.sent_at && now - new Date(p.sent_at) > 3 * day)
+        out.push({ t: 'Proposal waiting: ' + p.title, s: 'Sent ' + relTime(p.sent_at) + ' — worth a follow-up', r: 'proposal/' + p.id, c: 'amb' });
+    });
+    state.bookings.forEach(function (b) {
+      if (b.status === 'canceled') return;
+      var tot = net(b) + (Number(b.travel_fee) || 0);
+      if (b.downloads_locked && b.status === 'paid') out.push({ t: 'Paid but downloads locked: ' + b.title, s: 'Unlock so the client can download', r: 'project/' + b.id, c: 'grn' });
+      if (b.status === 'paid') return;
+      if (b.delivery_feedback && !b.delivery_approved_at) out.push({ t: 'Changes requested: ' + b.title, s: String(b.delivery_feedback).slice(0, 90), r: 'project/' + b.id, c: 'red' });
+      if (b.status === 'upcoming' && b.shoot_date && !b.confirmed_at && (new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00') - now) < 3 * day)
+        out.push({ t: 'Unconfirmed shoot: ' + b.title, s: 'Shoot ' + relTime(b.shoot_date).toLowerCase() + ' — send the confirmation', r: 'project/' + b.id, c: 'amb' });
+      if ((b.status === 'editing' || b.status === 'revisions') && b.shoot_date && !b.delivery_sent_at && (now - new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00')) > 3 * day)
+        out.push({ t: 'Delivery overdue: ' + b.title, s: 'Shot ' + relTime(b.shoot_date).toLowerCase() + ' — nothing sent yet', r: 'project/' + b.id, c: 'red' });
+      if (['delivered', 'completed'].indexOf(b.status) > -1 && !b.invoice_sent_at && b.price)
+        out.push({ t: 'Invoice not sent: ' + b.title, s: money(tot) + ' — delivered ' + relTime(b.delivered_at || b.delivery_sent_at).toLowerCase(), r: 'project/' + b.id, c: 'amb' });
+      if (b.invoice_sent_at && now - new Date(b.invoice_sent_at) > 14 * day)
+        out.push({ t: 'Invoice overdue: ' + b.title, s: money(tot) + ' — sent ' + relTime(b.invoice_sent_at).toLowerCase(), r: 'project/' + b.id, c: 'red' });
+    });
+    return out.slice(0, 40);
+  }
+  function paintBell() {
+    var n = notifItems().length, el = $('adm-bell-n');
+    if (el) { el.textContent = n; el.classList.toggle('adm-hidden', !n); }
+  }
+  function paintSide() {
+    var g = $('side-gcal'), d = $('side-date');
+    if (d) d.textContent = new Date().toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+    if (!g) return;
+    if (!state.gcal) { g.textContent = 'Checking…'; g.className = ''; }
+    else if (state.gcal.ok) { g.textContent = 'Connected'; g.className = 'ok'; }
+    else if (state.gcal.configured) { g.textContent = 'Not working'; g.className = 'warn'; }
+    else { g.textContent = 'Not set up'; g.className = 'warn'; }
+  }
+
   // ================= render =================
   function render() {
     var r = route(), m = $('main');
@@ -2041,10 +2473,15 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
     if (section === 'deliveries') { location.replace('#pipeline'); return; }
     if (section === 'delivery') { location.replace('#project/' + (r.split('/')[1] || '')); return; }
     var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline',
-                 proposals:'proposals', proposal:'proposals', licensing:'licensing',
+                 proposals:'proposals', proposal:'proposals', licensing:'licensing', billing:'billing',
                  clients:'clients', client:'clients', portfolio:'portfolio', siteproject:'portfolio', settings:'settings' }[section] || 'dash';
     document.querySelectorAll('#nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.r === owns); });
+    var side = $('side'); if (side) side.classList.remove('open');
+    var qr = $('adm-qres'); if (qr) qr.hidden = true;
+    var nf = $('adm-notif'); if (nf) nf.hidden = true;
+    paintBell(); paintSide();
     if (section === 'requests') m.innerHTML = vRequests();
+    else if (section === 'billing') m.innerHTML = vBilling();
     else if (section === 'pipeline') { m.innerHTML = vPipeline(); wirePipeline(); }
     else if (section === 'project') {
       var pid = r.split('/')[1];
@@ -2071,6 +2508,95 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
   // exposed for inline handlers
   window.ADM = {
     go: go,
+    // ---- shell: sidebar, global search, needs-attention feed -----------
+    menu: function () { $('side').classList.toggle('open'); },
+    dzScroll: function (dir) { var row = $('dz-row'); if (row) row.scrollBy({ left: dir * 360, behavior: 'smooth' }); },
+    dzGcal: async function () {
+      if (state.gcalBusy) return; state.gcalBusy = true;
+      try { state.gcal = await api('gcalcheck'); } catch (e) { state.gcal = { configured: false, ok: false }; }
+      state.gcalBusy = false;
+      paintSide();
+      if (route() === 'dash' || route() === '') render();
+    },
+    reqOpen: function (id) {
+      var r = state.requests.find(function (x) { return x.id == id; });
+      state.reqTab = r && r.status === 'pending' ? 'pending' : 'all';
+      go('requests');
+      setTimeout(function () { var el = document.getElementById('req-' + id); if (el) { el.scrollIntoView({ block: 'center' }); el.style.background = '#faf6e9'; setTimeout(function () { el.style.background = ''; }, 1600); } }, 60);
+    },
+    // global search — projects, clients, requests, proposals
+    qInput: function (v) {
+      var q = String(v || '').trim().toLowerCase();
+      var box = $('adm-qres');
+      if (!q) { box.hidden = true; box.innerHTML = ''; state.qSel = -1; return; }
+      var hit = function (s) { return String(s || '').toLowerCase().indexOf(q) > -1; };
+      var groups = [
+        ['Projects', state.bookings.filter(function (b) { return hit(b.title) || hit(b.client_name) || hit(b.location) || hit(b.delivery_slug); }).slice(0, 5)
+          .map(function (b) { return { t: b.title, s: (b.client_name || '') + (b.shoot_date ? ' · ' + dstr(b.shoot_date) : ''), r: 'project/' + b.id }; })],
+        ['Clients', state.clients.filter(function (c) { return hit(c.name) || hit(c.brokerage) || hit(c.email); }).slice(0, 4)
+          .map(function (c) { return { t: c.name, s: c.brokerage || c.email || '', r: 'client/' + c.id }; })],
+        ['Requests', state.requests.filter(function (r) { return hit(r.name) || hit(r.title) || hit(r.email) || hit(r.brokerage); }).slice(0, 4)
+          .map(function (r) { return { t: r.name + ' — ' + r.title, s: r.status, r: 'requests', id: r.id }; })],
+        ['Proposals', state.proposals.filter(function (p) { return hit(p.title) || hit(p.client_name) || hit(p.slug); }).slice(0, 4)
+          .map(function (p) { return { t: p.title, s: (p.client_name || '') + ' · ' + p.status, r: 'proposal/' + p.id }; })],
+      ].filter(function (g) { return g[1].length; });
+      state.qItems = [];
+      box.innerHTML = groups.length ? groups.map(function (g) {
+        return '<div class="g">' + g[0] + '</div>' + g[1].map(function (it) {
+          var i = state.qItems.push(it) - 1;
+          return '<a data-i="' + i + '" onmousedown="event.preventDefault();ADM.qGo(' + i + ')">' + esc(it.t) + '<small>' + esc(it.s) + '</small></a>';
+        }).join('');
+      }).join('') : '<div class="none">Nothing matches &ldquo;' + esc(q) + '&rdquo;.</div>';
+      box.hidden = false; state.qSel = -1;
+    },
+    qKey: function (e) {
+      var box = $('adm-qres'); if (box.hidden) { if (e.key === 'Escape') e.target.blur(); return; }
+      var links = box.querySelectorAll('a');
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        state.qSel = ((state.qSel || 0) + (e.key === 'ArrowDown' ? 1 : -1) + links.length) % Math.max(1, links.length);
+        if (state.qSel < 0) state.qSel = 0;
+        links.forEach(function (a, i) { a.classList.toggle('sel', i === state.qSel); });
+      } else if (e.key === 'Enter') {
+        e.preventDefault(); ADM.qGo(state.qSel >= 0 ? state.qSel : 0);
+      } else if (e.key === 'Escape') { box.hidden = true; e.target.blur(); }
+    },
+    qGo: function (i) {
+      var it = (state.qItems || [])[i]; if (!it) return;
+      $('adm-qres').hidden = true; $('adm-q').value = ''; $('adm-q').blur();
+      if (it.id) ADM.reqOpen(it.id); else go(it.r);
+    },
+    bell: function () {
+      var box = $('adm-notif');
+      if (!box.hidden) { box.hidden = true; return; }
+      var items = notifItems();
+      box.innerHTML = '<h4>Needs attention &middot; ' + items.length + '</h4>' + (items.length ? items.map(function (n) {
+        return '<a onclick="ADM.notifGo(\'' + n.r + '\')"><i class="' + (n.c || '') + '"></i><span>' + esc(n.t) + '<small>' + esc(n.s) + '</small></span></a>';
+      }).join('') : '<div class="empty">All clear — nothing waiting on you.</div>');
+      box.hidden = false;
+    },
+    notifGo: function (r) { $('adm-notif').hidden = true; go(r); },
+    // ---- tasks ----
+    taskTab: function (t) { state.taskTab = t; render(); },
+    taskAdd: async function () {
+      var inp = $('dz-task-title'), pri = $('dz-task-pri'); if (!inp) return;
+      var title = inp.value.trim(); if (!title) { inp.focus(); return; }
+      try {
+        var j = await api('tasks', 'POST', { title: title, priority: pri ? pri.value : 'normal' });
+        state.tasks.unshift(j.task); inp.value = ''; render();
+        var again = $('dz-task-title'); if (again) again.focus();
+      } catch (e) { toast(friendly(e), 'err'); }
+    },
+    taskToggle: async function (id) {
+      var t = state.tasks.find(function (x) { return x.id == id; }); if (!t) return;
+      try { var j = await api('tasks', 'PUT', { id: id, done: !t.done }); Object.assign(t, j.task); render(); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    taskDel: async function (id) {
+      try { await api('tasks', 'DELETE', { id: id }); state.tasks = state.tasks.filter(function (x) { return x.id != id; }); render(); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    billTab: function (t) { state.billTab = t; render(); },
     confirm: async function (id) {
       var b = state.bookings.find(function (x) { return x.id == id; }); if (!b) return;
       if (!b.shoot_date) { toast('Set a shoot date first (Edit).', 'err'); return; }
@@ -3037,6 +3563,18 @@ var STAGE_COLOR = { upcoming:'#4a6da8', editing:'#b98a2f', revisions:'#b9652f', 
       try { await api('bookings', 'DELETE', { id: id }); await reload(); go('pipeline'); render(); } catch (e) { toast(friendly(e), 'err'); }
     }
   };
+
+  // "/" focuses search; clicks outside close the search + attention popovers
+  document.addEventListener('keydown', function (e) {
+    if (e.key === '/' && !/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName) && !$('app').classList.contains('adm-hidden')) {
+      e.preventDefault(); var q = $('adm-q'); if (q) { q.focus(); q.select(); }
+    }
+  });
+  document.addEventListener('mousedown', function (e) {
+    var qr = $('adm-qres'), nf = $('adm-notif');
+    if (qr && !qr.hidden && !e.target.closest('.adm-search')) qr.hidden = true;
+    if (nf && !nf.hidden && !e.target.closest('.adm-top__acts')) nf.hidden = true;
+  });
 
   // boot
   fetch('/api/admin/me').then(function (r) { r.ok ? showApp() : showLogin(); }).catch(showLogin);
