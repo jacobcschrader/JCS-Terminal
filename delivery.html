@@ -4,133 +4,254 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
-<title>Your Delivery — Jacob Schrader</title>
-<meta name="description" content="Your delivery from Jacob Schrader.">
+<title>Your Listing — Jacob Schrader</title>
+<meta name="description" content="Your listing media from Jacob Schrader.">
 <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="styles.css">
 <style>
-.dv-hero { background: var(--navy); color: #fff; text-align: center;
-  padding: clamp(7rem, 14vh, 10rem) clamp(1.25rem, 5vw, 2rem) clamp(3.4rem, 7vw, 5rem); }
-.dv-hero .eyebrow { display: inline-flex; color: rgba(255,255,255,0.6); }
-.dv-hero h1 { font-family: var(--serif); font-style: italic; font-weight: 400; color: #fff;
-  font-size: clamp(2.2rem, 5.5vw, 3.6rem); line-height: 1.08; margin: 1.2rem 0 0.7rem; }
-.dv-hero .loc { font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase;
-  color: rgba(255,255,255,0.55); }
-.dv-hero .date { font-size: 0.82rem; color: rgba(255,255,255,0.45); margin-top: 0.5rem; }
-.dv-hero .btns { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; margin-top: 2.4rem; }
-.dv-hero .btns a { display: inline-block; padding: 1rem 2.1rem; font-size: 0.66rem;
-  letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; text-decoration: none;
-  transition: opacity 0.3s var(--ease); }
-.dv-hero .btns a:hover { opacity: 0.85; }
-.dv-hero .btns a.solid { background: #fff; color: var(--navy); }
-.dv-hero .btns a.ghost { border: 1px solid rgba(255,255,255,0.4); color: #fff; }
-@media (max-width: 520px) {
-  .dv-hero { padding-top: 5.2rem; padding-bottom: 2.6rem; }
-  .dv-hero h1 { font-size: clamp(1.7rem, 8vw, 2.2rem); }
-  .dv-hero .btns { margin-top: 1.8rem; }
-  .dv-hero .btns { gap: 0.6rem; }
-  .dv-hero .btns a { padding: 0.7rem 1.2rem; font-size: 0.58rem; letter-spacing: 0.16em; }
-  .dv-review .acts a, .dv-review .acts button { font-size: 0.62rem; padding: 0.7rem 1.2rem; }
-  .dv-wrap { padding-top: 2rem; }
-}
+/* ============ Client listing page — /portal/<slug> (pattern:
+   jacobguthrie.com/portal/<listing>, 2026-08-08). Full-bleed cover hero
+   with the address; then the delivery: bundle downloads (full-res +
+   MLS 2048px), films two-up, photos in a masonry grid — each with a
+   select box + hover download. Downloads are logged; locking hides
+   every download control. ========================================== */
+body { background: #f8f7f4; }
+[hidden] { display: none !important; }
 
-.dv-wrap { max-width: 680px; margin: 0 auto; padding: clamp(2.6rem, 6vw, 4rem) clamp(1.25rem, 5vw, 2rem) 6rem; }
-.dv-dels { text-align: center; padding-bottom: clamp(2rem, 5vw, 3rem); border-bottom: 1px solid var(--line); }
-.dv-dels b { display: block; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase;
-  color: var(--muted); font-weight: 600; margin-bottom: 0.7rem; }
-.dv-dels span { font-size: 0.95rem; color: var(--ink); line-height: 1.8; }
+/* ---- hero ---- */
+.lp-hero { position: relative; min-height: 100svh; display: flex; align-items: center; justify-content: center; text-align: center;
+  color: #fff; background: linear-gradient(150deg, var(--navy) 0%, var(--navy-deep) 100%); overflow: hidden; }
+.lp-hero--short { min-height: 62svh; }
+.lp-hero__img { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.lp-hero::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(6,13,24,0.42) 0%, rgba(6,13,24,0.18) 40%, rgba(6,13,24,0.5) 100%); }
+.lp-hero__in { position: relative; z-index: 1; padding: 7rem clamp(1.25rem, 5vw, 2rem) 5rem; }
+.lp-hero h1 { font-family: var(--serif); font-weight: 400; color: #fff; letter-spacing: -0.005em;
+  font-size: clamp(2.4rem, 6.2vw, 4.4rem); line-height: 1.05; margin: 0 0 1rem;
+  font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; text-shadow: 0 2px 30px rgba(0,0,0,0.25); }
+.lp-hero .sub { font-size: 0.64rem; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 500; color: rgba(255,255,255,0.85); }
+.lp-hero .soon { display: inline-block; margin-top: 1.4rem; font-size: 0.6rem; letter-spacing: 0.24em; text-transform: uppercase; color: rgba(255,255,255,0.7); }
 
-.dv-review { text-align: center; padding-top: clamp(2rem, 5vw, 3rem); }
-.dv-review h2 { font-family: var(--serif); font-style: italic; font-weight: 400;
-  font-size: 1.5rem; color: var(--navy); margin: 0 0 0.5rem; }
-.dv-review p { font-size: 0.88rem; color: var(--muted); margin: 0 0 1.6rem; line-height: 1.7; }
-.dv-review .acts { display: flex; gap: 0.9rem; justify-content: center; flex-wrap: wrap; }
-.dv-approved { display: inline-flex; align-items: center; gap: 0.6rem; background: #dfeee2;
-  color: #1d4d2a; font-size: 0.68rem; letter-spacing: 0.16em; text-transform: uppercase;
-  font-weight: 600; padding: 0.75rem 1.4rem; }
-#dv-changes-form { max-width: 460px; margin: 1.6rem auto 0; text-align: left; }
-#dv-changes-form label { display: block; font-size: 0.62rem; letter-spacing: 0.2em;
-  text-transform: uppercase; color: var(--muted); font-weight: 600; margin-bottom: 0.5rem; }
-#dv-changes-form textarea { width: 100%; box-sizing: border-box; min-height: 120px; resize: vertical;
-  font-family: var(--sans); font-size: 0.92rem; color: var(--ink); background: #fff;
-  border: 1px solid var(--line); padding: 0.85rem 0.95rem; outline: none; line-height: 1.6;
-  transition: border-color 0.3s var(--ease); }
-#dv-changes-form textarea:focus { border-color: var(--navy); }
+/* ---- body ---- */
+.lp-wrap { padding-top: clamp(2rem, 4vw, 3rem); padding-bottom: clamp(4rem, 8vw, 6rem); }
+.lp-top { display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap; margin-bottom: 1.4rem; }
+.lp-back { font-size: 0.58rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; text-decoration: none; }
+.lp-back:hover { color: var(--navy); }
+.lp-top .grow { flex: 1; }
+.lp-pillbtn { font-family: var(--sans); font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--ink);
+  border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 0.7rem 1.15rem; cursor: pointer; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.5rem; transition: border-color 0.25s var(--ease), color 0.25s var(--ease); white-space: nowrap; }
+.lp-pillbtn:hover { border-color: rgba(15,34,64,0.5); color: var(--navy); }
+.lp-pillbtn[disabled] { opacity: 0.45; cursor: default; }
+.lp-pillbtn.busy { border-color: var(--navy); color: var(--navy); }
+.lp-state { font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; padding: 0.55rem 1rem; border-radius: 999px; }
+.lp-state--ok { background: #e6f0e8; color: #2f6b3f; }
+.lp-state--locked { background: #f5e8e8; color: #a03a3a; }
+.lp-bundles { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: clamp(1.8rem, 4vw, 2.6rem); }
+.lp-lockmsg { font-size: 0.85rem; color: var(--muted); background: #fff; border: 1px solid var(--line); padding: 1rem 1.2rem; margin-bottom: 2rem; line-height: 1.7; }
+.lp-lockmsg a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.lp-lbl { font-size: 0.56rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 0.75rem; }
+.lp-sec { margin-bottom: clamp(2rem, 4vw, 3rem); }
 
-.dv-note { margin-top: clamp(2.4rem, 5vw, 3.4rem); padding-top: 1.8rem; border-top: 1px solid var(--line);
-  text-align: center; font-size: 0.84rem; color: var(--muted); }
-.dv-note a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
-.dv-missing { text-align: center; padding: 9rem 1rem 5rem; }
-.dv-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400;
-  font-size: 1.7rem; color: var(--navy); margin: 0 0 0.6rem; }
-.dv-missing p { font-size: 0.85rem; color: var(--muted); }
-.dv-missing a { color: var(--navy); }
+/* films: two-up 16:9 players + name row */
+.lp-films { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
+@media (max-width: 760px) { .lp-films { grid-template-columns: 1fr; } }
+.lp-film { background: #fff; border: 1px solid var(--line); }
+.lp-film video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
+.lp-film__row { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 0.9rem; font-size: 0.8rem; color: var(--ink); }
+.lp-film__row .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lp-dl { font-family: var(--sans); font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--ink);
+  border: 1px solid var(--line); background: #fff; padding: 0.5rem 0.85rem; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.lp-dl:hover { border-color: rgba(15,34,64,0.5); color: var(--navy); }
+.lp-chk { appearance: none; -webkit-appearance: none; width: 15px; height: 15px; border: 1px solid rgba(15,34,64,0.45); background: #fff; cursor: pointer; margin: 0; flex: none; display: inline-block; position: relative; }
+.lp-chk:checked { background: var(--navy); border-color: var(--navy); }
+.lp-chk:checked::after { content: ""; position: absolute; left: 4px; top: 1px; width: 4px; height: 8px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+/* photos: masonry via CSS columns */
+.lp-photos { columns: 4; column-gap: 0.45rem; }
+@media (max-width: 1100px) { .lp-photos { columns: 3; } }
+@media (max-width: 700px) { .lp-photos { columns: 2; } }
+.lp-ph { position: relative; break-inside: avoid; margin: 0 0 0.45rem; background: #e9e6df; overflow: hidden; cursor: zoom-in; }
+.lp-ph img { width: 100%; height: auto; display: block; transition: transform 0.6s var(--ease); }
+.lp-ph:hover img { transform: scale(1.02); }
+.lp-ph .lp-chk { position: absolute; left: 0.6rem; top: 0.6rem; z-index: 2; box-shadow: 0 1px 4px rgba(0,0,0,0.25); }
+.lp-ph .dl { position: absolute; right: 0.55rem; bottom: 0.55rem; z-index: 2; width: 30px; height: 30px; border-radius: 50%; border: 0;
+  background: rgba(255,255,255,0.92); color: var(--navy); display: flex; align-items: center; justify-content: center; cursor: pointer;
+  opacity: 0; transform: translateY(4px); transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); text-decoration: none; }
+.lp-ph:hover .dl, .lp-ph .dl:focus { opacity: 1; transform: none; }
+.lp-ph .dl svg { width: 13px; height: 13px; }
+@media (hover: none) { .lp-ph .dl { opacity: 1; transform: none; } }
+
+/* other files */
+.lp-files .row { display: flex; align-items: center; gap: 0.8rem; background: #fff; border: 1px solid var(--line); padding: 0.75rem 0.95rem; margin-bottom: 0.45rem; font-size: 0.84rem; }
+.lp-files .row .nm { flex: 1; }
+
+/* selection bar */
+.lp-selbar { position: fixed; left: 50%; bottom: 1.4rem; transform: translate(-50%, 20px); z-index: 90; background: var(--navy); color: #fff;
+  display: flex; align-items: center; gap: 1rem; padding: 0.7rem 0.8rem 0.7rem 1.3rem; box-shadow: 0 14px 40px rgba(9,22,39,0.35);
+  opacity: 0; pointer-events: none; transition: opacity 0.3s var(--ease), transform 0.3s var(--ease); font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; }
+.lp-selbar.in { opacity: 1; pointer-events: auto; transform: translate(-50%, 0); }
+.lp-selbar button { font-family: var(--sans); font-size: 0.56rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.35); background: transparent; color: #fff; padding: 0.55rem 0.9rem; }
+.lp-selbar button.solid { background: #fff; color: var(--navy); border-color: #fff; }
+
+/* progress toast */
+.lp-toast { position: fixed; left: 50%; bottom: 1.4rem; transform: translateX(-50%); z-index: 95; background: #fff; color: var(--ink); border: 1px solid var(--line);
+  padding: 0.8rem 1.2rem; font-size: 0.8rem; min-width: 280px; box-shadow: 0 14px 40px rgba(9,22,39,0.18); display: none; }
+.lp-toast.in { display: block; }
+.lp-toast .bar { height: 3px; background: var(--line-soft); margin-top: 0.6rem; }
+.lp-toast .bar i { display: block; height: 100%; background: var(--navy); width: 0; transition: width 0.2s; }
+
+/* invoice + review */
+.lp-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+@media (max-width: 760px) { .lp-meta { grid-template-columns: 1fr; } }
+.lp-box { background: #fff; border: 1px solid var(--line); padding: 1.3rem 1.4rem; }
+.lp-box h3 { font-family: var(--sans); font-size: 0.56rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 0.8rem; }
+.lp-box p { font-size: 0.86rem; color: var(--muted); line-height: 1.7; margin: 0 0 1rem; }
+.lp-box .row { font-size: 0.86rem; color: var(--ink); display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: baseline; }
+.lp-box .row a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.lp-box .acts { display: flex; gap: 0.6rem; flex-wrap: wrap; }
+.lp-box textarea { width: 100%; box-sizing: border-box; min-height: 100px; resize: vertical; font-family: var(--sans); font-size: 0.9rem; color: var(--ink);
+  background: #fff; border: 1px solid var(--line); padding: 0.8rem 0.9rem; outline: none; line-height: 1.6; margin: 0.8rem 0; }
+.lp-box textarea:focus { border-color: var(--navy); }
+.lp-approved { display: inline-flex; align-items: center; gap: 0.6rem; background: #e6f0e8; color: #2f6b3f; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 600; padding: 0.7rem 1.2rem; }
+
+/* lightbox */
+.lp-lb { position: fixed; inset: 0; z-index: 120; background: rgba(6,13,24,0.94); display: none; align-items: center; justify-content: center; }
+.lp-lb.in { display: flex; }
+.lp-lb img { max-width: 92vw; max-height: 84vh; object-fit: contain; box-shadow: 0 30px 80px rgba(0,0,0,0.5); }
+.lp-lb .cap { position: absolute; left: 0; right: 0; bottom: 1.4rem; text-align: center; color: rgba(255,255,255,0.75); font-size: 0.7rem; letter-spacing: 0.08em; }
+.lp-lb .cap a { color: #fff; margin-left: 1rem; font-size: 0.56rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; text-decoration: none; border: 1px solid rgba(255,255,255,0.4); padding: 0.4rem 0.8rem; }
+.lp-lb button { position: absolute; top: 50%; transform: translateY(-50%); background: none; border: 0; color: #fff; font-size: 2rem; cursor: pointer; padding: 1rem; opacity: 0.7; }
+.lp-lb button:hover { opacity: 1; }
+.lp-lb .prev { left: 0.5rem; } .lp-lb .next { right: 0.5rem; }
+.lp-lb .close { top: 1rem; right: 1rem; transform: none; font-size: 1.6rem; }
+
+.lp-note { margin-top: clamp(2.4rem, 5vw, 3.4rem); padding-top: 1.8rem; border-top: 1px solid var(--line); text-align: center; font-size: 0.84rem; color: var(--muted); }
+.lp-note a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.lp-missing { text-align: center; padding: 10rem 1rem 6rem; }
+.lp-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.7rem; color: var(--navy); margin: 0 0 0.6rem; }
+.lp-missing p { font-size: 0.85rem; color: var(--muted); }
+.lp-missing a { color: var(--navy); }
 </style>
 </head>
 <body>
 
-<nav class="mnav mnav--light" id="dv-nav">
-  <a class="mnav__brand" href="/">JCS</a>
-  <a class="mnav__link" id="dv-portal-link" hidden>&larr; Back to Portal</a>
+<nav class="nav nav--over-hero" id="lp-nav">
+  <a class="nav__brand" href="/">JCS</a>
+  <button class="nav__toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+  <div class="nav__links">
+    <a href="/projects">Work</a>
+    <a href="/services">Services</a>
+    <a href="/about">About</a>
+    <a href="/book">Contact</a>
+  </div>
+  <div class="nav__side">
+    <a class="nav__login" href="/portal">Client Login</a>
+    <a class="nav__cta" href="/book">Book a Shoot</a>
+  </div>
 </nav>
 
-<header class="dv-hero" id="dv-hero" hidden>
-  <span class="eyebrow">Your Delivery</span>
-  <h1 id="dv-title"></h1>
-  <div class="loc" id="dv-loc"></div>
-  <div class="date" id="dv-date"></div>
-  <div class="btns" id="dv-actions"></div>
+<header class="lp-hero" id="lp-hero" hidden>
+  <div class="lp-hero__img" id="lp-hero-img"></div>
+  <div class="lp-hero__in">
+    <h1 id="lp-title"></h1>
+    <div class="sub" id="lp-sub"></div>
+    <span class="soon" id="lp-soon" hidden>Gallery coming soon</span>
+  </div>
 </header>
 
-<div class="dv-wrap" id="dv-body" hidden>
-  <div class="dv-dels" id="dv-dels" hidden>
-    <b>Included in your delivery</b>
-    <span id="dv-dels-text"></span>
+<div class="wrap lp-wrap" id="lp-body" hidden>
+  <div class="lp-top">
+    <a class="lp-back" id="lp-back" href="/portal">&larr; All listings</a>
+    <span class="grow"></span>
+    <button class="lp-pillbtn" id="lp-share" hidden>Share preview &nearr;</button>
+    <span class="lp-state" id="lp-state"></span>
+  </div>
+  <div class="lp-bundles" id="lp-bundles"></div>
+  <div class="lp-lockmsg" id="lp-lockmsg" hidden></div>
+
+  <div class="lp-sec" id="lp-filmsec" hidden>
+    <div class="lp-lbl" id="lp-filmlbl"></div>
+    <div class="lp-films" id="lp-films"></div>
+  </div>
+  <div class="lp-sec" id="lp-photosec" hidden>
+    <div class="lp-lbl" id="lp-photolbl"></div>
+    <div class="lp-photos" id="lp-photos"></div>
+  </div>
+  <div class="lp-sec lp-files" id="lp-filesec" hidden>
+    <div class="lp-lbl" id="lp-filelbl"></div>
+    <div id="lp-files"></div>
   </div>
 
-  <div class="dv-review">
-    <div id="dv-review-open">
-      <h2>Happy with everything?</h2>
-      <p>Approve the delivery, or tell me what to adjust — revisions are always included.</p>
-      <div class="acts">
-        <a class="btn btn--solid" style="cursor:pointer" id="dv-approve">Approve Delivery</a>
-        <a class="btn" style="cursor:pointer" id="dv-request">Request Changes</a>
+  <div class="lp-meta">
+    <div class="lp-box" id="lp-invbox" hidden>
+      <h3>Invoice</h3>
+      <div class="row" id="lp-inv"></div>
+    </div>
+    <div class="lp-box" id="lp-review">
+      <h3>Feedback</h3>
+      <div id="lp-review-open">
+        <p>Happy with everything? Approve the delivery, or tell me what to adjust &mdash; revisions are always included.</p>
+        <div class="acts">
+          <button class="lp-pillbtn" id="lp-approve">Approve delivery</button>
+          <button class="lp-pillbtn" id="lp-request">Request changes</button>
+        </div>
+        <form id="lp-changes" hidden>
+          <textarea id="lp-msg" required placeholder="e.g. Could we brighten the kitchen photos and trim the film intro?"></textarea>
+          <button class="lp-pillbtn" type="submit" id="lp-send">Send request</button>
+        </form>
       </div>
-      <form id="dv-changes-form" hidden>
-        <label for="dv-msg">What should change?</label>
-        <textarea id="dv-msg" required placeholder="e.g. Could we brighten the kitchen photos and trim the film intro?"></textarea>
-        <button class="btn btn--solid" type="submit" id="dv-send" style="width:100%;margin-top:1rem;border:0;cursor:pointer">Send Request</button>
-      </form>
-    </div>
-    <div id="dv-review-approved" hidden>
-      <div class="dv-approved">&#10003;&nbsp; Delivery approved<span id="dv-approved-date" style="text-transform:none;letter-spacing:0.04em;font-weight:400"></span></div>
-      <p style="margin-top:1.2rem">Thank you! Need something adjusted after all? <a href="#" id="dv-reopen" style="color:var(--navy)">Request changes</a>.</p>
-    </div>
-    <div id="dv-review-sent" hidden>
-      <h2>Request received.</h2>
-      <p>I'm on it — you'll get an updated delivery at this same link.</p>
+      <div id="lp-review-approved" hidden>
+        <div class="lp-approved">&#10003;&nbsp; Delivery approved<span id="lp-approved-date" style="text-transform:none;letter-spacing:0.04em;font-weight:400"></span></div>
+        <p style="margin-top:1rem">Need something adjusted after all? <a href="#" id="lp-reopen" style="color:var(--navy)">Request changes</a>.</p>
+      </div>
+      <div id="lp-review-sent" hidden>
+        <p style="margin:0">Request received &mdash; I&rsquo;m on it. You&rsquo;ll get the update at this same page.</p>
+      </div>
     </div>
   </div>
 
-  <p class="dv-note">Questions or requests? <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> &nbsp;·&nbsp; <a href="tel:+14088248719">(408) 824-8719</a></p>
+  <p class="lp-note">Questions or requests? <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> &nbsp;·&nbsp; <a href="tel:+14088248719">(408) 824-8719</a></p>
 </div>
 
-<div class="dv-missing" id="dv-missing" hidden>
-  <h1>This delivery link isn't valid.</h1>
-  <p>Check the link from your email, or <a href="mailto:jacxbschrader@gmail.com">get in touch</a> and I'll resend it.</p>
+<div class="lp-missing" id="lp-missing" hidden>
+  <h1 id="lp-missing-h">This listing link isn't valid.</h1>
+  <p id="lp-missing-p">Sign in to your <a href="/portal">client portal</a> to see your listings, or <a href="mailto:jacxbschrader@gmail.com">get in touch</a>.</p>
 </div>
 
-<footer class="footer footer--min">
-  <div class="wrap footer__center">
-    <a class="footer__brand" href="/">JCS</a>
-    <div class="footer__meta">
-      <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a>
-      <span class="sep">·</span>
-      <a href="tel:+14088248719">(408) 824-8719</a>
+<div class="lp-selbar" id="lp-selbar"><span id="lp-selcount">0 selected</span><button class="solid" id="lp-seldl">Download selected</button><button id="lp-selclear">Clear</button></div>
+<div class="lp-toast" id="lp-toast"><span id="lp-toast-t"></span><div class="bar"><i id="lp-toast-b"></i></div></div>
+<div class="lp-lb" id="lp-lb"><button class="close" id="lp-lb-close">&times;</button><button class="prev" id="lp-lb-prev">&lsaquo;</button><img id="lp-lb-img" alt=""><button class="next" id="lp-lb-next">&rsaquo;</button><div class="cap" id="lp-lb-cap"></div></div>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div>
+        <a class="footer__brand" href="/" style="display:inline-block">JCS</a>
+        <p style="max-width:26ch;font-family:var(--serif);font-weight:300;font-size:1.19rem;line-height:1.45;color:rgba(255,255,255,0.65)">Luxury real estate photography &amp; film. Danville, California &mdash; available worldwide.</p>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <a href="/projects">Work</a>
+        <a href="/services">Services</a>
+        <a href="/about">About</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="/book">Book a Shoot</a>
+        <a href="https://www.instagram.com/byjcs_/" target="_blank" rel="noopener">Instagram</a>
+        <a href="/portal">Client Portal</a>
+        <a href="mailto:jacxbschrader@gmail.com">Email</a>
+        <a href="tel:+14088248719">(408) 824-8719</a>
+      </div>
     </div>
-    <div class="footer__base">© 2026 Jacob Schrader</div>
+    <div class="footer__bottom">
+      <span>&copy; 2026 JCS LLC. All rights reserved.</span>
+      <span><a href="tel:+14088248719" style="display:inline;padding:0;font-size:inherit">408.824.8719</a> &middot; <a href="mailto:jacxbschrader@gmail.com" style="display:inline;padding:0;font-size:inherit">JacxbSchrader@gmail.com</a></span>
+    </div>
   </div>
 </footer>
 
@@ -138,91 +259,356 @@
 <script>
 (async function () {
   var $ = function (id) { return document.getElementById(id); };
-  var t = new URLSearchParams(location.search).get('t');
-  function missing() { $('dv-missing').hidden = false; $('dv-nav').classList.remove('mnav--light'); }
+  var qs = new URLSearchParams(location.search);
+  var t = qs.get('t') || '';
+  // /portal/<slug> (Vercel rewrite) or ?slug= for local previews
+  var m = location.pathname.match(/^\/portal\/([a-z0-9-]+)/i);
+  var slug = (m ? m[1] : (qs.get('slug') || '')).toLowerCase();
+  function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+  function money(n) { return '$' + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
   function dstr(s) {
-    return new Date(String(s).slice(0, 10) + 'T12:00:00')
-      .toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+    if (!s) return '';
+    return new Date(String(s).slice(0, 10) + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
   }
-  if (!t) { missing(); return; }
+  function fmtBytes(n) { return n > 1e9 ? (n / 1e9).toFixed(2) + ' GB' : n > 1e6 ? Math.round(n / 1e6) + ' MB' : Math.round(n / 1e3) + ' KB'; }
+  function dlUrl(u) { return u + (u.indexOf('?') > -1 ? '&' : '?') + 'download=1'; }
+  var DL_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v9M4.5 7.5 8 11l3.5-3.5M3 13.5h10"/></svg>';
+
+  function missing(unauth) {
+    $('lp-nav').classList.remove('nav--over-hero');
+    $('lp-missing').hidden = false;
+    if (unauth) {
+      $('lp-missing-h').textContent = 'Please sign in to view this listing.';
+      $('lp-missing-p').innerHTML = 'Open your <a href="/portal">client portal</a> and request a sign-in link &mdash; it lands you right back here.';
+    }
+  }
+  var apiQ = t ? 't=' + encodeURIComponent(t) : (slug ? 'slug=' + encodeURIComponent(slug) : '');
+  if (!apiQ) { missing(); return; }
+  var d;
   try {
-    var r = await fetch('/api/delivery?t=' + encodeURIComponent(t));
+    var r = await fetch('/api/delivery?' + apiQ);
+    if (r.status === 401) { missing(true); return; }
     if (!r.ok) { missing(); return; }
-    var d = await r.json();
-    document.title = d.title + ' — Delivery — Jacob Schrader';
-    $('dv-title').textContent = d.title;
-    $('dv-loc').textContent = d.location || '';
-    // Gallery cover as the hero backdrop (black scrim keeps text legible);
-    // falls back to the flat navy hero when no cover is cached.
-    if (d.cover_url) {
-      var hero = $('dv-hero');
-      hero.style.backgroundImage =
-        'linear-gradient(rgba(6,13,24,0.55), rgba(6,13,24,0.72)), url("' + d.cover_url.replace(/"/g, '%22') + '")';
-      hero.style.backgroundSize = 'cover';
-      hero.style.backgroundPosition = 'center';
-    }
-    if (d.delivered_at) $('dv-date').textContent = 'Delivered ' + dstr(d.delivered_at);
-    if (d.portal_url) { var pl = $('dv-portal-link'); pl.href = d.portal_url; pl.hidden = false; }
-    var acts = $('dv-actions');
-    (d.links || []).forEach(function (l, i) {
-      var a = document.createElement('a');
-      a.className = i === 0 ? 'solid' : 'ghost';
-      a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
-      a.textContent = l.label || 'View';
-      acts.appendChild(a);
+    d = await r.json();
+  } catch (e) { missing(); return; }
+
+  // ---- identity for the activity log + POST helper ----
+  var ident = t ? { t: t } : { slug: d.slug || slug };
+  function post(body) {
+    return fetch('/api/delivery', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(Object.assign({}, ident, body)), keepalive: true });
+  }
+  function log(kind, file, label) {
+    post({ action: 'download', kind: kind, file_id: file ? file.id : null, label: label || '' }).catch(function () {});
+  }
+
+  // ---- hero ----
+  document.title = d.title + ' — Jacob Schrader';
+  $('lp-title').textContent = d.title;
+  $('lp-sub').textContent = [d.location, d.client_brokerage || d.client_name].filter(Boolean).join('  ·  ');
+  var photos = (d.files || []).filter(function (f) { return f.kind === 'photo'; });
+  var films = (d.files || []).filter(function (f) { return f.kind === 'film'; });
+  var others = (d.files || []).filter(function (f) { return f.kind !== 'photo' && f.kind !== 'film'; });
+  var heroImg = d.cover_url || (photos[0] && (photos[0].web || photos[0].thumb)) || (films[0] && films[0].thumb) || '';
+  if (heroImg) $('lp-hero-img').style.backgroundImage = 'url("' + heroImg.replace(/"/g, '%22') + '")';
+  else { $('lp-hero').classList.add('lp-hero--short'); $('lp-soon').hidden = false; }
+  $('lp-hero').hidden = false;
+  $('lp-body').hidden = false;
+
+  // ---- top row: state + share ----
+  var locked = !!d.locked;
+  var st = $('lp-state');
+  if (locked) { st.className = 'lp-state lp-state--locked'; st.textContent = 'Downloads locked'; }
+  else { st.className = 'lp-state lp-state--ok'; st.textContent = d.paid ? 'Paid — downloads unlocked' : 'Downloads unlocked'; }
+  if (d.share_url) {
+    var sh = $('lp-share'); sh.hidden = false;
+    sh.addEventListener('click', async function () {
+      try { await navigator.clipboard.writeText(d.share_url); sh.textContent = 'Link copied'; setTimeout(function () { sh.innerHTML = 'Share preview &nearr;'; }, 1800); }
+      catch (e) { prompt('Share link:', d.share_url); }
     });
-    if (d.deliverables) { $('dv-dels').hidden = false; $('dv-dels-text').textContent = d.deliverables; }
+  }
+  if (d.via === 'share') $('lp-back').textContent = 'JCS Client Portal';
+  if (locked) {
+    $('lp-lockmsg').hidden = false;
+    $('lp-lockmsg').innerHTML = 'Downloads are locked for this listing' +
+      (d.invoice && !d.invoice.paid ? ' until the invoice is settled &mdash; <a href="' + esc(d.invoice.url) + '">view invoice ' + esc(d.invoice.number) + '</a>.' : ' &mdash; get in touch and I&rsquo;ll open them up.') +
+      ' You can still preview everything below.';
+  }
 
-    function showApproved(at) {
-      $('dv-review-open').hidden = true;
-      $('dv-review-sent').hidden = true;
-      $('dv-review-approved').hidden = false;
-      if (at) $('dv-approved-date').textContent = ' · ' + dstr(at);
-    }
-    if (d.approved_at) showApproved(d.approved_at);
+  // ---- bundle buttons ----
+  var bundles = $('lp-bundles');
+  function pill(label, id) {
+    var b = document.createElement('button'); b.className = 'lp-pillbtn'; b.innerHTML = '&#8615;&nbsp; ' + label; if (id) b.id = id; return b;
+  }
+  if (!locked && photos.length) {
+    var bFull = pill('Download all &mdash; full res', 'lp-full'), bMls = pill('MLS photo download &mdash; 2048px', 'lp-mls');
+    bundles.appendChild(bFull); bundles.appendChild(bMls);
+    bFull.addEventListener('click', function () { bundle(photos.map(function (f) { return { name: f.name, url: f.url }; }), 'full-res', bFull); log('full'); });
+    bMls.addEventListener('click', function () {
+      bundle(photos.map(function (f) { return { name: f.name.replace(/\.[^.]+$/, '') + '.jpg', url: f.web || f.url }; }), 'mls-2048px', bMls); log('mls');
+    });
+  }
+  (d.links || []).forEach(function (l) {
+    var a = document.createElement('a'); a.className = 'lp-pillbtn'; a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML = esc(l.label || 'View') + ' &nearr;'; bundles.appendChild(a);
+  });
 
-    $('dv-approve').addEventListener('click', async function () {
-      this.textContent = 'Approving…';
-      try {
-        var rr = await fetch('/api/delivery', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ t: t, action: 'approve' })
+  // ---- selection ----
+  var selected = {};
+  function selCount() { return Object.keys(selected).length; }
+  function paintSel() {
+    var n = selCount();
+    $('lp-selcount').textContent = n + ' selected';
+    $('lp-selbar').classList.toggle('in', n > 0);
+  }
+  function chk(f) {
+    if (locked) return '';
+    return '<input type="checkbox" class="lp-chk" data-id="' + f.id + '" aria-label="Select ' + esc(f.name) + '">';
+  }
+  document.addEventListener('change', function (e) {
+    var c = e.target; if (!c.classList || !c.classList.contains('lp-chk')) return;
+    var id = c.getAttribute('data-id');
+    if (c.checked) selected[id] = true; else delete selected[id];
+    paintSel();
+  });
+  $('lp-selclear').addEventListener('click', function () {
+    selected = {}; document.querySelectorAll('.lp-chk').forEach(function (c) { c.checked = false; }); paintSel();
+  });
+  $('lp-seldl').addEventListener('click', function () {
+    var picks = (d.files || []).filter(function (f) { return selected[f.id]; });
+    if (!picks.length) return;
+    if (picks.length === 1) { single(picks[0]); return; }
+    bundle(picks.map(function (f) { return { name: f.name, url: f.url }; }), 'selected', $('lp-seldl'));
+    log('selected', null, 'Selected files (' + picks.length + ')');
+  });
+
+  // ---- films ----
+  if (films.length) {
+    $('lp-filmsec').hidden = false;
+    $('lp-filmlbl').textContent = 'Films · ' + films.length;
+    $('lp-films').innerHTML = films.map(function (f) {
+      return '<div class="lp-film"><video controls preload="metadata" playsinline' + (f.thumb ? ' poster="' + esc(f.thumb) + '"' : '') + ' src="' + esc(f.url) + '"></video>' +
+        '<div class="lp-film__row">' + chk(f) + '<span class="nm">' + esc(f.name) + '</span>' +
+        (!locked ? '<a class="lp-dl" href="' + esc(dlUrl(f.url)) + '" data-id="' + f.id + '">Download</a>' : '') + '</div></div>';
+    }).join('');
+  }
+
+  // ---- photos ----
+  if (photos.length) {
+    $('lp-photosec').hidden = false;
+    $('lp-photolbl').textContent = 'Photos · ' + photos.length;
+    $('lp-photos').innerHTML = photos.map(function (f, i) {
+      var ratio = (f.width && f.height) ? ' style="aspect-ratio:' + f.width + '/' + f.height + '"' : '';
+      return '<figure class="lp-ph" data-i="' + i + '">' + chk(f) +
+        '<img loading="lazy" src="' + esc(f.thumb || f.web || f.url) + '" alt=""' + ratio + '>' +
+        (!locked ? '<a class="dl" href="' + esc(dlUrl(f.url)) + '" data-id="' + f.id + '" title="Download full-res">' + DL_ICON + '</a>' : '') +
+        '</figure>';
+    }).join('');
+  }
+
+  // ---- other files (PDFs etc.) ----
+  if (others.length) {
+    $('lp-filesec').hidden = false;
+    $('lp-filelbl').textContent = 'Files · ' + others.length;
+    $('lp-files').innerHTML = others.map(function (f) {
+      return '<div class="row">' + chk(f) + '<span class="nm">' + esc(f.name) + '</span><small style="color:var(--muted)">' + fmtBytes(f.size) + '</small>' +
+        (!locked ? '<a class="lp-dl" href="' + esc(dlUrl(f.url)) + '" data-id="' + f.id + '">Download</a>' : '') + '</div>';
+    }).join('');
+  }
+
+  // single-file downloads: native (the stored filename is the clean one) + log
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a.dl, a.lp-dl') : null;
+    if (!a) return;
+    e.stopPropagation();
+    var f = (d.files || []).find(function (x) { return String(x.id) === a.getAttribute('data-id'); });
+    if (f) log('file', f, f.name);
+  });
+  function single(f) {
+    if (!f.url) return;
+    var a = document.createElement('a'); a.href = dlUrl(f.url); a.style.display = 'none'; document.body.appendChild(a); a.click(); a.remove();
+    log('file', f, f.name);
+  }
+
+  // ---- lightbox ----
+  var lbIdx = -1;
+  function lbShow(i) {
+    if (!photos.length) return;
+    lbIdx = (i + photos.length) % photos.length;
+    var f = photos[lbIdx];
+    $('lp-lb-img').src = f.web || f.url || f.thumb;
+    $('lp-lb-cap').innerHTML = esc(f.name) + (!locked && f.url ? '<a href="' + esc(dlUrl(f.url)) + '" data-id="' + f.id + '" class="lp-dl-lb">Download</a>' : '');
+    $('lp-lb').classList.add('in');
+  }
+  function lbHide() { $('lp-lb').classList.remove('in'); }
+  $('lp-photos').addEventListener('click', function (e) {
+    if (e.target.closest('.lp-chk, .dl')) return;
+    var fig = e.target.closest('.lp-ph'); if (!fig) return;
+    lbShow(parseInt(fig.getAttribute('data-i'), 10));
+  });
+  $('lp-lb-close').addEventListener('click', lbHide);
+  $('lp-lb').addEventListener('click', function (e) { if (e.target === this) lbHide(); });
+  $('lp-lb-prev').addEventListener('click', function () { lbShow(lbIdx - 1); });
+  $('lp-lb-next').addEventListener('click', function () { lbShow(lbIdx + 1); });
+  $('lp-lb-cap').addEventListener('click', function (e) {
+    var a = e.target.closest('a.lp-dl-lb'); if (!a) return;
+    var f = photos[lbIdx]; if (f) log('file', f, f.name);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (!$('lp-lb').classList.contains('in')) return;
+    if (e.key === 'Escape') lbHide(); else if (e.key === 'ArrowLeft') lbShow(lbIdx - 1); else if (e.key === 'ArrowRight') lbShow(lbIdx + 1);
+  });
+
+  // ---- invoice ----
+  if (d.invoice) {
+    $('lp-invbox').hidden = false;
+    $('lp-inv').innerHTML = '<span>' + esc(d.invoice.number) + '</span><span style="color:var(--muted)">&middot;</span><span>' + (d.invoice.paid ? 'paid' : 'unpaid') + '</span>' +
+      '<span style="color:var(--muted)">&middot;</span><span>' + money(d.invoice.total) + '</span><span style="color:var(--muted)">&middot;</span><a href="' + esc(d.invoice.url) + '">view</a>';
+  }
+
+  // ---- review (approve / request changes) ----
+  function showApproved(at) {
+    $('lp-review-open').hidden = true; $('lp-review-sent').hidden = true; $('lp-review-approved').hidden = false;
+    if (at) $('lp-approved-date').textContent = ' · ' + dstr(at);
+  }
+  if (d.approved_at) showApproved(d.approved_at);
+  $('lp-approve').addEventListener('click', async function () {
+    this.textContent = 'Approving…';
+    try {
+      var rr = await post({ action: 'approve' }); var j = await rr.json();
+      if (rr.ok) showApproved(j.approved_at); else this.textContent = 'Approve delivery';
+    } catch (e) { this.textContent = 'Approve delivery'; }
+  });
+  function openForm() { $('lp-review-approved').hidden = true; $('lp-review-open').hidden = false; $('lp-changes').hidden = false; $('lp-msg').focus(); }
+  $('lp-request').addEventListener('click', openForm);
+  $('lp-reopen').addEventListener('click', function (e) { e.preventDefault(); openForm(); });
+  $('lp-changes').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var btn = $('lp-send'); btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var rr = await post({ action: 'changes', message: $('lp-msg').value });
+      if (rr.ok) { $('lp-review-open').hidden = true; $('lp-review-approved').hidden = true; $('lp-review-sent').hidden = false; }
+      else { btn.disabled = false; btn.textContent = 'Send request'; }
+    } catch (err) { btn.disabled = false; btn.textContent = 'Send request'; }
+  });
+
+  // ================= bundle downloads: client-side ZIP =================
+  // Files are pulled straight from storage (CORS-open) and written into
+  // a STORE zip in the browser — no server round-trip, no size cap from
+  // serverless limits. Chrome/Edge stream to disk (File System Access);
+  // other browsers build the zip in memory, so big sets split into parts.
+  var CRC = (function () { var t = new Uint32Array(256); for (var n = 0; n < 256; n++) { var c = n; for (var k = 0; k < 8; k++) c = c & 1 ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1); t[n] = c >>> 0; } return t; })();
+  function crcUpd(c, buf) { for (var i = 0; i < buf.length; i++) c = CRC[(c ^ buf[i]) & 0xFF] ^ (c >>> 8); return c >>> 0; }
+  function u16(v) { return [v & 255, (v >>> 8) & 255]; }
+  function u32(v) { return [v & 255, (v >>> 8) & 255, (v >>> 16) & 255, (v >>> 24) & 255]; }
+  function dosTime(dt) {
+    return { t: ((dt.getHours() << 11) | (dt.getMinutes() << 5) | (dt.getSeconds() >> 1)) & 0xFFFF,
+             d: (((dt.getFullYear() - 1980) << 9) | ((dt.getMonth() + 1) << 5) | dt.getDate()) & 0xFFFF };
+  }
+  var busyDl = false;
+  function toast(txt, frac) {
+    var el = $('lp-toast'); el.classList.add('in'); $('lp-toast-t').textContent = txt;
+    $('lp-toast-b').style.width = Math.round(100 * (frac || 0)) + '%';
+    if (frac == null) setTimeout(function () { el.classList.remove('in'); }, 3500);
+  }
+  function hideToast() { $('lp-toast').classList.remove('in'); }
+
+  async function bundle(items, tag, btn) {
+    if (busyDl) { toast('One download at a time — the current bundle is still packing.'); return; }
+    items = items.filter(function (x) { return x.url; });
+    if (!items.length) return;
+    busyDl = true; if (btn) btn.classList.add('busy');
+    var base = (d.slug || 'listing') + '-' + tag;
+    try {
+      // sizes (best effort, HEAD) — decides streaming vs in-memory parts
+      var sizes = await Promise.all(items.map(function (it) {
+        return fetch(it.url, { method: 'HEAD' }).then(function (r) { return parseInt(r.headers.get('content-length') || '0', 10) || 0; }).catch(function () { return 0; });
+      }));
+      var total = sizes.reduce(function (a, b) { return a + b; }, 0);
+      var canStream = !!window.showSaveFilePicker;
+      var limit = canStream ? 3.8e9 : 1.2e9;
+      // split into parts under the limit (zip32 / memory)
+      var parts = [[]], acc = 0;
+      items.forEach(function (it, i) {
+        if (acc + sizes[i] > limit && parts[parts.length - 1].length) { parts.push([]); acc = 0; }
+        parts[parts.length - 1].push(Object.assign({ size: sizes[i] }, it)); acc += sizes[i];
+      });
+      var done = 0;
+      for (var p = 0; p < parts.length; p++) {
+        var name = base + (parts.length > 1 ? '-part-' + (p + 1) + '-of-' + parts.length : '') + '.zip';
+        var sink = await makeSink(name, canStream);
+        if (!sink) { toast('Download cancelled.'); break; }
+        await writeZip(parts[p], sink, function (bytes) {
+          toast('Packing ' + name + ' — ' + fmtBytes(done + bytes) + (total ? ' of ' + fmtBytes(total) : ''), total ? (done + bytes) / total : 0);
         });
-        var j = await rr.json();
-        if (rr.ok) showApproved(j.approved_at);
-        else this.textContent = 'Approve Delivery';
-      } catch (e) { this.textContent = 'Approve Delivery'; }
-    });
-    function openForm() {
-      $('dv-review-approved').hidden = true;
-      $('dv-review-open').hidden = false;
-      $('dv-changes-form').hidden = false;
-      $('dv-msg').focus();
-    }
-    $('dv-request').addEventListener('click', openForm);
-    $('dv-reopen').addEventListener('click', function (e) { e.preventDefault(); openForm(); });
-    $('dv-changes-form').addEventListener('submit', async function (e) {
-      e.preventDefault();
-      var btn = $('dv-send');
-      btn.disabled = true; btn.textContent = 'Sending…';
+        done += parts[p].reduce(function (a, it) { return a + it.size; }, 0);
+        await sink.close();
+      }
+      hideToast();
+      toast('Bundle ready — check your downloads.', null);
+    } catch (e) {
+      hideToast();
+      toast('That download hit a snag — try again, or download files individually.', null);
+    } finally { busyDl = false; if (btn) btn.classList.remove('busy'); }
+  }
+  async function makeSink(name, canStream) {
+    if (canStream) {
       try {
-        var rr = await fetch('/api/delivery', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ t: t, action: 'changes', message: $('dv-msg').value })
-        });
-        if (rr.ok) {
-          $('dv-review-open').hidden = true;
-          $('dv-review-approved').hidden = true;
-          $('dv-review-sent').hidden = false;
-        } else { btn.disabled = false; btn.textContent = 'Send Request'; }
-      } catch (err) { btn.disabled = false; btn.textContent = 'Send Request'; }
-    });
-
-    $('dv-hero').hidden = false;
-    $('dv-body').hidden = false;
-  } catch (e) { missing(); }
+        var h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'ZIP archive', accept: { 'application/zip': ['.zip'] } }] });
+        var w = await h.createWritable();
+        return { write: function (u8) { return w.write(u8); }, close: function () { return w.close(); } };
+      } catch (e) { if (e && e.name === 'AbortError') return null; /* fall through to memory */ }
+    }
+    var chunks = [];
+    return {
+      write: function (u8) { chunks.push(u8); },
+      close: function () {
+        var blob = new Blob(chunks, { type: 'application/zip' }); chunks = [];
+        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+        document.body.appendChild(a); a.click();
+        setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+      }
+    };
+  }
+  async function writeZip(items, sink, onProgress) {
+    var offset = 0, central = [], written = 0, enc = new TextEncoder();
+    var seen = {};
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      var fname = it.name || ('file-' + (i + 1));
+      if (seen[fname]) { var k = ++seen[fname]; fname = fname.replace(/(\.[^.]+)?$/, '-' + k + '$1'); } else seen[fname] = 1;
+      var nameBytes = enc.encode(fname);
+      var dt = dosTime(new Date());
+      var localOff = offset;
+      // local header — sizes + crc follow in a data descriptor (bit 3), utf-8 names (bit 11)
+      var lh = new Uint8Array([].concat(u32(0x04034b50), u16(20), u16(0x0808), u16(0), u16(dt.t), u16(dt.d), u32(0), u32(0), u32(0), u16(nameBytes.length), u16(0)));
+      await sink.write(lh); await sink.write(nameBytes); offset += lh.length + nameBytes.length;
+      var res = await fetch(it.url);
+      if (!res.ok || !res.body) throw new Error('fetch ' + res.status);
+      var reader = res.body.getReader(), crc = 0xFFFFFFFF, size = 0;
+      while (true) {
+        var step = await reader.read(); if (step.done) break;
+        var chunk = step.value; crc = crcUpd(crc, chunk); size += chunk.length; written += chunk.length;
+        await sink.write(chunk); offset += chunk.length;
+        onProgress(written);
+      }
+      crc = (crc ^ 0xFFFFFFFF) >>> 0;
+      var dd = new Uint8Array([].concat(u32(0x08074b50), u32(crc), u32(size), u32(size)));
+      await sink.write(dd); offset += dd.length;
+      central.push({ crc: crc, size: size, off: localOff, name: nameBytes, t: dt.t, d: dt.d });
+    }
+    var cdStart = offset, cdSize = 0;
+    for (var j = 0; j < central.length; j++) {
+      var c = central[j];
+      var ch = new Uint8Array([].concat(u32(0x02014b50), u16(20), u16(20), u16(0x0808), u16(0), u16(c.t), u16(c.d), u32(c.crc), u32(c.size), u32(c.size),
+        u16(c.name.length), u16(0), u16(0), u16(0), u16(0), u32(0), u32(c.off)));
+      await sink.write(ch); await sink.write(c.name); cdSize += ch.length + c.name.length; offset += ch.length + c.name.length;
+    }
+    var eocd = new Uint8Array([].concat(u32(0x06054b50), u16(0), u16(0), u16(central.length), u16(central.length), u32(cdSize), u32(cdStart), u16(0)));
+    await sink.write(eocd);
+  }
+  // exposed for diagnostics (console): JCS_ZIP.writeZip(items, sink, onProgress)
+  window.JCS_ZIP = { writeZip: writeZip, makeSink: makeSink };
 })();
 </script>
 </body>

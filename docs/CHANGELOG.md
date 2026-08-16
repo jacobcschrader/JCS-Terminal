@@ -1458,3 +1458,66 @@ state on it with JCS skin:
   with sessionStorage guard, navFlow() chrome switch.
 - Mobile: column gets its own side gutters; headline clamps down to
   2.1rem. Verified 375px and desktop in the preview.
+
+## 2026-08-08 — Custom delivery system (Pixieset retired) + admin/portal restyle
+
+Jacob: "lets drift away from using pixieset for delivery and create a
+custom delivery system for admin … copy it exact" — with frames from
+Jacob Guthrie's REM Academy call showing his admin dashboard, listings
+table, listing page, client portal and client listing page. Everything
+below mirrors those screens in JCS type/palette.
+
+- **Storage + data:** delivery_files (photo | film | file; original +
+  2048px web + 640px thumb; clean download name), download_events
+  (kind file | full | mls | selected | view, label, client email),
+  bookings.delivery_slug (unique portal URL, lazily backfilled) +
+  downloads_locked. Blob paths delivery/<id>/<rand>/<name> — the broker
+  skips the random suffix there so browsers save clean filenames.
+- **Admin router:** `files` (list + activity / add / cover / lock / sort
+  / delete w/ blob cleanup) and `downloads` (feed + 7-day count).
+  bookings GET carries files_count + client_email; DELETE cascades.
+  The Pixieset auto-draft on Editing is gone.
+- **Public /api/delivery:** listing by ?slug= (owner session or admin
+  preview) or ?t= (share link); download logging (bundle / file /
+  selected — admin previews aren't logged; portal views logged once per
+  6h as "—"); approve / changes kept. Locked listings withhold original
+  URLs. /api/portal login lands on /portal/<slug> when the email link
+  carried a project; cards get slug / files / cover thumb / ready /
+  locked; is_admin flag drives the "Admin →" pill.
+- **Admin shell restyled** to the reference: site nav + footer, pill tabs
+  (ADMIN · Dashboard · Requests · Projects · Proposals · Licensing ·
+  Clients · Portfolio · Settings · Sign out), Cormorant "Dashboard."
+  titles with the trailing period, hairline square cards, navy caps
+  buttons; licensing + proposal editor tokens follow suit. Sidebar,
+  Deliveries page, delivery editor and the kanban board are retired
+  (#deliveries / #delivery/:id redirect).
+- **Dashboard:** 5 stat cards (Clients / Listings / Locked / Open
+  invoices / Downloads 7d) + Recent downloads ledger.
+- **Projects:** listings ledger — Address · Client · Stage · Files ·
+  Invoice · Downloads · Lock/Unlock, stage segments + search + client
+  filter.
+- **Project page = listing:** header (client · N files · portal slug ·
+  "Delivery email last sent … — email"; Send/Re-send delivery email +
+  Lock/Unlock downloads), PROJECT facts + actions, INVOICES, DELIVERY
+  EMAIL (message/CC), DOWNLOAD ACTIVITY, COVER PHOTO — CLICK TO SET
+  grid, UPLOAD dropzone (photos → original as-is + web + thumb made in
+  the browser; films → original multipart + poster; PDFs; 3 in flight;
+  progress bar), ADDITIONAL LINKS. Share-preview link copies
+  /portal/<slug>?t=<token>.
+- **Portal home:** "Client Portal / Your listings." + email, Admin → +
+  Sign Out, 3-up cards (cover / "Gallery coming soon", READY · IN
+  PRODUCTION · UPCOMING · LOCKED pill, address, LOCATION · N FILES ·
+  DATE). Proposal / application bands stay above the grid.
+- **Listing page (/portal/<slug>):** full-bleed cover hero, ← All
+  listings / Share preview / PAID — DOWNLOADS UNLOCKED, bundle pills
+  (Download all — full res / MLS photo download — 2048px / extra links),
+  FILMS two-up with checkbox + Download, PHOTOS masonry with checkbox +
+  hover download + lightbox, FILES, invoice row, feedback box.
+  Selection bar downloads picked files. Bundles zip in the browser
+  (STORE + CRC32, streamed to disk on Chrome/Edge, in-memory parts
+  elsewhere) — verified byte-identical with unzip. Delivery email CTA
+  now says "Open Your Listing" and lands on the listing.
+- **Verified locally** with API stubs: dashboard, projects table,
+  listing page (grid, cover state, upload flow with a mocked Blob
+  client, derived 2048/640 sizes), portal grid, listing page
+  (selection, lightbox, zip validity), mobile layouts.

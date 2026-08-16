@@ -6,7 +6,9 @@
 //    3. Stamps delivery_sent_at, increments delivery_sends, sets
 //       delivered_at, and advances the stage to 'delivered' if the
 //       project is still earlier in the pipeline.
-//  Requires a client with an email and a gallery link on the project.
+//  Requires a client with an email and media on the listing (uploaded
+//  files, or at least one external link for legacy deliveries). The
+//  button lands the client on their listing page: /portal/<slug>.
 // =====================================================================
 const crypto = require("node:crypto");
 const { requireAuth } = require("../auth.js");
@@ -15,6 +17,7 @@ const { linksOf, recipientsOf } = require("../links.js");
 const { loginUrl } = require("../portal-auth.js");
 const { sendEmail, jcsEmail, SENDERS, OWNER } = require("../email.js");
 const { coverFor } = require("./covers.js");
+const { ensureSlug, filesOf, summarize } = require("../delivery.js");
 
 const escHtml = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
@@ -36,15 +39,17 @@ module.exports = async function handler(req, res) {
       WHERE bk.id = ${id}`;
     if (!b) { res.status(404).json({ error: "not-found" }); return; }
     const links = linksOf(b);
-    if (!links.length) { res.status(400).json({ error: "no-links" }); return; }
+    const files = await filesOf(s, id);
+    if (!files.length && !links.length) { res.status(400).json({ error: "no-links" }); return; }
     const clientTo = recipientsOf(b.client_email, b.client_extra_emails);
     if (!clientTo.length) { res.status(400).json({ error: "no-client-email" }); return; }
 
+    await ensureSlug(s, b);
     const token = b.delivery_token || crypto.randomBytes(12).toString("base64url");
-    // Make sure the gallery cover is cached before the client ever opens
-    // the page (retries earlier misses — the gallery may exist by now).
+    // Cover: the chosen upload (set on the listing page). Legacy link-only
+    // deliveries still try the portfolio / og:image unfurl.
     let coverUrl = b.delivery_cover_url;
-    if (!coverUrl || coverUrl === "-") {
+    if ((!coverUrl || coverUrl === "-") && !files.length) {
       coverUrl = (await coverFor(s, b, links)) || "-";
       await s`UPDATE bookings SET delivery_cover_url = ${coverUrl} WHERE id = ${id}`;
     }
@@ -60,7 +65,7 @@ module.exports = async function handler(req, res) {
       hour: "numeric", minute: "2-digit", timeZoneName: "short",
     });
     const headline = `${escHtml(b.client_name || "")}${b.client_name ? " · " : ""}${escHtml(b.title)}`;
-    const included = links.map((l) => escHtml(l.label)).join(" · ");
+    const included = [summarize(files)].concat(links.map((l) => escHtml(l.label))).filter(Boolean).join(" · ");
 
     await sendEmail({
       from: SENDERS.delivery,
@@ -73,14 +78,14 @@ module.exports = async function handler(req, res) {
       html: jcsEmail({
         eyebrow: "Media Delivery",
         headline,
-        note: `Hi ${escHtml(first)} — ${note ? escHtml(note) + " " : ""}your full delivery is ready. Everything is on your page, always up to date.`,
+        note: `Hi ${escHtml(first)} — ${note ? escHtml(note) + " " : ""}your full delivery is ready. View, download individual files, or grab the full-res and MLS bundles from your listing page — always up to date.`,
         rows: [
           ["Client", b.client_name ? escHtml(b.client_name) : ""],
           ["Property", escHtml(b.title) + (b.location ? `<br><span style="color:#8a94a6;">${escHtml(b.location)}</span>` : "")],
           ["Included", included],
           ["Delivered", escHtml(sentAt)],
         ],
-        cta: { label: "View Delivery", url: pageUrl },
+        cta: { label: "Open Your Listing", url: pageUrl },
         audience: "client",
       }),
     });

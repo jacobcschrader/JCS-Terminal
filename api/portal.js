@@ -20,8 +20,10 @@ const crypto = require("node:crypto");
 const { db } = require("./_lib/db.js");
 const { ymd } = require("./_lib/ics.js");
 const { linksOf } = require("./_lib/links.js");
+const { ensureSlug } = require("./_lib/delivery.js");
 const { sendEmail, jcsEmail, SENDERS } = require("./_lib/email.js");
 const { COOKIE, DAY, makeToken, verifyToken, readCookie, loginUrl } = require("./_lib/portal-auth.js");
+const adminAuth = require("./_lib/auth.js");
 
 // Client-facing pipeline, derived — the project moves on its own:
 //   Upcoming → In production (shoot date) → Delivered (email sent,
@@ -88,8 +90,19 @@ module.exports = async function handler(req, res) {
       const session = makeToken(cid, "portal-session", 30 * DAY);
       res.setHeader("Set-Cookie",
         `${COOKIE}=${session}; Max-Age=${30 * DAY}; Path=/; HttpOnly; Secure; SameSite=Lax`);
+      // land on the listing itself when the link came from a delivery
+      // email (?p=<project id>) — the slug is looked up server-side
+      let dest = "/portal";
+      const pid = parseInt(q.p, 10);
+      if (pid) {
+        try {
+          const s0 = await db();
+          const [row] = await s0`SELECT delivery_slug FROM bookings WHERE id = ${pid} AND client_id = ${cid} LIMIT 1`;
+          if (row && row.delivery_slug) dest = "/portal/" + row.delivery_slug;
+        } catch (e) { /* fall back to the dashboard */ }
+      }
       res.statusCode = 302;
-      res.setHeader("Location", "/portal" + (q.p ? `?p=${encodeURIComponent(q.p)}` : ""));
+      res.setHeader("Location", dest);
       res.end();
       return;
     }
@@ -128,9 +141,17 @@ module.exports = async function handler(req, res) {
       ORDER BY r.created_at DESC` : [];
 
     const rows = await s`
-      SELECT * FROM bookings
-      WHERE client_id = ${c.id} AND status NOT IN ('canceled', 'pending')
-      ORDER BY shoot_date DESC NULLS LAST, id DESC`;
+      SELECT bk.*,
+        (SELECT count(*)::int FROM delivery_files f WHERE f.booking_id = bk.id) AS files_count,
+        (SELECT f.thumb_url FROM delivery_files f WHERE f.booking_id = bk.id AND f.kind = 'photo'
+           AND (f.web_url = bk.delivery_cover_url OR f.url = bk.delivery_cover_url) LIMIT 1) AS cover_thumb,
+        (SELECT f.thumb_url FROM delivery_files f WHERE f.booking_id = bk.id AND f.kind = 'photo'
+           ORDER BY f.sort_order ASC, f.id ASC LIMIT 1) AS first_thumb
+      FROM bookings bk
+      WHERE bk.client_id = ${c.id} AND bk.status NOT IN ('canceled', 'pending')
+      ORDER BY bk.shoot_date DESC NULLS LAST, bk.id DESC`;
+    // portal slugs are lazy — make sure every card has a link
+    for (const r of rows) if (!r.delivery_slug) await ensureSlug(s, r);
 
     // Proposal-gated projects (status 'pending'): not in the pipeline
     // yet — surfaced as "your proposal is ready" once the proposal has
@@ -148,15 +169,21 @@ module.exports = async function handler(req, res) {
       const invoiced = !!(b.invoice_token && b.invoice_sent_at);
       const paid = b.status === "paid";
       if (invoiced && !paid) outstanding += total;
+      const cover = (b.delivery_cover_url && b.delivery_cover_url !== "-") ? b.delivery_cover_url : "";
       return {
         id: b.id,
+        slug: b.delivery_slug || "",
         title: b.title,
         location: b.location || "",
         shoot_date: b.shoot_date || null,
         service: b.type || "",
-        // Gallery cover (unfurled at delivery time) — the portal leads
-        // with photography: hero backdrop + project card thumbs.
-        cover: (b.delivery_cover_url && b.delivery_cover_url !== "-") ? b.delivery_cover_url : null,
+        files: Number(b.files_count) || 0,
+        // card cover: the chosen cover's thumb, else the first photo's
+        // thumb, else the full cover URL (legacy Pixieset/portfolio covers)
+        cover: b.cover_thumb || b.first_thumb || cover || null,
+        // "Ready" = there's media on the listing page (delivered)
+        ready: !!(b.delivery_sent_at || Number(b.files_count)),
+        locked: !!b.downloads_locked,
         stage: stageOf(b),
         delivery: b.delivery_sent_at
           ? { token: b.delivery_token, links: linksOf(b), delivered_at: b.delivered_at || null }
@@ -171,6 +198,10 @@ module.exports = async function handler(req, res) {
     res.status(200).json({
       client_first: (c.name || "").split(" ")[0] || "",
       client_name: c.name || "",
+      client_email: c.email || "",
+      // Jacob signed in as a client while also holding an admin session
+      // gets an "Admin →" shortcut (same as the reference portal)
+      is_admin: adminAuth.verifySessionToken(adminAuth.readCookie(req)),
       pending: pendingRows.map((r) => ({
         title: r.title,
         location: [r.city, r.state].filter(Boolean).join(", "),

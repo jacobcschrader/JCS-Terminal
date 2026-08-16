@@ -226,6 +226,45 @@ function ensureSchema() {
       await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS accepted_at timestamptz`;
       await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS licensed_at timestamptz`;
       await s`ALTER TABLE license_leads ADD COLUMN IF NOT EXISTS paid_at timestamptz`;
+      // Custom delivery system (2026-08-08, replaces Pixieset): media is
+      // uploaded browser→Vercel Blob; every project ("listing") gets a
+      // portal slug (/portal/<slug>), a downloads lock, and its files.
+      await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS delivery_slug text DEFAULT ''`;
+      await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS downloads_locked boolean NOT NULL DEFAULT false`;
+      await s`CREATE UNIQUE INDEX IF NOT EXISTS bookings_delivery_slug ON bookings (delivery_slug) WHERE delivery_slug <> ''`;
+      // One row per uploaded file. Photos carry a 2048px "web" copy (the
+      // MLS bundle + on-page viewing) and a ~640px thumb; films carry a
+      // poster frame as thumb. name = clean download filename.
+      await s`CREATE TABLE IF NOT EXISTS delivery_files (
+        id          serial PRIMARY KEY,
+        booking_id  integer NOT NULL,
+        kind        text NOT NULL DEFAULT 'photo',
+        name        text NOT NULL,
+        url         text NOT NULL,
+        web_url     text DEFAULT '',
+        thumb_url   text DEFAULT '',
+        size        bigint DEFAULT 0,
+        width       integer,
+        height      integer,
+        sort_order  integer NOT NULL DEFAULT 0,
+        created_at  timestamptz NOT NULL DEFAULT now()
+      )`;
+      await s`CREATE INDEX IF NOT EXISTS delivery_files_booking ON delivery_files (booking_id, sort_order, id)`;
+      // Download activity (dashboard "Recent downloads" + per-listing feed).
+      // kind: file | full | mls | selected | view
+      await s`CREATE TABLE IF NOT EXISTS download_events (
+        id          serial PRIMARY KEY,
+        booking_id  integer NOT NULL,
+        file_id     integer,
+        kind        text NOT NULL DEFAULT 'file',
+        label       text DEFAULT '',
+        email       text DEFAULT '',
+        ip          text DEFAULT '',
+        ua          text DEFAULT '',
+        created_at  timestamptz NOT NULL DEFAULT now()
+      )`;
+      await s`CREATE INDEX IF NOT EXISTS download_events_booking ON download_events (booking_id, created_at)`;
+      await s`CREATE INDEX IF NOT EXISTS download_events_time ON download_events (created_at)`;
     })();
   }
   return _ready;

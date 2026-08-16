@@ -23,6 +23,8 @@ const routes = {
   gcalcheck: require("../_lib/admin/gcal-check.js"),
   siteprojects: require("../_lib/admin/site-projects.js"),
   upload: require("../_lib/admin/upload.js"),
+  files: require("../_lib/admin/files.js"),
+  downloads: require("../_lib/admin/downloads.js"),
 };
 
 module.exports = function handler(req, res) {

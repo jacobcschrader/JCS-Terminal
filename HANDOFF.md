@@ -13,11 +13,19 @@ domain www.jacobcschrader.com):
 
 1. **Public site** — static HTML marketing site (design modeled on
    jacobguthrie.com, JCS navy/Cormorant identity).
-2. **Studio Admin** (`/admin`) — Jacob's back office: booking pipeline,
-   clients, deliveries, invoices, requests inbox, portfolio CMS,
-   license tracker, settings.
-3. **Client experience** — magic-link portal (`/portal`), shareable
-   delivery pages (`/delivery?t=…`), invoices (`/invoice?t=…`).
+2. **Studio Admin** (`/admin`) — Jacob's back office: projects
+   (listings) with the custom delivery system (uploads, cover, lock,
+   downloads feed), clients, invoices, requests inbox, proposals,
+   portfolio CMS, license tracker, settings.
+3. **Client experience** — magic-link portal (`/portal`, "Your
+   listings." grid), listing pages (`/portal/<slug>` — gallery, films,
+   bundle downloads), invoices (`/invoice?t=…`).
+
+**Delivery is custom (2026-08-08, replaces Pixieset):** media uploads
+browser→Vercel Blob from the project page in the admin; the client
+views/downloads on /portal/<slug>; every download is logged. Design
+pattern for admin + portal + listing page: jacobguthrie.com (REM
+Academy call frames) — site chrome, pill tabs, "Dashboard." titles.
 
 **The booking flow is proposal-first (2026-07-29):** /book is an
 application (no pricing, no signature). Jacob reviews it in Requests →
@@ -97,14 +105,29 @@ proposal.html              Private client proposal page — canonical link
                            to Upcoming.
 project.html               Dynamic project page (renders ?slug=…)
 project/<slug>.html        Static share pages (generated — see §4)
-portal.html delivery.html invoice.html   Client pages (minimal .mnav chrome).
-                           Portal: textured navy hero (the .ph placeholder
-                           treatment; no photo — Jacob's call) with stats
-                           inside it + delivery takeover on ?p=, gallery-
-                           cover thumbs on rows (no service names — also
-                           his call), centered-column sign-in (Guthrie
-                           /portal/login pattern: kicker, serif headline,
-                           one email field, navy caps button).
+portal.html                Client portal, site chrome: "Client Portal /
+                           Your listings." + email, Admin → (if admin
+                           session) + Sign Out, 3-up listing cards (cover
+                           thumb or "Gallery coming soon", READY / IN
+                           PRODUCTION / UPCOMING / LOCKED pill, address,
+                           LOCATION · N FILES · YYYY-MM-DD) → /portal/<slug>.
+                           Proposal-ready / application-in-review bands sit
+                           above the grid. Sign-in = centered column.
+delivery.html              Listing page, served at /portal/<slug> (vercel.json
+                           rewrite; ?slug= works locally, ?t= = share link).
+                           Full-bleed cover hero + address + "LOCATION ·
+                           BROKERAGE"; ← All listings / Share preview /
+                           PAID — DOWNLOADS UNLOCKED pill; bundle pills
+                           (Download all — full res / MLS photo download —
+                           2048px + extra links); FILMS · N two-up players
+                           w/ checkbox + Download; PHOTOS · N masonry
+                           (checkbox, hover download, lightbox); FILES · N;
+                           invoice row; approve / request-changes box.
+                           Bundles are zipped IN THE BROWSER (STORE zip +
+                           CRC32; File System Access streaming on Chrome,
+                           in-memory parts elsewhere) — no server limits.
+                           window.JCS_ZIP exposes the writer for debugging.
+invoice.html               Client invoice page (minimal .mnav chrome).
 admin.html                 Entire admin SPA (single file: CSS + views + JS)
 admin-blob.js              Browser bundle of @vercel/blob/client (esbuild IIFE)
 styles.css                 All public-site styles (tokens at top, "v2 layer"
@@ -183,9 +206,30 @@ toggle, delete (cleans Blob media).
 
 - **Auth:** ADMIN_EMAIL + PBKDF2 hash (ADMIN_PASSWORD_HASH) → HMAC session
   cookie `jcs_session` (SESSION_SECRET). All data handlers requireAuth.
-- **Pipeline:** upcoming → editing → revisions → delivered → completed →
-  paid (+canceled). Board + list views, search, drag between stages.
-  Daily cron moves upcoming→editing on shoot day.
+- **Shell (2026-08-08):** the admin lives inside the public site chrome
+  (site nav + footer), pill tabs "ADMIN · Dashboard · Requests · Projects
+  · Proposals · Licensing · Clients · Portfolio · Settings · Sign out",
+  Cormorant "Dashboard." titles, hairline square cards, navy caps
+  buttons. Dashboard = 5 stat cards (Clients / Listings / Locked / Open
+  invoices / Downloads 7d) + Recent downloads ledger (time · email ·
+  item · listing → project page).
+- **Projects:** a listings ledger — Address · Client · Stage · Files ·
+  Invoice · Downloads (LOCKED/UNLOCKED) · Lock/Unlock — with stage
+  segments + search + client filter. Stages: pending → upcoming →
+  editing → revisions → delivered → completed → paid (+canceled); the
+  stage select lives on the project page. Daily cron moves
+  upcoming→editing on shoot day.
+- **Project page (#project/:id) = the listing:** header (client · N
+  files · portal slug · delivery-email-last-sent line; Send/Re-send
+  delivery email + Lock/Unlock downloads), PROJECT facts + Edit /
+  Confirm / Preview as client / Copy share-preview link / Delete,
+  INVOICES, DELIVERY EMAIL (message + CC), DOWNLOAD ACTIVITY, COVER
+  PHOTO — CLICK TO SET (6-up grid of every file; hover × removes),
+  UPLOAD dropzone (drag/drop or click; photos → original as-is + 2048px
+  web JPEG + 640px thumb made in the browser; films → original
+  (multipart) + poster frame; PDFs as-is; 3 uploads in flight; blob
+  paths delivery/<id>/<rand>/<clean name> so downloads keep clean
+  filenames), ADDITIONAL LINKS (external — 3D tour, floor plans).
 - **Projects:** Visaro-style form — Google Places address autocomplete
   (key in Settings; Photon fallback), client typeahead (+ inline new
   client w/ CC emails), 30-min time dropdowns, addons → deliverables,
@@ -194,11 +238,11 @@ toggle, delete (cleans Blob media).
 - **Confirm & send:** branded emails to client(+CCs) & Jacob w/ .ics and
   Google-Calendar links; writes to Jacob's GCal if service account is
   configured (see api/_lib/gcal.js header — NOT yet set up).
-- **Deliveries:** cover-photo cards (og:image unfurl from Pixieset links,
-  cached in delivery_cover_url), editor w/ named links + per-link Save,
-  CC, personal note; "Send delivery" emails client (magic-link CTA).
-  Moving a project to Editing pre-drafts the predicted Pixieset URL
-  (settings.pixieset_subdomain).
+- **Delivery email:** "Send delivery email" (project page) needs media
+  or a link + a client email; CTA = 30-day sign-in link that lands on
+  /portal/<slug>; stamps delivery_sent_at, advances stage to Delivered.
+  Legacy link-only deliveries still work (Pixieset og:image unfurl only
+  runs when a listing has no uploaded files).
 - **Invoices:** Generate & send (one click) → /invoice?t=… page; resend;
   paid status flips project to Paid (portal shows green chip).
 - **Requests:** /contact submissions; accept → creates client+project.
@@ -228,12 +272,19 @@ toggle, delete (cleans Blob media).
 ## 6. Client experience
 
 - **Portal:** cookie session via emailed magic link (30-day HMAC token;
-  portal-auth.js). Derived pipeline: Upcoming → In production (shoot
-  day) → Delivered (red Unpaid chip) → Completed (green Paid). Rows link
-  View Delivery / View Invoice. Possession of a URL is never enough for
-  the dashboard; delivery/invoice token links are intentionally shareable.
-- **Delivery page:** navy hero, link buttons, Approve Delivery /
-  Request Changes (feedback demotes project to Revisions + emails Jacob).
+  portal-auth.js; ?login=…&p=<id> lands straight on /portal/<slug>).
+  "Your listings." card grid; pills: READY (files/delivered), IN
+  PRODUCTION, UPCOMING, LOCKED. Possession of a URL is never enough for
+  the dashboard; share-preview links (/portal/<slug>?t=<token>) and
+  invoice links are intentionally shareable.
+- **Listing page (/portal/<slug>):** access = signed-in owner, admin
+  session (preview), or share token. Downloads: per-file (native, clean
+  filename via ?download=1), Full-res bundle, MLS 2048px bundle,
+  selected files — all logged to download_events with the client's
+  email (share link → "email (share link)"; admin previews aren't
+  logged). LOCKED hides every download control + withholds original
+  URLs (films still stream, photos show web/thumb). Approve / Request
+  changes kept (feedback demotes project to Revisions + emails Jacob).
 
 ## 7. API map (9 functions of Vercel Hobby's 12)
 
@@ -246,10 +297,11 @@ api/book.js             Public application → request + 2 emails (addons,
                         remain for legacy rows)
 api/calendar.js         .ics feed (signed); exports sigFor
 api/cron.js             Daily stage advance (optional CRON_SECRET)
-api/delivery.js         Delivery data + approve/changes actions
+api/delivery.js         Listing data (?slug= w/ session|admin, ?t= share)
+                        + POST download log / approve / changes
 api/invoice.js          Invoice data
-api/portal.js           Magic link, session, portal data (incl. per-project
-                        cover — the portal hero + row thumbs use it)
+api/portal.js           Magic link, session, portal data (listing cards:
+                        slug, files, cover thumb, ready/locked, is_admin)
 api/proposal.js         Public proposal by slug + accept action (drafts 404
                         unless ?preview=1 with admin session). Accept
                         stores acceptance JSON + signature/signed_at,
@@ -259,12 +311,21 @@ api/site-projects.js    Public published projects (Cache-Control: no-store)
 ```
 
 `api/_lib/`: db.js (idempotent schema — ALL tables/columns created on
-first use), email.js, auth.js, portal-auth.js, ics.js, gcal.js, links.js.
+first use), email.js, auth.js, portal-auth.js, ics.js, gcal.js, links.js,
+delivery.js (slugs, files, publicFile, logDownload).
+Admin router additions: `files` (GET list+events / POST add / PUT
+cover|lock|sort / DELETE + blob del), `downloads` (feed + 7-day count).
+`upload.js` broker: delivery/<id>/… paths get addRandomSuffix:false and
+a 4GB cap; everything else unchanged.
 
-**DB tables:** clients, bookings (~40 cols incl. delivery_*/invoice_*),
-site_projects, discounts, settings (key/value), requests (+ launch_date,
-addons, estimated_total, details JSON, signature, signed_at), proposals
-(slug unique, items JSON, status draft/sent/accepted).
+**DB tables:** clients, bookings (~45 cols incl. delivery_*/invoice_*,
+delivery_slug unique, downloads_locked), delivery_files (booking_id,
+kind photo|film|file, name, url, web_url, thumb_url, size, w/h,
+sort_order), download_events (booking_id, file_id, kind
+file|full|mls|selected|view, label, email, ip, ua), site_projects,
+discounts, settings (key/value), requests (+ launch_date, addons,
+estimated_total, details JSON, signature, signed_at), proposals (slug
+unique, items JSON, status draft/sent/accepted), license_leads.
 
 **Subdomains (middleware.js):** Edge Middleware (runs pre-filesystem;
 does NOT count toward the 12-function cap) serves the subdomain roots
@@ -307,8 +368,12 @@ Google Places key is NOT an env var — stored in admin Settings (DB).
   checkbox or handleUpload fails.
 - **`.footer a` specificity** can override .footer__brand — keep the
   compound selector.
-- **Pixieset has no public API** — links are predicted from the subdomain
-  + slugified title; collection must be created in Pixieset by hand.
+- **Pixieset is retired for delivery** (custom system since 2026-08-08);
+  settings.pixieset_subdomain + covers.js unfurl only serve legacy
+  link-only deliveries.
+- **Blob deletes** need BLOB_READ_WRITE_TOKEN in the function env; if
+  the store is OIDC-only the DB row still goes and the blob is orphaned
+  (harmless).
 - Cormorant old-style numerals look odd in UI — portal uses lining nums.
 - Repo media conventions: photos 2400px JPEG q80; films 1080p H.264
   CRF23-27 faststart; reels 720×1280 CRF26; keep files well under

@@ -22,12 +22,19 @@ module.exports = async function handler(req, res) {
     const jsonResponse = await handleUpload({
       body: req.body,
       request: req,
-      onBeforeGenerateToken: async (pathname) => ({
-        allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/quicktime"],
-        maximumSizeInBytes: 500 * 1024 * 1024,
-        addRandomSuffix: true,
-        cacheControlMaxAge: 31536000,
-      }),
+      onBeforeGenerateToken: async (pathname) => {
+        // Client deliveries: the browser already puts every file in its
+        // own random folder (delivery/<id>/<rand>/name.jpg), so the
+        // stored name stays clean — that's the filename the client's
+        // browser saves as. Films can be big; multipart handles it.
+        const delivery = /^delivery\/\d+\//.test(pathname);
+        return {
+          allowedContentTypes: ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/quicktime", "application/pdf"],
+          maximumSizeInBytes: (delivery ? 4000 : 500) * 1024 * 1024,
+          addRandomSuffix: !delivery,
+          cacheControlMaxAge: 31536000,
+        };
+      },
       // Fire-and-forget: nothing to do after upload — the editor sends
       // the final URLs with the project save.
       onUploadCompleted: async () => {},

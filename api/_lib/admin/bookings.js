@@ -7,11 +7,13 @@
 //  Pipeline stages: upcoming | editing | revisions | delivered | completed | paid
 //  (+ canceled, + pending = proposal sent, not yet accepted — sits
 //  before the pipeline; accepting the proposal flips it to upcoming).
-//  Delivery fields: delivery_url, delivered_at.
+//  Delivery: media lives in delivery_files (see admin/files.js); every
+//  booking carries delivery_slug (portal URL) + downloads_locked.
 // =====================================================================
 const crypto = require("node:crypto");
 const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
+const { ensureSlug } = require("../delivery.js");
 
 const field = (v, max = 300) => String(v == null ? "" : v).trim().slice(0, max);
 const STATUSES = ["pending", "upcoming", "editing", "revisions", "delivered", "completed", "paid", "canceled"];
@@ -83,22 +85,6 @@ async function applyDiscount(s, f) {
     : Math.min(Number(d.value), price);
 }
 
-// Pixieset hook: when a project moves to Editing and has no delivery
-// links yet, prefill the delivery draft with the predicted collection
-// URL (subdomain from settings; slug = Pixieset's slugified title).
-// Pixieset has no public API, so the collection itself is created in
-// Pixieset (or via their Lightroom plugin) under the same name.
-async function maybePixiesetDraft(s, f) {
-  if (f.status !== "editing" || f.delivery_links) return;
-  const [row] = await s`SELECT value FROM settings WHERE key = 'pixieset_subdomain'`;
-  const sub = row && row.value;
-  if (!sub) return;
-  const slug = f.title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-  if (!slug) return;
-  f.delivery_links = JSON.stringify([{ label: "View Gallery", url: `https://${sub}.pixieset.com/${slug}/` }]);
-  f.delivery_created_at = f.delivery_created_at || new Date().toISOString();
-}
-
 // location is derived: "City, ST 96145" (falls back to a raw location string)
 function makeLocation(f, raw) {
   const cityBit = [f.city, [f.state, f.zip].filter(Boolean).join(" ")].filter(Boolean).join(", ");
@@ -114,9 +100,12 @@ module.exports = async function handler(req, res) {
 
     if (req.method === "GET") {
       const rows = await s`
-        SELECT bk.*, c.name AS client_name
+        SELECT bk.*, c.name AS client_name, c.email AS client_email,
+               (SELECT count(*)::int FROM delivery_files f WHERE f.booking_id = bk.id) AS files_count
         FROM bookings bk LEFT JOIN clients c ON c.id = bk.client_id
         ORDER BY bk.shoot_date DESC NULLS LAST, bk.id DESC`;
+      // portal slugs are lazy — backfill any listing that predates them
+      for (const r of rows) if (!r.delivery_slug) await ensureSlug(s, r);
       res.status(200).json({ bookings: rows });
 
     } else if (req.method === "POST") {
@@ -124,7 +113,6 @@ module.exports = async function handler(req, res) {
       f.location = makeLocation(f, b.location);
       await applyDiscount(s, f);
       if (!f.title) { res.status(400).json({ error: "title-required" }); return; }
-      await maybePixiesetDraft(s, f);
       const token = (f.delivery_links || f.delivery_url) ? crypto.randomBytes(12).toString("base64url") : "";
       const [row] = await s`
         INSERT INTO bookings (client_id, title, location, shoot_date, shoot_time, type, price, status, notes, delivery_url, delivered_at, twilight_date, twilight_time, deliverables, city, state, zip, sqft, addons, travel_fee, travel_note, show_price, skip_confirmation, discount_code, discount_value, download_url, delivery_message, delivery_cc, delivery_links, delivery_token)
@@ -138,7 +126,6 @@ module.exports = async function handler(req, res) {
       f.location = makeLocation(f, b.location);
       await applyDiscount(s, f);
       if (!id || !f.title) { res.status(400).json({ error: "invalid" }); return; }
-      await maybePixiesetDraft(s, f);
       const [row] = await s`
         UPDATE bookings SET
           client_id = ${f.client_id}, title = ${f.title}, location = ${f.location},
@@ -164,6 +151,8 @@ module.exports = async function handler(req, res) {
     } else if (req.method === "DELETE") {
       const id = parseInt(b.id, 10);
       if (!id) { res.status(400).json({ error: "invalid" }); return; }
+      await s`DELETE FROM download_events WHERE booking_id = ${id}`;
+      await s`DELETE FROM delivery_files WHERE booking_id = ${id}`;
       await s`DELETE FROM bookings WHERE id = ${id}`;
       res.status(200).json({ ok: true });
 
