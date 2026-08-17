@@ -181,6 +181,15 @@ vercel.json                cleanUrls, redirects (/architecture,/films,/design
   everywhere, VideoObjects on services, ImageGallery on project pages),
   sitemap.xml, robots.txt (blocks /admin, /api), OG/Twitter tags, 301s
   from retired URLs. Client pages are noindexed.
+- **Error page (`404.html`, 2026-08-16):** Vercel serves it (status
+  404) for every unknown URL on www and the subdomains — same nav +
+  footer, giant faded serif numeral, eyebrow/headline/actions. One file
+  speaks for several codes: linking `/404?code=401|403|410|500` swaps
+  the copy + CTAs (401/403/410 point at /portal/login, 500 offers Try
+  again + email). Plain 404s also print the URL that was asked for.
+  Noindexed. Note the media host (media.jacobcschrader.com, Cloudflare
+  R2) still shows Cloudflare's stock 404 — Free plan has no Custom
+  Errors rule type; a Snippet could brand it if ever wanted.
 
 ---
 
@@ -453,8 +462,25 @@ with no path in the URL — form. → /book, pricing. → /pricing,
 proposal./<slug> → /proposal (bare proposal. root redirects to www).
 vercel.json handles /proposals/:slug and /portal/:slug rewrites (the
 old /contact → /book redirect is gone — /contact is a page again).
-The three subdomains are attached to the project in Vercel → Domains
-(DNS is Vercel-managed, so that was just "Add Domain" three times).
+The three subdomains are attached to the project in Vercel → Domains.
+
+**DNS & domains (since 2026-08-16):** the domain is registered at
+Namecheap; DNS is hosted on **Cloudflare** (Free plan, account
+jacxbschrader@gmail.com, nameservers hunts/noor.ns.cloudflare.com) —
+moved off Vercel's nameservers so the R2 bucket could get the custom
+domain media.jacobcschrader.com. Hosting is unchanged: every
+site record is **DNS-only (grey cloud)** — never proxy them, Vercel
+terminates TLS itself. Zone contents (keep in sync if anything moves):
+`A @ → 216.198.79.1` · `CNAME www/form/pricing/proposal →
+947f571f690760fb.vercel-dns-017.com` (Vercel's per-project target from
+the project's Domains page — the legacy 76.76.21.21 /
+cname.vercel-dns.com also work) · Resend mail: `MX send → 10
+feedback-smtp.us-east-1.amazonses.com`, `TXT send → v=spf1
+include:amazonses.com ~all`, `TXT resend._domainkey → p=MIGf…` ·
+`CNAME media → jcs-media R2 bucket` (Cloudflare-managed, proxied by
+design). Vercel's Domains page now says "third-party nameservers" —
+expected. Adding a new subdomain = add the CNAME on Cloudflare (DNS
+only) + "Add Domain" on the Vercel project.
 
 ## 8. Email system
 
@@ -474,9 +500,19 @@ SESSION_SECRET               CONTACT_TO (default jacxbschrader@gmail.com)
 BLOB_READ_WRITE_TOKEN + BLOB_STORE_ID + BLOB_WEBHOOK_PUBLIC_KEY
   (from Blob store "jcs-website-media" — must be the PUBLIC store;
    private stores 503 client uploads)
-Optional/pending: CRON_SECRET, GCAL_CALENDAR_ID + GOOGLE_SA_KEY
+R2_ACCOUNT_ID + R2_ACCESS_KEY_ID + R2_SECRET_ACCESS_KEY + R2_BUCKET (jcs-media)
+  + R2_PUBLIC_URL (https://media.jacobcschrader.com — the bucket's custom
+    domain; the r2.dev dev URL is rate-limited, don't go back to it)
+GCAL_CALENDAR_ID + GOOGLE_SA_KEY (Google Calendar, set)
+Optional/pending: CRON_SECRET, STRIPE_SECRET_KEY (+ webhook)
 Google Places key is NOT an env var — stored in admin Settings (DB).
 ```
+Changing R2_PUBLIC_URL later means the URLs already stored in
+delivery_files / site_projects / bookings.delivery_cover_url still
+point at the old host — rewrite them with a REPLACE() UPDATE in Neon
+(or keep the old host serving); r2.keyOf only recognises the current
+R2_PUBLIC_URL, so old-host URLs would be neither accepted on upload nor
+deleted on remove.
 
 ## 10. Gotchas (learned the hard way)
 
@@ -505,8 +541,16 @@ Google Places key is NOT an env var — stored in admin Settings (DB).
 
 - **Booking-form terms** (book.html step 7) need Jacob's/legal review —
   esp. the payment clause (currently "due on final invoice").
-- **Add subdomains in Vercel** (Settings → Domains): form., pricing.,
-  proposal.jacobcschrader.com — redirects/rewrites are already live.
+- Vercel → Domains → jacobcschrader.com → DNS Records still holds two
+  **transition-only** `A media → 104.21.62.203 / 172.67.139.60` rows
+  (Cloudflare edge IPs) so resolvers that cached the old Vercel
+  delegation (≤48h from 2026-08-16) still reach the media domain.
+  Safe to delete after ~2026-08-19; harmless if forgotten (nobody asks
+  Vercel's nameservers once the delegation cache expires).
+- Cloudflare: once media.jacobcschrader.com shows Active on the bucket,
+  the r2.dev "Public Development URL" can be disabled (Settings → Public
+  Development URL → Disable) — nothing references it. The probe object
+  delivery/1/probee86p9n/probe.jpg in jcs-media can be deleted.
 - Static project share pages were patched by hand (Contact → /contact,
   Book a Shoot → /book); regenerate via `node tools/generate-share-pages.mjs`
   when Node is available locally (the generator now keeps the app

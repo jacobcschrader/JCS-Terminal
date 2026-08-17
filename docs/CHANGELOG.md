@@ -1675,3 +1675,38 @@ Jacob: "i dont want to pay for clients downloading their media."
   disk on Chrome/Edge, blob elsewhere) since R2 has no ?download=1.
 Existing Blob files keep working; new uploads move to R2 once the env
 vars exist.
+
+## 2026-08-16 — DNS to Cloudflare + media.jacobcschrader.com
+
+- Domain DNS moved from Vercel nameservers to Cloudflare (Free) so the
+  R2 bucket can serve from a real domain: Namecheap nameservers →
+  hunts/noor.ns.cloudflare.com. Zone recreated by hand, all DNS-only:
+  A @ 76.76.21.21, CNAME www/form/pricing/proposal → cname.vercel-dns.com,
+  Resend MX/SPF/DKIM copied 1:1; then switched to Vercel's recommended
+  values (A 216.198.79.1, CNAME 947f571f690760fb.vercel-dns-017.com) so
+  the project's Domains page reads "Valid Configuration" everywhere
+  (Cloudflare's scan had imported proxied
+  wildcard/apex/www A records, a _domainconnect CNAME and 3 CAA records —
+  all removed). Verified both CF nameservers answered identically before
+  the switch; site + email never blinked.
+- jcs-media bucket → Custom Domains → media.jacobcschrader.com (Cloudflare
+  adds the proxied CNAME itself). R2_PUBLIC_URL in Vercel switched from
+  the rate-limited r2.dev URL to https://media.jacobcschrader.com;
+  no stored URLs referenced r2.dev, so nothing to rewrite.
+- Propagation gotcha: resolvers holding the old delegation kept asking
+  Vercel's nameservers, whose wildcard sent media.* to Vercel (404).
+  Fix: two transition-only `A media → Cloudflare edge IPs` records in
+  Vercel's DNS (delete after ~2026-08-19).
+- HANDOFF: new "DNS & domains" note (records list, grey-cloud rule),
+  env list gains the R2_* vars + the "changing R2_PUBLIC_URL" caveat.
+
+## 2026-08-16 — Branded error page
+
+- New `404.html`: Vercel now serves a JCS-branded page (nav, huge faded
+  serif numeral, eyebrow + headline + CTAs, footer) instead of its plain
+  "NOT_FOUND" text for unknown URLs. `?code=401|403|410|500` variants
+  swap the copy for private / not-yours / expired / server-error cases;
+  plain 404s echo the requested URL. Noindexed. Verified desktop +
+  mobile in the local preview (safe-centering so short viewports never
+  clip the top; entrance animation via setTimeout, not rAF).
+

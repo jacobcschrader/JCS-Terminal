@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Page not found — Jacob Schrader</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="description" content="Jacob Schrader — architectural photographer and filmmaker.">
+<link rel="stylesheet" href="/styles.css">
+<style>
+  /* =====================================================================
+     Branded error page. Vercel serves this file for every unknown URL
+     (status 404). The same page also speaks for other codes when linked
+     as /404?code=401|403|410|500 — the copy swaps in errCopy() below.
+     ===================================================================== */
+  html, body { height: 100%; }
+  body { display: flex; flex-direction: column; min-height: 100vh; }
+  .err { flex: 1; min-height: 100vh; display: flex; align-items: safe center;
+         padding: clamp(8.5rem, 18vh, 12rem) 0 clamp(4rem, 8vw, 6rem);
+         position: relative; overflow-x: clip; }
+  .err .wrap { position: relative; width: 100%; }
+  /* the numeral — enormous, feather-light, sitting behind the words */
+  .err__code {
+    position: absolute; right: calc(-1 * var(--gut) * 0.2); top: 50%;
+    transform: translateY(-56%);
+    font-family: var(--serif); font-weight: 300; font-style: italic;
+    font-size: clamp(11rem, 30vw, 27rem); line-height: 1; letter-spacing: -0.04em;
+    color: var(--navy); opacity: 0.045; pointer-events: none; user-select: none;
+    z-index: 0;
+  }
+  .err__body { position: relative; z-index: 1; max-width: 46rem; }
+  .err__eyebrow { display: inline-flex; align-items: center; gap: 0.9rem; }
+  .err__eyebrow::before { content: ""; width: 2.25rem; height: 1px; background: currentColor; opacity: 0.55; }
+  .err__title { margin: 1.4rem 0 1.25rem; font-size: clamp(2.7rem, 5.5vw, 4.5rem); }
+  .err__title em { font-style: italic; font-weight: 300; }
+  .err__text { font-family: var(--serif); font-weight: 300; font-size: 1.28rem; line-height: 1.5;
+               color: var(--muted); max-width: 34rem; text-wrap: pretty; }
+  .err__path { margin-top: 1rem; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted);
+               opacity: 0.8; word-break: break-all; }
+  .err__path code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; }
+  .err__actions { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; margin-top: 2.4rem; align-items: center; }
+  .err__links { display: flex; flex-wrap: wrap; gap: 0.6rem 1.9rem; margin-top: 2.6rem; padding-top: 1.6rem;
+                border-top: 1px solid var(--line-soft); }
+  .err__links a { font-size: 0.6875rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500;
+                  color: var(--ink); position: relative; padding: 2px 0; }
+  .err__links a::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 0; height: 1px;
+                         background: var(--navy); transition: width 0.35s var(--ease); }
+  .err__links a:hover::after { width: 100%; }
+  /* gentle entrance — mirrors the site's .reveal timing */
+  .err__body > * { opacity: 0; transform: translateY(14px);
+                   transition: opacity 0.6s var(--ease), transform 0.65s var(--ease); }
+  .err.in .err__body > * { opacity: 1; transform: none; }
+  .err.in .err__body > *:nth-child(2) { transition-delay: 0.08s; }
+  .err.in .err__body > *:nth-child(3) { transition-delay: 0.16s; }
+  .err.in .err__body > *:nth-child(4) { transition-delay: 0.22s; }
+  .err.in .err__body > *:nth-child(5) { transition-delay: 0.3s; }
+  .err.in .err__body > *:nth-child(6) { transition-delay: 0.38s; }
+  .err__code { opacity: 0; transition: opacity 1.2s var(--ease) 0.2s; }
+  .err.in .err__code { opacity: 0.045; }
+  @media (prefers-reduced-motion: reduce) {
+    .err__body > *, .err__code { transition: none; opacity: 1; transform: none; }
+    .err__code { opacity: 0.045; }
+  }
+  @media (max-width: 720px) {
+    .err { padding-top: 7.5rem; align-items: flex-start; }
+    .err__code { right: -0.4rem; top: auto; bottom: -1.2rem; transform: none; font-size: 9.5rem; }
+    .err__text { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav__brand" href="/">JCS</a>
+  <button class="nav__toggle" aria-label="Menu"><span></span><span></span><span></span></button>
+  <div class="nav__links">
+    <a href="/projects">Work</a>
+    <a href="/services">Services</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+  </div>
+  <div class="nav__side">
+    <a class="nav__login" href="/portal">Client Login</a>
+    <a class="nav__cta" href="/book">Book a Shoot</a>
+  </div>
+</nav>
+
+<main class="err" id="err">
+  <div class="wrap">
+    <div class="err__code" id="err-code" aria-hidden="true">404</div>
+    <div class="err__body">
+      <span class="eyebrow err__eyebrow" id="err-eyebrow">Error 404 &mdash; Page not found</span>
+      <h1 class="display err__title" id="err-title">This page has <em>moved on.</em></h1>
+      <p class="err__text" id="err-text">The link may be out of date, or the address was mistyped. Nothing's lost &mdash; everything you're looking for is a click away.</p>
+      <p class="err__path" id="err-path" hidden></p>
+      <div class="err__actions" id="err-actions">
+        <a class="btn btn--solid" href="/">Back to Home</a>
+        <a class="btn" href="/projects">View the Work</a>
+      </div>
+      <div class="err__links">
+        <a href="/services">Services</a>
+        <a href="/book">Book a Shoot</a>
+        <a href="/portal">Client Portal</a>
+        <a href="/contact">Contact</a>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div>
+        <a class="footer__brand" href="/" style="display:inline-block">JCS</a>
+        <p style="max-width:26ch;font-family:var(--serif);font-weight:300;font-size:1.19rem;line-height:1.45;color:rgba(255,255,255,0.65)">Luxury real estate photography &amp; film. Danville, California &mdash; available worldwide.</p>
+      </div>
+      <div>
+        <h4>Studio</h4>
+        <a href="/projects">Work</a>
+        <a href="/services">Services</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="/book">Book a Shoot</a>
+        <a href="https://www.instagram.com/byjcs_/" target="_blank" rel="noopener">Instagram</a>
+        <a href="/portal">Client Portal</a>
+        <a href="mailto:jacxbschrader@gmail.com">Email</a>
+        <a href="tel:+14088248719">(408) 824-8719</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>&copy; 2026 JCS LLC. All rights reserved.</span>
+      <span><a href="tel:+14088248719" style="display:inline;padding:0;font-size:inherit">408.824.8719</a> &middot; <a href="mailto:jacxbschrader@gmail.com" style="display:inline;padding:0;font-size:inherit">JacxbSchrader@gmail.com</a></span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  // Which error are we? Vercel serves this file for 404s; other codes are
+  // linked explicitly as /404?code=401 (or #401) from our own pages.
+  var m = (location.search + location.hash).match(/(?:code=|#)(401|403|404|410|500|502|503)/);
+  var code = m ? m[1] : '404';
+  var COPY = {
+    '404': { eyebrow: 'Error 404 &mdash; Page not found', title: 'This page has <em>moved on.</em>',
+             text: 'The link may be out of date, or the address was mistyped. Nothing’s lost — everything you’re looking for is a click away.',
+             actions: [['Back to Home', '/', true], ['View the Work', '/projects', false]], showPath: true },
+    '401': { eyebrow: 'Error 401 &mdash; Sign-in required', title: 'This one’s <em>private.</em>',
+             text: 'You’re looking at a client page. Sign in to the client portal and we’ll email you a fresh link — no password to remember.',
+             actions: [['Client Portal', '/portal/login', true], ['Back to Home', '/', false]] },
+    '403': { eyebrow: 'Error 403 &mdash; Not available', title: 'Not yours <em>to open.</em>',
+             text: 'This link belongs to another client’s account. If it should be yours, sign in with your own email and it will appear in your portal.',
+             actions: [['Client Portal', '/portal/login', true], ['Contact Jacob', '/contact', false]] },
+    '410': { eyebrow: 'Error 410 &mdash; Link expired', title: 'This link has <em>expired.</em>',
+             text: 'For your security, client links only work for a while. Sign in to the portal and a fresh one is one click away.',
+             actions: [['Client Portal', '/portal/login', true], ['Back to Home', '/', false]] },
+    '500': { eyebrow: 'Error 500 &mdash; Something went wrong', title: 'That’s on <em>us.</em>',
+             text: 'Something broke on our end while loading this page. Give it another try in a moment — and if it keeps happening, tell Jacob directly.',
+             actions: [['Try Again', 'reload', true], ['Email Jacob', 'mailto:jacxbschrader@gmail.com', false]] }
+  };
+  COPY['502'] = COPY['503'] = COPY['500'];
+  var c = COPY[code] || COPY['404'];
+  var $ = function (id) { return document.getElementById(id); };
+  $('err-code').textContent = code;
+  $('err-eyebrow').innerHTML = c.eyebrow;
+  $('err-title').innerHTML = c.title;
+  $('err-text').textContent = c.text;
+  document.title = c.eyebrow.replace(/^Error \d+ &mdash; /, '') + ' — Jacob Schrader';
+  var acts = $('err-actions'); acts.innerHTML = '';
+  c.actions.forEach(function (a) {
+    var el = document.createElement('a');
+    el.className = 'btn' + (a[2] ? ' btn--solid' : '');
+    el.textContent = a[0];
+    if (a[1] === 'reload') { el.href = '#'; el.onclick = function (e) { e.preventDefault(); location.reload(); }; }
+    else el.href = a[1];
+    acts.appendChild(el);
+  });
+  // show what was asked for on plain 404s (never for query-linked codes)
+  if (c.showPath && !m && location.pathname !== '/404' && location.pathname !== '/404.html') {
+    var p = $('err-path'); p.innerHTML = 'You asked for <code></code>';
+    p.querySelector('code').textContent = location.host + location.pathname;
+    p.hidden = false;
+  }
+  setTimeout(function () { $('err').classList.add('in'); }, 40);
+})();
+</script>
+<script src="/site.js"></script>
+</body>
+</html>

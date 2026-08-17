@@ -1,7 +1,8 @@
 // =====================================================================
 //  Cloudflare R2 (S3-compatible) — zero-egress media storage.
 //  Env: R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET,
-//       R2_PUBLIC_URL (https://media.jacobcschrader.com or the r2.dev URL)
+//       R2_PUBLIC_URL (https://media.jacobcschrader.com — the bucket's
+//       custom domain on Cloudflare DNS; the r2.dev URL is dev-only)
 //  When all five exist, uploads go browser → R2 via presigned PUT URLs
 //  (SigV4, no SDK), public reads come off R2_PUBLIC_URL, deletes are
 //  signed DELETEs. When they don't, everything stays on Vercel Blob.
