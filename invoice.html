@@ -37,6 +37,14 @@
 .inv-foot { margin-top: 2.4rem; font-size: 0.82rem; color: var(--muted); line-height: 1.7; }
 .inv-foot a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 .inv-print { margin-top: 1.6rem; text-align: center; }
+.inv-ledger { margin-top: 1.4rem; border-top: 1px solid var(--line); }
+.inv-ledger div { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--line-soft, #eee); font-size: 0.9rem; color: var(--ink); }
+.inv-ledger div span:last-child { font-family: var(--serif); font-size: 1.15rem; font-weight: 500; color: var(--navy); font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; }
+.inv-ledger small { color: var(--muted); font-size: 0.74rem; margin-left: 0.5rem; }
+.inv-pay { display: flex; gap: 0.7rem; flex-wrap: wrap; justify-content: flex-end; margin-top: 1.3rem; }
+.inv-pay .btn { border: 0; cursor: pointer; }
+.inv-pay .note { flex-basis: 100%; text-align: right; font-size: 0.74rem; color: var(--muted); }
+@media print { .inv-pay { display: none; } }
 .inv-missing { text-align: center; padding: 4rem 1rem; }
 @media (max-width: 520px) {
   .inv-card { padding: 1.5rem 1.2rem; }
@@ -87,6 +95,8 @@
       <tbody id="inv-items"></tbody>
     </table>
     <div class="inv-total"><div><label>Total</label><b id="inv-total"></b></div></div>
+    <div class="inv-ledger" id="inv-ledger" hidden></div>
+    <div class="inv-pay" id="inv-pay" hidden></div>
     <p class="inv-foot">Questions about this invoice? Email <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> or call <a href="tel:+14088248719">(408) 824-8719</a>.</p>
   </div>
   <div class="inv-print" id="inv-print" hidden>
@@ -121,7 +131,8 @@
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
   if (!t) { missing(); return; }
   try {
-    var r = await fetch('/api/invoice?t=' + encodeURIComponent(t));
+    var sid = new URLSearchParams(location.search).get('session_id');
+    var r = await fetch('/api/invoice?t=' + encodeURIComponent(t) + (sid ? '&session_id=' + encodeURIComponent(sid) : ''));
     if (!r.ok) { missing(); return; }
     var d = await r.json();
     if (d.portal_url) { var pl = $('inv-portal-link'); pl.href = d.portal_url; pl.hidden = false; }
@@ -143,6 +154,27 @@
         '</td><td>' + (i.amount < 0 ? '&minus;' + money(-i.amount) : money(i.amount)) + '</td></tr>';
     }).join('');
     $('inv-total').textContent = money(d.total);
+    // deposit / balance ledger + online payment (when Stripe is set up)
+    var L = $('inv-ledger'), P = $('inv-pay');
+    if (d.deposit) {
+      L.hidden = false;
+      L.innerHTML = '<div><span>Deposit' + (d.deposit_paid_at ? '<small>paid ' + new Date(d.deposit_paid_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + '</small>' : '<small>due to reserve the date</small>') + '</span><span>' + money(d.deposit) + '</span></div>' +
+        '<div><span>Balance' + (d.paid ? '<small>paid</small>' : d.deposit_paid_at ? '<small>due on delivery</small>' : '<small>after deposit</small>') + '</span><span>' + money(d.paid ? 0 : d.balance) + '</span></div>';
+    }
+    if (d.pay_online && !d.paid) {
+      P.hidden = false;
+      var due = d.deposit && !d.deposit_paid_at ? { kind: 'deposit', label: 'Pay deposit ' + money(d.deposit) } : { kind: d.deposit ? 'balance' : 'full', label: 'Pay ' + money(d.deposit ? d.balance : d.total) };
+      P.innerHTML = '<a class="btn btn--solid" id="inv-paybtn">' + due.label + ' &rarr;</a><span class="note">Secure card payment via Stripe. Prefer ACH or a check? Just reply to the invoice email.</span>';
+      $('inv-paybtn').addEventListener('click', async function () {
+        this.textContent = 'One moment…';
+        try {
+          var rr = await fetch('/api/invoice', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ t: t, action: 'checkout', kind: due.kind }) });
+          var j = await rr.json();
+          if (rr.ok && j.url) location.href = j.url; else this.innerHTML = due.label + ' &rarr;';
+        } catch (e) { this.innerHTML = due.label + ' &rarr;'; }
+      });
+    }
+    if (d.paid && new URLSearchParams(location.search).get('paid')) { st.textContent = 'Paid — thank you'; }
     $('inv-card').hidden = false;
     $('inv-print').hidden = false;
   } catch (e) { missing(); }

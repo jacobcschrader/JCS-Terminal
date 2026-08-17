@@ -298,6 +298,12 @@ function ensureSchema() {
         created_at   timestamptz NOT NULL DEFAULT now()
       )`;
       await s`ALTER TABLE proposals ADD COLUMN IF NOT EXISTS reminded_at timestamptz`;
+      // Payments (Stripe, optional) + deposits; archived originals.
+      await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS deposit_amount numeric`;
+      await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS deposit_paid_at timestamptz`;
+      await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS stripe_session_id text DEFAULT ''`;
+      await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS paid_via text DEFAULT ''`;
+      await s`ALTER TABLE delivery_files ADD COLUMN IF NOT EXISTS archived_at timestamptz`;
       await s`UPDATE bookings SET paid_at = COALESCE(paid_at, invoice_sent_at, delivered_at::timestamptz, created_at) WHERE status = 'paid' AND paid_at IS NULL`;
     })();
   }

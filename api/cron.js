@@ -22,6 +22,7 @@ const { sendEmail, jcsEmail, SENDERS, OWNER } = require("./_lib/email.js");
 const { loginUrl } = require("./_lib/portal-auth.js");
 const { logEvent } = require("./_lib/events.js");
 const { loadTemplates, tpl } = require("./_lib/templates.js");
+const backup = require("./_lib/backup.js");
 
 const escHtml = (s) =>
   String(s == null ? "" : s).replace(/[&<>"']/g, (c) =>
@@ -147,7 +148,33 @@ module.exports = async function handler(req, res) {
     let sent = { invoice: 0, proposal: 0, delivery: 0 };
     try { sent = await reminders(s); } catch (e) { /* reminders never break the stage job */ }
 
-    res.status(200).json({ ok: true, moved: moved.length, reminders: sent });
+    // archive full-res originals N months after delivery (web/thumb copies stay)
+    let archived = 0;
+    try {
+      const [row] = await s`SELECT value FROM settings WHERE key = 'archive_months'`;
+      const months = parseInt((row && row.value) || "0", 10);
+      if (months > 0) {
+        const files = await s`
+          SELECT f.id, f.booking_id, f.url FROM delivery_files f JOIN bookings bk ON bk.id = f.booking_id
+          WHERE f.kind = 'photo' AND f.archived_at IS NULL AND f.url <> '' AND f.web_url <> ''
+            AND bk.delivery_sent_at IS NOT NULL AND bk.delivery_sent_at < now() - (${months} * interval '1 month')
+          LIMIT 300`;
+        let del = null; try { del = require("@vercel/blob").del; } catch (e) {}
+        const perBooking = {};
+        for (const f of files) {
+          try { if (del) await del(f.url); } catch (e) { /* orphan is harmless */ }
+          await s`UPDATE delivery_files SET url = '', archived_at = now() WHERE id = ${f.id}`;
+          perBooking[f.booking_id] = (perBooking[f.booking_id] || 0) + 1; archived++;
+        }
+        for (const bid of Object.keys(perBooking)) await logEvent(s, bid, "files", `Archived ${perBooking[bid]} full-res original${perBooking[bid] === 1 ? "" : "s"} (${months}-month rule)`, "system");
+      }
+    } catch (e) { /* never break the run */ }
+
+    // nightly encrypted backup to Blob (best effort)
+    let backedUp = null;
+    try { backedUp = await backup.run(s); } catch (e) { backedUp = { error: String(e.message || e).slice(0, 120) }; }
+
+    res.status(200).json({ ok: true, moved: moved.length, reminders: sent, archived, backup: backedUp });
   } catch (e) {
     const msg = /DATABASE_URL/.test(String(e)) ? "db-not-configured" : "error";
     res.status(500).json({ error: msg });

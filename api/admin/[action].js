@@ -26,6 +26,8 @@ const routes = {
   downloads: require("../_lib/admin/downloads.js"),
   tasks: require("../_lib/admin/tasks.js"),
   testimonials: require("../_lib/admin/testimonials.js"),
+  gcalevents: require("../_lib/admin/gcal-events.js"),
+  backup: require("../_lib/admin/backup.js"),
 };
 
 module.exports = function handler(req, res) {

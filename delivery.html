@@ -347,10 +347,16 @@ body { background: #f8f7f4; }
   function pill(label, id) {
     var b = document.createElement('button'); b.className = 'lp-pillbtn'; b.innerHTML = '&#8615;&nbsp; ' + label; if (id) b.id = id; return b;
   }
+  var fullRes = photos.filter(function (f) { return f.url && !f.archived; });
+  var archivedN = photos.filter(function (f) { return f.archived; }).length;
   if (!locked && photos.length) {
-    var bFull = pill('Download all &mdash; full res', 'lp-full'), bMls = pill('MLS photo download &mdash; 2048px', 'lp-mls');
-    bundles.appendChild(bFull); bundles.appendChild(bMls);
-    bFull.addEventListener('click', function () { bundle(photos.map(function (f) { return { name: f.name, url: f.url }; }), 'full-res', bFull); log('full'); });
+    var bMls = pill('MLS photo download &mdash; 2048px', 'lp-mls');
+    if (fullRes.length) {
+      var bFull = pill('Download all &mdash; full res', 'lp-full');
+      bundles.appendChild(bFull);
+      bFull.addEventListener('click', function () { bundle(fullRes.map(function (f) { return { name: f.name, url: f.url }; }), 'full-res', bFull); log('full'); });
+    }
+    bundles.appendChild(bMls);
     bMls.addEventListener('click', function () {
       bundle(photos.map(function (f) { return { name: f.name.replace(/\.[^.]+$/, '') + '.jpg', url: f.web || f.url }; }), 'mls-2048px', bMls); log('mls');
     });
@@ -359,6 +365,11 @@ body { background: #f8f7f4; }
     var a = document.createElement('a'); a.className = 'lp-pillbtn'; a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
     a.innerHTML = esc(l.label || 'View') + ' &nearr;'; bundles.appendChild(a);
   });
+  if (archivedN && !locked) {
+    var note = document.createElement('div'); note.className = 'lp-lockmsg';
+    note.textContent = 'Full-resolution originals for ' + archivedN + (archivedN === 1 ? ' photo were' : ' photos were') + ' archived after the delivery window; the 2048px web versions remain available above.';
+    bundles.parentNode.insertBefore(note, bundles.nextSibling);
+  }
 
   // ---- selection ----
   var selected = {};
@@ -408,7 +419,8 @@ body { background: #f8f7f4; }
       var ratio = (f.width && f.height) ? ' style="aspect-ratio:' + f.width + '/' + f.height + '"' : '';
       return '<figure class="lp-ph" data-i="' + i + '">' + chk(f) +
         '<img loading="lazy" src="' + esc(f.thumb || f.web || f.url) + '" alt=""' + ratio + '>' +
-        (!locked ? '<a class="dl" href="' + esc(dlUrl(f.url)) + '" data-id="' + f.id + '" title="Download full-res">' + DL_ICON + '</a>' : '') +
+        (!locked && f.url && !f.archived ? '<a class="dl" href="' + esc(dlUrl(f.url)) + '" data-id="' + f.id + '" title="Download full-res">' + DL_ICON + '</a>'
+          : (!locked && f.web ? '<a class="dl" href="' + esc(dlUrl(f.web)) + '" data-id="' + f.id + '" title="Download 2048px">' + DL_ICON + '</a>' : '')) +
         '</figure>';
     }).join('');
   }

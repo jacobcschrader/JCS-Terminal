@@ -535,6 +535,7 @@ select.lx-input { padding-right: 2rem; }
 .cal__ev--twilight { background: #4a4266; }
 .cal__ev.unconf { background: #fff; color: var(--navy); border: 1px dashed rgba(15,34,64,0.45); }
 .cal__ev--twilight.unconf { color: #4a4266; border-color: #4a4266; }
+.cal__ev--ext { background: #ecebe6; color: var(--muted); cursor: default; }
 @media (max-width: 860px) { .cal__cell { min-height: 70px; padding: 0.3rem; } .cal__ev { font-size: 0.58rem; } .cal__ev b { display: none; } }
 /* ---- settings: templates ---- */
 .tpl { border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 0.7rem; }
@@ -639,7 +640,7 @@ select.lx-input { padding-right: 2rem; }
               licTab: 'active', licProp: '', licResults: null, licSearching: false,
               stageFilter: 'active', ls: null, downloads: [], dlWeek: 0,
               tasks: [], taskTab: 'all', billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1,
-              testimonials: [], calMonth: '', fDrag: null };
+              testimonials: [], calMonth: '', fDrag: null, env: {}, calExt: {}, calBusy: {}, backup: null };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
   var ADDONS = {
     'Photography': ['Flash / Ambient Photography','Aerial Photography','Vertical / Vignette Images','Twilight Photography','Virtual Staging','Virtual Twilight'],
@@ -757,7 +758,7 @@ select.lx-input { padding-right: 2rem; }
     state.siteProjects = sp.projects || [];
     state.proposals = pr.proposals || [];
     state.licenseLeads = lic.leads || [];
-    state.settings = st.settings || {}; state.loaded = true;
+    state.settings = st.settings || {}; state.env = st.env || {}; state.loaded = true;
     var extra = await Promise.all([api('downloads?limit=80').catch(function () { return {}; }), api('tasks').catch(function () { return {}; }), api('testimonials').catch(function () { return {}; })]);
     state.downloads = extra[0].events || []; state.dlWeek = extra[0].week || 0; state.tasks = extra[1].tasks || []; state.testimonials = extra[2].testimonials || [];
     paintBell();
@@ -1673,6 +1674,13 @@ select.lx-input { padding-right: 2rem; }
       add(b.shoot_date, 'shoot', b.shoot_time);
       if (b.twilight_date || b.twilight_time) add(b.twilight_date || b.shoot_date, 'twilight', b.twilight_time);
     });
+    var ext = state.calExt[ym];
+    if (!ext) setTimeout(function () { ADM.calExtLoad(ym); }, 0);
+    (ext || []).forEach(function (e) {
+      var k = String(e.start).slice(0, 10);
+      var time = e.allDay ? '' : String(e.start).slice(11, 16);
+      (byDay[k] = byDay[k] || []).push({ ext: e, kind: 'ext', time: time });
+    });
     var cells = '';
     var lead = first.getDay();
     for (var i = 0; i < lead; i++) cells += '<div class="cal__cell cal__cell--pad"></div>';
@@ -1681,6 +1689,10 @@ select.lx-input { padding-right: 2rem; }
       var list = (byDay[key] || []).sort(function (a, c) { return (a.time || '') < (c.time || '') ? -1 : 1; });
       cells += '<div class="cal__cell' + (key === todayS ? ' today' : '') + (key < todayS ? ' past' : '') + '"><span class="cal__n">' + d + '</span>' +
         list.map(function (it) {
+          if (it.kind === 'ext') {
+            return '<span class="cal__ev cal__ev--ext" title="' + esc(it.ext.title) + (it.ext.location ? ' · ' + esc(it.ext.location) : '') + '">' +
+              (it.time ? '<b>' + esc(fmtT(it.time)) + '</b> ' : '') + esc(it.ext.title) + '</span>';
+          }
           return '<a class="cal__ev cal__ev--' + it.kind + (it.b.confirmed_at ? '' : ' unconf') + '" onclick="ADM.go(\'project/' + it.b.id + '\')" title="' + esc(it.b.title) + (it.b.client_name ? ' · ' + esc(it.b.client_name) : '') + '">' +
             (it.kind === 'twilight' ? '&#9790; ' : '') + (it.time ? '<b>' + esc(fmtT(it.time)) + '</b> ' : '') + esc(it.b.title) + '</a>';
         }).join('') + '</div>';
@@ -1691,7 +1703,7 @@ select.lx-input { padding-right: 2rem; }
         '<span class="adm-seg"><button onclick="ADM.calMove(-1)">&lsaquo;</button><button onclick="ADM.calMove(0)">Today</button><button onclick="ADM.calMove(1)">&rsaquo;</button></span>' +
         '<button class="adm-btn" onclick="ADM.newBooking()">+ New project</button>') +
       '<div class="dz-sechead" style="margin-bottom:0.6rem"><h2>' + esc(monthName) + '</h2><span class="dz-count">' + count + '</span><span class="grow"></span>' +
-        '<span class="mut" style="font-size:0.7rem">solid = confirmed &middot; outlined = not confirmed &middot; &#9790; twilight</span></div>' +
+        '<span class="mut" style="font-size:0.7rem">solid = confirmed &middot; outlined = not confirmed &middot; &#9790; twilight &middot; grey = your Google Calendar' + (state.calBusy[ym] ? ' (loading…)' : '') + '</span></div>' +
       '<div class="dz-card cal"><div class="cal__head">' + ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
       '<div class="cal__grid">' + cells + '</div></div>';
   }
@@ -1945,9 +1957,32 @@ select.lx-input { padding-right: 2rem; }
           '<span class="grow"></span><small class="mut">sent ' + dstr(b.invoice_sent_at) + (b.invoice_sends > 1 ? ' &middot; ' + b.invoice_sends + '&times;' : '') + '</small></div>'
         : '<div class="adm-row"><span class="mut">No invoice yet' + (b.price ? '' : ' — set a price first (Edit project)') + '.</span></div>') +
       '</div>' +
+      (Number(b.deposit_amount)
+        ? '<div class="adm-row" style="border-top:1px solid var(--line-soft);margin-top:0.3rem"><span>Deposit ' + money(b.deposit_amount) + '</span><span class="dim">&middot;</span>' +
+          (b.deposit_paid_at ? '<span style="color:#2f6b3f">paid ' + dstr(b.deposit_paid_at) + '</span>' : '<span class="mut">unpaid</span>') +
+          '<span class="grow"></span><small class="mut">balance ' + money(Math.max(0, (total || 0) - Number(b.deposit_amount))) + '</small></div>'
+        : '') +
+      (b.paid_via === 'stripe' ? '<div class="adm-row"><span class="mut" style="font-size:0.74rem">Paid online via Stripe' + (b.paid_at ? ' · ' + dstr(b.paid_at) : '') + '</span></div>' : '') +
+      '</div>' +
       (b.client_id && b.price
-        ? '<div style="margin-top:0.9rem"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invSend(' + b.id + ')">' + (b.invoice_sent_at ? 'Resend invoice' : 'Generate &amp; send invoice') + '</button>' +
-          (b.status !== 'paid' && b.invoice_sent_at ? ' <button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.stage(' + b.id + ',\'paid\')">Mark paid</button>' : '') + '</div>'
+        ? (function () {
+            var pct = parseFloat((state.settings || {}).deposit_pct) || 0;
+            var dep = Number(b.deposit_amount) || 0;
+            var suggested = Math.round((total || 0) * pct / 100);
+            var out = '<div style="margin-top:0.9rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">';
+            if (pct > 0 && !dep && b.status !== 'paid') {
+              out += '<button class="adm-btn adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'deposit\',' + suggested + ')">Send deposit invoice (' + pct + '% &middot; ' + money(suggested) + ')</button>';
+            }
+            if (dep && !b.deposit_paid_at && b.status !== 'paid') {
+              out += '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'deposit\')">Resend deposit invoice</button>' +
+                     '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.depositPaid(' + b.id + ')">Deposit received</button>';
+            }
+            var mainKind = dep && b.deposit_paid_at ? 'balance' : 'full';
+            var mainLabel = b.invoice_sent_at ? (mainKind === 'balance' ? 'Resend balance invoice' : 'Resend invoice') : (mainKind === 'balance' ? 'Send balance invoice' : 'Generate &amp; send invoice');
+            if (b.status !== 'paid' || b.invoice_sent_at) out += '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'' + mainKind + '\')">' + mainLabel + '</button>';
+            if (b.status !== 'paid' && b.invoice_sent_at) out += '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.stage(' + b.id + ',\'paid\')">Mark paid</button>';
+            return out + '</div>';
+          })()
         : '') +
       '</div>';
 
@@ -2022,6 +2057,7 @@ select.lx-input { padding-right: 2rem; }
           ' onclick="' + (selMode ? 'ADM.lsSelToggle(' + f.id + ')' : 'ADM.lsCover(' + f.id + ')') + '" title="' + esc(f.name) + '">' +
         (thumb ? '<img loading="lazy" src="' + esc(thumb) + '" alt="" draggable="false">' : '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:0.6rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">' + esc(f.kind) + '</div>') +
         (f.kind === 'film' ? '<span class="film">&#9654;</span>' : '') +
+        (f.archived_at ? '<span class="tag" style="left:auto;right:6px;top:auto;bottom:6px;background:rgba(15,34,64,0.6)">Archived</span>' : '') +
         (isCover && !selMode ? '<span class="tag">Cover</span>' : '') +
         (selMode ? '<span class="pick">' + (picked ? '&#10003;' : '') + '</span>' : '') +
         '<span class="nm">' + esc(f.name) + '</span>' +
@@ -2465,7 +2501,8 @@ select.lx-input { padding-right: 2rem; }
         fld('s-gplaces', 'Google Places API key <small style="text-transform:none;letter-spacing:0">(address autocomplete in the project form)</small>', '<input id="s-gplaces" placeholder="AIza\u2026" value="' + esc(st.google_places_key || '') + '">') +
         '<div class="adm-field"><label>Google Calendar</label><div id="gcal-status" class="mut" style="font-size:0.84rem;line-height:1.6;padding-top:0.3rem">Checking&hellip;</div>' +
           '<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" style="margin-top:0.5rem" onclick="ADM.gcalCheck()">Run test</button></div>' +
-        '<div class="adm-field full"><small class="mut" style="font-size:0.76rem;line-height:1.6">Confirming a project writes the shoot (and twilight) onto your calendar; re-confirming updates the same event. Setup lives in Vercel env vars <b>GCAL_CALENDAR_ID</b> + <b>GOOGLE_SA_KEY</b> (service-account JSON), then redeploy.</small></div>' +
+        '<div class="adm-field full"><small class="mut" style="font-size:0.76rem;line-height:1.6">Confirming a project writes the shoot (and twilight) onto your calendar; re-confirming updates the same event. Setup lives in Vercel env vars <b>GCAL_CALENDAR_ID</b> + <b>GOOGLE_SA_KEY</b> (service-account JSON), then redeploy. The admin Calendar also <b>reads</b> everything on that calendar; to see other calendars too, share each with the service-account email (&ldquo;See all event details&rdquo;) and list their IDs below.</small></div>' +
+        fld('s-gcalread', 'Other calendar IDs to read <small style="text-transform:none;letter-spacing:0">(comma-separated, e.g. jacxbschrader@gmail.com)</small>', '<input id="s-gcalread" placeholder="jacxbschrader@gmail.com, family@group.calendar.google.com" value="' + esc(st.gcal_read_ids || '') + '">') +
         '<div class="adm-field full" style="margin-top:0.4rem"><label>Licensing research <small style="text-transform:none;letter-spacing:0">(one key is enough &mdash; Serper is free for 2,500 searches at serper.dev)</small></label></div>' +
         fld('s-serper', 'Serper API key', '<input id="s-serper" placeholder="paste key from serper.dev" value="' + esc(st.serper_key || '') + '">') +
         fld('s-brave', 'Brave Search key <small style="text-transform:none;letter-spacing:0">(alternative)</small>', '<input id="s-brave" placeholder="optional" value="' + esc(st.brave_search_key || '') + '">') +
@@ -2473,6 +2510,13 @@ select.lx-input { padding-right: 2rem; }
         fld('s-cse-cx', 'Google engine ID <small style="text-transform:none;letter-spacing:0">(pairs with the Google key)</small>', '<input id="s-cse-cx" placeholder="optional" value="' + esc(st.google_cse_cx || '') + '">') +
         '<div class="adm-field full"><button class="adm-btn" type="submit">Save settings</button></div>' +
       '</form></div>' +
+      '<div class="adm-card"><h2>Payments <small style="text-transform:none;letter-spacing:0;font-weight:400">— optional; invoices get a Pay button and paying marks the project Paid + unlocks downloads</small></h2>' +
+        '<div class="adm-row" style="border:0;padding:0 0 0.6rem"><span>Stripe</span><span class="dim">&middot;</span>' +
+          ((state.env || {}).stripe ? '<span style="color:#2f6b3f">connected (' + esc(state.env.stripe_mode) + ' mode)</span>' : '<span class="mut">not connected &mdash; add <b>STRIPE_SECRET_KEY</b> in Vercel &rarr; Environment Variables and redeploy; then add a webhook for <b>checkout.session.completed</b> &rarr; https://www.jacobcschrader.com/api/stripe</span>') + '</div>' +
+        '<div class="adm-form" style="margin-top:0.4rem">' +
+          fld('s-deposit', 'Deposit to reserve a date <small style="text-transform:none;letter-spacing:0">(% of the total &mdash; blank or 0 = no deposits; shows a "Send deposit invoice" button on projects)</small>', '<input id="s-deposit" type="number" min="0" max="100" step="5" placeholder="e.g. 50" value="' + esc(st.deposit_pct || '') + '">') +
+          '<div class="adm-field" style="display:flex;align-items:flex-end"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.miscSave()">Save</button></div>' +
+        '</div></div>' +
       '<div class="adm-card"><h2>Automatic reminders <small style="text-transform:none;letter-spacing:0;font-weight:400">— sent by the daily cron, once per milestone, logged on the project</small></h2>' +
         [['invoice', 'Unpaid invoice', 'A friendly note at 14 days, another at 21 — links to the invoice.'],
          ['proposal', 'Unanswered proposal', 'One nudge 3 days after a proposal is sent and still waiting.'],
@@ -2490,6 +2534,29 @@ select.lx-input { padding-right: 2rem; }
         }).join('') +
         '<button class="adm-btn" onclick="ADM.tplSave()">Save templates</button>' +
       '</div>' +
+      (function () {
+        var bk = state.backup, sto = bk && bk.storage;
+        var gb = function (n) { return (n / 1e9).toFixed(2) + ' GB'; };
+        return '<div class="adm-card"><h2>Storage &amp; archive</h2>' +
+          (sto ? '<div class="bl-stats" style="margin-bottom:0.9rem">' +
+              '<div class="dz-stat"><div class="lbl">Delivery storage</div><b>' + gb(sto.live_bytes) + '</b><span class="d"><span class="mut">' + sto.files + ' files &middot; ~$' + (sto.live_bytes / 1e9 * 0.023).toFixed(2) + '/mo</span></span></div>' +
+              '<div class="dz-stat"><div class="lbl">Photos</div><b>' + sto.photos + '</b></div>' +
+              '<div class="dz-stat"><div class="lbl">Films</div><b>' + sto.films + '</b></div>' +
+              '<div class="dz-stat"><div class="lbl">Archived originals</div><b>' + sto.archived + '</b></div></div>'
+            : '<p class="adm-empty">Loading storage&hellip;</p>') +
+          '<div class="adm-form">' +
+            fld('s-archive', 'Archive full-res originals after <small style="text-transform:none;letter-spacing:0">(months since delivery &mdash; blank = keep forever; the 2048px web copies and thumbnails always stay, so MLS downloads keep working)</small>', '<input id="s-archive" type="number" min="0" max="120" step="1" placeholder="e.g. 12" value="' + esc(st.archive_months || '') + '">') +
+            '<div class="adm-field" style="display:flex;align-items:flex-end"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.miscSave()">Save</button></div>' +
+          '</div></div>' +
+          '<div class="adm-card"><h2>Backups <small style="text-transform:none;letter-spacing:0;font-weight:400">— every table, encrypted, saved to Blob nightly by the cron; last 30 kept</small></h2>' +
+          (bk ? (bk.error ? '<p class="adm-empty">Backups unavailable: ' + esc(bk.error) + ' &mdash; the Blob store needs a read-write token in the function environment.</p>'
+                : (bk.backups && bk.backups.length
+                    ? '<div class="adm-rows">' + bk.backups.slice(0, 5).map(function (x) { return '<div class="adm-row"><span>' + stamp(x.at) + '</span><span class="dim">&middot;</span><span class="mut">' + Math.round(x.size / 1024) + ' KB</span></div>'; }).join('') + '</div>'
+                    : '<p class="adm-empty">No backups yet &mdash; the first one runs tonight, or run one now.</p>'))
+              : '<p class="adm-empty">Loading&hellip;</p>') +
+          '<div style="margin-top:0.8rem;display:flex;gap:0.5rem;flex-wrap:wrap"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.backupNow()">Back up now</button>' +
+          '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/api/admin/backup?download=1">Download latest (decrypted JSON)</a></div></div>';
+      })() +
       '<div class="adm-card"><h2>Discount codes</h2>' +
       '<form class="adm-form" onsubmit="ADM.discCreate(event)" style="margin-bottom:1.2rem">' +
         fld('d-code', 'Code *', '<input id="d-code" required placeholder="SPRING10" style="text-transform:uppercase">') +
@@ -2678,7 +2745,7 @@ select.lx-input { padding-right: 2rem; }
     else if (section === 'client') m.innerHTML = vClientDetail(r.split('/')[1]);
     else if (section === 'portfolio') { state.sp = null; m.innerHTML = vPortfolio(); }
     else if (section === 'siteproject') m.innerHTML = vSiteProject(r.split('/')[1]);
-    else if (section === 'settings') { m.innerHTML = vSettings(); setTimeout(function () { ADM.gcalCheck(); }, 0); }
+    else if (section === 'settings') { m.innerHTML = vSettings(); setTimeout(function () { ADM.gcalCheck(); ADM.backupInfo(); }, 0); }
     else m.innerHTML = vDash();
   }
 
@@ -2689,6 +2756,32 @@ select.lx-input { padding-right: 2rem; }
   // exposed for inline handlers
   window.ADM = {
     go: go,
+    miscSave: async function () {
+      var body = {};
+      if ($('s-deposit')) body.deposit_pct = $('s-deposit').value.trim();
+      if ($('s-archive')) body.archive_months = $('s-archive').value.trim();
+      try { var j = await api('settings', 'PUT', body); state.settings = j.settings || state.settings; toast('Saved.'); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    backupInfo: async function () {
+      try { state.backup = await api('backup'); } catch (e) { state.backup = { error: friendly(e), backups: [], storage: null }; }
+      if (route() === 'settings') render();
+    },
+    backupNow: async function () {
+      toast('Backing up…');
+      try { var j = await api('backup', 'POST', {}); toast('Backup saved (' + Math.round(j.backup.bytes / 1024) + ' KB).'); ADM.backupInfo(); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    calExtLoad: async function (ym) {
+      if (state.calExt[ym] || state.calBusy[ym]) return;
+      state.calBusy[ym] = true;
+      var y = parseInt(ym.slice(0, 4), 10), mo = parseInt(ym.slice(5, 7), 10);
+      var from = ym + '-01', to = y + '-' + String(mo).padStart(2, '0') + '-' + String(new Date(y, mo, 0).getDate()).padStart(2, '0');
+      try { var j = await api('gcalevents?from=' + from + '&to=' + to); state.calExt[ym] = j.events || []; }
+      catch (e) { state.calExt[ym] = []; }
+      state.calBusy[ym] = false;
+      if (route() === 'calendar') render();
+    },
     // ---- calendar ----
     calMove: function (dir) {
       if (dir === 0) { state.calMonth = new Date().toISOString().slice(0, 7); render(); return; }
@@ -2912,9 +3005,17 @@ select.lx-input { padding-right: 2rem; }
         toast(msg);
       } catch (e) { toast(friendly(e), 'err'); }
     },
-    invSend: async function (id) {
+    depositPaid: async function (id) {
+      var b = state.bookings.find(function (x) { return x.id == id; }); if (!b) return;
+      if (!confirm('Mark the deposit of ' + money(b.deposit_amount) + ' as received?')) return;
+      try { await api('bookings', 'PUT', Object.assign({}, b, { deposit_paid: true })); await reload(); render(); toast('Deposit recorded.'); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    invSend: async function (id, kind, depositAmount) {
+      var body = { id: id, send: true, kind: kind || 'full' };
+      if (kind === 'deposit' && depositAmount) body.deposit_amount = depositAmount;
       try {
-        await api('invoice', 'POST', { id: id, send: true });
+        await api('invoice', 'POST', body);
         await reload(); render();
       } catch (e) {
         toast(String(e.message) === 'no-client-email' ? 'The client has no email on file — add one first.'
@@ -3800,7 +3901,7 @@ select.lx-input { padding-right: 2rem; }
     settingsSave: async function (e) {
       e.preventDefault();
       try {
-        var j = await api('settings', 'PUT', { google_places_key: $('s-gplaces').value,
+        var j = await api('settings', 'PUT', { google_places_key: $('s-gplaces').value, gcal_read_ids: $('s-gcalread').value,
           google_cse_key: $('s-cse-key').value, google_cse_cx: $('s-cse-cx').value,
           serper_key: $('s-serper').value, brave_search_key: $('s-brave').value });
         state.settings = j.settings || {}; render();

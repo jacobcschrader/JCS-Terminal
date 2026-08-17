@@ -107,4 +107,31 @@ async function upsertEvents(events) {
   return events.length;
 }
 
-module.exports = { isConfigured, upsertEvents, accessToken };
+// Read events between two dates (YYYY-MM-DD) from the configured calendar
+// plus any extra calendar ids (shared with the service account). Our own
+// shoot events (ids start with "jcs") are skipped — the admin already
+// draws those from the database.
+async function listEvents(from, to, extraIds) {
+  const token = await accessToken();
+  const ids = [process.env.GCAL_CALENDAR_ID].concat(extraIds || []).filter(Boolean);
+  const out = [];
+  for (const cal of ids) {
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(cal)}/events?` +
+      new URLSearchParams({ timeMin: `${from}T00:00:00Z`, timeMax: `${to}T23:59:59Z`, singleEvents: "true", orderBy: "startTime", maxResults: "500" }).toString();
+    const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    if (!r.ok) continue;
+    const j = await r.json();
+    (j.items || []).forEach((e) => {
+      if (!e || e.status === "cancelled" || String(e.id || "").startsWith("jcs")) return;
+      const start = e.start || {}, end = e.end || {};
+      out.push({
+        id: e.id, cal, title: e.summary || "(busy)",
+        start: start.dateTime || start.date || "", end: end.dateTime || end.date || "",
+        allDay: !!start.date, location: e.location || "",
+      });
+    });
+  }
+  return out;
+}
+
+module.exports = { isConfigured, upsertEvents, accessToken, listEvents };

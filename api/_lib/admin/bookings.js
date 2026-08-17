@@ -51,6 +51,7 @@ function parse(b) {
     delivery_links: parseLinks(b.delivery_links),
     delivery_cover_url: field(b.delivery_cover_url, 600),
     delivery_created_at: field(b.delivery_created_at, 40) || null,
+    deposit_paid: b.deposit_paid === true,   // "Deposit received" (manual)
   };
 }
 
@@ -128,7 +129,7 @@ module.exports = async function handler(req, res) {
       f.location = makeLocation(f, b.location);
       await applyDiscount(s, f);
       if (!id || !f.title) { res.status(400).json({ error: "invalid" }); return; }
-      const [before] = await s`SELECT status FROM bookings WHERE id = ${id}`;
+      const [before] = await s`SELECT status, deposit_paid_at FROM bookings WHERE id = ${id}`;
       const [row] = await s`
         UPDATE bookings SET
           client_id = ${f.client_id}, title = ${f.title}, location = ${f.location},
@@ -147,10 +148,13 @@ module.exports = async function handler(req, res) {
           delivery_cover_url = ${f.delivery_cover_url},
           delivery_created_at = COALESCE(delivery_created_at, ${f.delivery_created_at}),
           delivery_token = COALESCE(NULLIF(delivery_token, ''), ${(f.delivery_links || f.delivery_url) ? crypto.randomBytes(12).toString("base64url") : null}),
-          paid_at = CASE WHEN ${f.status} = 'paid' THEN COALESCE(paid_at, now()) ELSE NULL END
+          paid_at = CASE WHEN ${f.status} = 'paid' THEN COALESCE(paid_at, now()) ELSE NULL END,
+          downloads_locked = CASE WHEN ${f.status} = 'paid' THEN false ELSE downloads_locked END,
+          deposit_paid_at = CASE WHEN ${f.deposit_paid} THEN COALESCE(deposit_paid_at, now()) ELSE deposit_paid_at END
         WHERE id = ${id} RETURNING *`;
       if (!row) { res.status(404).json({ error: "not-found" }); return; }
-      if (before && before.status !== row.status) await logEvent(s, id, "stage", "Moved to " + row.status, "admin");
+      if (before && before.status !== row.status) await logEvent(s, id, "stage", "Moved to " + row.status + (row.status === "paid" ? " · downloads unlocked" : ""), "admin");
+      if (f.deposit_paid && !before.deposit_paid_at) await logEvent(s, id, "invoice", "Deposit received (recorded manually)", "admin");
       res.status(200).json({ booking: row });
 
     } else if (req.method === "DELETE") {

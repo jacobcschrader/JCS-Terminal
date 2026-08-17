@@ -26,11 +26,16 @@ module.exports = async function handler(req, res) {
       const rows = await s`SELECT key, value FROM settings`;
       const settings = {};
       rows.forEach((r) => { settings[r.key] = r.value; });
-      res.status(200).json({ settings });
+      res.status(200).json({ settings, env: {
+        stripe: !!process.env.STRIPE_SECRET_KEY,
+        stripe_mode: /^sk_live_/.test(process.env.STRIPE_SECRET_KEY || "") ? "live" : "test",
+        blob: !!(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID),
+        gcal: !!(process.env.GCAL_CALENDAR_ID && process.env.GOOGLE_SA_KEY),
+      } });
 
     } else if (req.method === "PUT") {
       const b = req.body || {};
-      const ok = (k) => KEYS.includes(k) || /^(tpl_[a-z_]+_(subject|note)|remind_[a-z_]+)$/.test(k);
+      const ok = (k) => KEYS.includes(k) || /^(tpl_[a-z_]+_(subject|note)|remind_[a-z_]+|deposit_pct|gcal_read_ids|archive_months)$/.test(k);
       for (const k of Object.keys(b)) {
         if (!ok(k)) continue;
         // subdomain: keep it a clean hostname label

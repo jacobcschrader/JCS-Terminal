@@ -1621,3 +1621,22 @@ new features:
   /api/site-projects → home page cards.
 - Fixed a `.ph` class collision (template placeholder hint vs the site's
   photo placeholder).
+
+## 2026-08-08 — Payments + deposits (optional), nightly backup, storage/archive, Google Calendar read
+
+- **Stripe pay online (optional):** api/_lib/stripe.js (no SDK) +
+  api/stripe.js webhook (10th function). Invoice page: Deposit / Balance
+  ledger + "Pay $X →" via Checkout; return trip verifies the session and
+  applies the payment; webhook covers the rest. Paying (or manual Mark
+  paid) marks Paid, stamps paid_at/paid_via and unlocks downloads. Off
+  until STRIPE_SECRET_KEY exists.
+- **Deposits (optional):** Settings → Payments → deposit %; project page
+  "Send deposit invoice", "Deposit received", balance invoice; admin
+  invoice send takes kind full | deposit | balance.
+- **Nightly encrypted backup** to Blob (api/_lib/backup.js; admin route
+  backup with list / run now / download decrypted).
+- **Storage meter + archive rule** (Settings): cron archives full-res
+  originals N months after delivery; listing page falls back to 2048px.
+- **Google Calendar read:** gcal.listEvents + admin gcalevents route;
+  Calendar view overlays your Google events (grey); Settings takes extra
+  calendar IDs to read.

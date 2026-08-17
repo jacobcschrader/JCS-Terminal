@@ -276,6 +276,36 @@ toggle, delete (cleans Blob media).
   reminders; stored as settings tpl_<key>_subject|_note (blank = default),
   placeholders {first} {name} {property} {location} {number} {total}
   {date}; api/_lib/templates.js DEFAULTS mirrored in admin TPL_DEFAULTS.
+- **Payments (optional, Stripe):** env STRIPE_SECRET_KEY (+ a webhook to
+  /api/stripe for checkout.session.completed). Invoice page shows a Pay
+  button (deposit / balance / full); success marks the project Paid,
+  stamps paid_at + paid_via=stripe and UNLOCKS downloads; the return trip
+  (?session_id) applies it instantly, the webhook covers closed tabs.
+  Manual "Mark paid" also unlocks. api/_lib/stripe.js — no SDK.
+- **Deposits (optional):** Settings → Payments → deposit % (blank = off).
+  Project page then offers "Send deposit invoice (50% · $X)" →
+  bookings.deposit_amount + deposit invoice email; "Deposit received"
+  (manual) or Stripe sets deposit_paid_at; the invoice page shows
+  Deposit / Balance rows and charges the right amount; balance invoice
+  after the deposit is paid.
+- **Google Calendar READ:** admin Calendar overlays everything on the
+  configured calendar (+ settings.gcal_read_ids for other calendars
+  shared with the service account) as grey chips — gcal.listEvents,
+  admin route gcalevents?from&to; our own shoot events (ids "jcs…") are
+  skipped.
+- **Nightly backup:** cron dumps every table to JSON, AES-256-GCM
+  encrypts it (key derived from SESSION_SECRET) and puts it in Blob
+  under backups/YYYY-MM-DD.json.enc (random suffix, last 30 kept).
+  Settings → Backups lists them, "Back up now", "Download latest
+  (decrypted JSON)" (admin route backup: GET / GET ?download=1 / POST).
+  Needs BLOB_READ_WRITE_TOKEN in the function env.
+- **Storage meter + archive rule:** Settings → Storage shows delivery
+  bytes / files / est. $ per month; settings.archive_months (blank =
+  never) makes the cron delete FULL-RES originals of photos N months
+  after delivery (delivery_files.url='' + archived_at; web 2048 + thumb
+  stay, so MLS downloads keep working). Listing page: archived photos
+  download the 2048px copy; the full-res bundle excludes them; a note
+  explains. Project tiles show "Archived".
 - **Testimonials:** after a client approves a delivery the listing page
   asks for a one-line review → testimonials table + admin email;
   Portfolio → Testimonials card approves/hides/deletes; approved quotes
@@ -355,7 +385,7 @@ toggle, delete (cleans Blob media).
   URLs (films still stream, photos show web/thumb). Approve / Request
   changes kept (feedback demotes project to Revisions + emails Jacob).
 
-## 7. API map (9 functions of Vercel Hobby's 12)
+## 7. API map (10 functions of Vercel Hobby's 12)
 
 ```
 api/admin/[action].js   Router → api/_lib/admin/*: login logout me clients
@@ -368,7 +398,11 @@ api/calendar.js         .ics feed (signed); exports sigFor
 api/cron.js             Daily stage advance (optional CRON_SECRET)
 api/delivery.js         Listing data (?slug= w/ session|admin, ?t= share)
                         + POST download log / approve / changes
-api/invoice.js          Invoice data
+api/invoice.js          Invoice data (+ deposit/balance ledger); ?session_id=
+                        verifies a Stripe return trip and applies the payment;
+                        POST checkout → Stripe Checkout URL
+api/stripe.js           Stripe webhook (checkout.session.completed) — verified by
+                        re-fetching the event by id; applies payment idempotently
 api/portal.js           Magic link, session, portal data (listing cards:
                         slug, files, cover thumb, ready/locked, is_admin)
 api/proposal.js         Public proposal by slug + accept action (drafts 404
@@ -394,7 +428,9 @@ a 4GB cap; everything else unchanged.
 delivery_slug unique, downloads_locked, paid_at), tasks (title, priority
 low|normal|medium|high, done, due, booking_id), project_events
 (booking_id, kind, label, actor, meta), testimonials (booking_id,
-client_name, brokerage, quote, approved), proposals.reminded_at, delivery_files (booking_id,
+client_name, brokerage, quote, approved), proposals.reminded_at, bookings
+deposit_amount / deposit_paid_at / stripe_session_id / paid_via,
+delivery_files.archived_at, delivery_files (booking_id,
 kind photo|film|file, name, url, web_url, thumb_url, size, w/h,
 sort_order), download_events (booking_id, file_id, kind
 file|full|mls|selected|view, label, email, ip, ua), site_projects,

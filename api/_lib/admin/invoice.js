@@ -42,6 +42,15 @@ module.exports = async function handler(req, res) {
     const pageUrl = `https://www.jacobcschrader.com/invoice?t=${token}`;
     const number = invoiceNumber(b.id);
     const total = Number(b.price) + (Number(b.travel_fee) || 0) - (Number(b.discount_value) || 0);
+    // kind: full (default) · deposit (records deposit_amount) · balance (after a paid deposit)
+    let kind = ["deposit", "balance"].includes(body.kind) ? body.kind : "full";
+    let depositAmt = Number(b.deposit_amount) || 0;
+    if (kind === "deposit") {
+      depositAmt = Math.min(total, Math.max(0, Number(body.deposit_amount) || depositAmt));
+      if (!depositAmt) { res.status(400).json({ error: "no-deposit" }); return; }
+      await s`UPDATE bookings SET deposit_amount = ${depositAmt} WHERE id = ${id}`;
+    }
+    const dueNow = kind === "deposit" ? depositAmt : (kind === "balance" ? Math.max(0, total - depositAmt) : total);
 
     if (!body.send) {
       const [updated] = await s`
@@ -55,17 +64,18 @@ module.exports = async function handler(req, res) {
     if (!clientTo.length) { res.status(400).json({ error: "no-client-email" }); return; }
     const first = (b.client_name || "").split(" ")[0] || "there";
 
-    const T = tpl(await loadTemplates(s), "invoice", { first, name: b.client_name || "", property: b.title, location: b.location || "", number, total: money(total) });
+    const T = tpl(await loadTemplates(s), "invoice", { first, name: b.client_name || "", property: b.title, location: b.location || "", number, total: money(dueNow) });
+    const label = kind === "deposit" ? "Deposit invoice" : kind === "balance" ? "Balance invoice" : "Invoice";
     await sendEmail({
       from: SENDERS.billing,
       to: clientTo,
       replyTo: OWNER,
-      subject: T.subject,
-      text: `Hi ${first},\n\nInvoice ${number} for ${b.title} — total ${money(total)}.\n` +
+      subject: kind === "full" ? T.subject : `${b.title} | ${label} ${number}`,
+      text: `Hi ${first},\n\n${label} ${number} for ${b.title} — ${kind === "full" ? "total" : "amount due now"} ${money(dueNow)}.\n` +
         `View it here: ${pageUrl}\n\nQuestions? Just reply to this email.\n\n` +
         `— Jacob Schrader · jacobcschrader.com`,
       html: jcsEmail({
-        eyebrow: `Invoice ${number}`,
+        eyebrow: `${label} ${number}`,
         headline: `${escHtml(b.client_name || "")}${b.client_name ? " · " : ""}${escHtml(b.title)}`,
         note: T.note,
         rows: [
@@ -74,6 +84,7 @@ module.exports = async function handler(req, res) {
           ["Service", b.type ? escHtml(b.type) : ""],
           ["Status", b.status === "paid" ? "Paid — thank you" : "Due"],
           ["Total", escHtml(money(total))],
+          kind !== "full" ? ["Due now", escHtml(money(dueNow)) + (kind === "deposit" ? " (deposit)" : " (balance)")] : ["", ""],
         ],
         cta: { label: "View Invoice", url: pageUrl },
         audience: "client",
@@ -87,7 +98,7 @@ module.exports = async function handler(req, res) {
         invoice_sends = COALESCE(invoice_sends, 0) + 1
       WHERE id = ${id} RETURNING *`;
 
-    await logEvent(s, id, "invoice", (b.invoice_sent_at ? "Invoice re-sent" : "Invoice " + number + " sent") + " · " + money(total), "admin");
+    await logEvent(s, id, "invoice", (b.invoice_sent_at ? label + " re-sent" : label + " " + number + " sent") + " · " + money(dueNow), "admin");
     res.status(200).json({ ok: true, booking: updated, pageUrl, number, sentTo: clientTo });
   } catch (e) {
     const msg = /DATABASE_URL/.test(String(e)) ? "db-not-configured"

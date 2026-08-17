@@ -52,6 +52,7 @@ function publicFile(f, locked) {
     size: Number(f.size) || 0,
     width: f.width || null,
     height: f.height || null,
+    archived: !!f.archived_at,
   };
 }
 
