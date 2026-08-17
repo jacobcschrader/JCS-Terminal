@@ -1738,3 +1738,23 @@ vars exist.
   for sections, session for template rows) so saving never loses your
   place. Collapsed page ≈ 900px instead of ~4,000px.
 
+## 2026-08-16 — Services: 04 Aerial & Drone
+
+- New section between Reels and Design (Design → 05), patterned on
+  jacobguthrie.com/services: "The home in its setting." + one paragraph
+  (aerial motion in every film; stills add-on/standalone — no prices),
+  tags right, two-up 3:2 aerial grid (new images/svc/aerial-cove.jpg +
+  aerial-dusk.jpg, 1600px crops of 3 N La Senda 22 + Pennock Point 21).
+  Hero jump links + meta description updated; Photography's "Aerial &
+  drone" tag moved into the new section.
+
+## 2026-08-16 — Services: Photography rebuilt Guthrie-style
+
+- 01 Photography now: shared `.svc-head` header (copy left, tags right)
+  → 16:9 hero → three 4:5 portraits with quiet white labels (Interiors ·
+  Vignettes · Twilight). New derivatives images/svc/photo-hero.jpg
+  (3 N La Senda 1), photo-interiors.jpg (Big Ranch Rd 18),
+  photo-vignette.jpg (Del Monte 3), photo-twilight.jpg (Pennock Point
+  19, centered 4:5 crop). Replaces the old split layout + Blob image.
+  Aerial's `.aer-head` renamed to the shared `.svc-head`.
+

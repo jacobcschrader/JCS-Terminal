@@ -997,6 +997,30 @@ html, body { overflow-x: clip; }   /* nothing may cause sideways scroll */
 .svcx p { color: var(--muted); max-width: 46ch; line-height: 1.75; margin: 0 0 1.4rem; }
 .svcx__media img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4 / 3; display: block; }
 .svc-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+/* Services: shared header row (copy left · tag pills right) — Photography + Aerial */
+.svc-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 1.5rem 3rem; }
+.svc-head > div:first-child { max-width: 56ch; }
+.svc-head h2 { margin: 0.9rem 0 1.1rem; max-width: 18ch; }
+.svc-head p { color: var(--muted); max-width: 52ch; line-height: 1.75; margin: 0; }
+.svc-head .svc-tags { max-width: 26rem; justify-content: flex-end; }
+/* Photography: full-width 16:9 hero + three 4:5 portraits with quiet labels */
+.ph-hero { margin-top: clamp(2rem, 4vw, 2.75rem); overflow: hidden; background: var(--paper-warm); }
+.ph-hero img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; }
+.ph-trio { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.9rem; margin-top: 0.9rem; }
+.ph-trio figure { position: relative; margin: 0; overflow: hidden; background: var(--paper-warm); }
+.ph-trio img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; display: block; transition: transform 0.85s var(--ease); }
+.ph-trio figure:hover img { transform: scale(1.03); }
+.ph-trio figcaption { position: absolute; left: 14px; bottom: 12px; font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase;
+  font-weight: 500; color: #fff; text-shadow: 0 1px 12px rgba(0,0,0,0.5); pointer-events: none; }
+/* Aerial & Drone: two-up 3:2 grid under the shared header row */
+.aer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; margin-top: clamp(2rem, 4vw, 2.75rem); }
+.aer-grid > div { overflow: hidden; background: var(--paper-warm); }
+.aer-grid img { width: 100%; height: 100%; aspect-ratio: 3 / 2; object-fit: cover; display: block; transition: transform 0.85s var(--ease); }
+.aer-grid > div:hover img { transform: scale(1.03); }
+@media (max-width: 760px) {
+  .aer-grid, .ph-trio { grid-template-columns: 1fr; gap: 0.75rem; }
+  .svc-head .svc-tags { justify-content: flex-start; max-width: none; }
+}
 .svc-tags span { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; color: var(--ink); border: 1px solid var(--line); padding: 0.45rem 0.85rem; white-space: nowrap; }
 
 /* ---------- Error / fail states (shared) -----------------------------

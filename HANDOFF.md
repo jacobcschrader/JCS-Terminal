@@ -170,10 +170,22 @@ vercel.json                cleanUrls, redirects (/architecture,/films,/design
   `data-nosound` (no mute button). The `data-video` enhancer in site.js
   handles all video: autoplay muted, one-sound-at-a-time, visibility
   pause, `data-poster`, error fallback.
-- **Services page:** numbered sections 01 Photography (incl. aerial) /
-  02 Films (4 cut cards) / 03 Social Reels (4 reels in videos/reels/) /
-  04 Design, one short paragraph each + tag pills; film & reel captions
-  share .cut__loc/.cut__price typography.
+- **Services page:** numbered sections 01 Photography (2026-08-16,
+  Guthrie pattern: `.svc-head` copy left + tag pills right → full-width
+  16:9 hero `.ph-hero` (images/svc/photo-hero.jpg, 3 N La Senda great
+  room) → `.ph-trio` three 4:5 portraits with white bottom-left labels
+  Interiors / Vignettes / Twilight (photo-interiors.jpg Big Ranch Rd 18,
+  photo-vignette.jpg Del Monte 3, photo-twilight.jpg Pennock Point 19 —
+  all 960/1920px crops of project photos)) / 02 Films (4 cut
+  cards) / 03 Social Reels (4 reels in videos/reels/) / 04 Aerial & Drone
+  (2026-08-16, patterned on jacobguthrie.com/services: shared `.svc-head`
+  row, `.aer-grid` two-up 3:2 aerials —
+  images/svc/aerial-cove.jpg (3 N La Senda) + aerial-dusk.jpg (5211
+  Pennock Point), 1600px crops of the project photos; copy is honest to
+  pricing-data: aerial motion included in every film, stills add-on or
+  standalone) / 05 Design; one short paragraph each + tag pills; film &
+  reel captions share .cut__loc/.cut__price typography. Hero jump links
+  include #aerial.
 - **Mobile:** ≤520px layer at the end of styles.css (+ page-local blocks
   in portal/delivery/invoice/admin). `overflow-x: clip` guards sideways
   scroll. Headless-Chromium screenshots verified the layout.
