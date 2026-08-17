@@ -278,7 +278,27 @@ body { background: #f8f7f4; }
     return new Date(String(s).slice(0, 10) + 'T12:00:00').toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
   }
   function fmtBytes(n) { return n > 1e9 ? (n / 1e9).toFixed(2) + ' GB' : n > 1e6 ? Math.round(n / 1e6) + ' MB' : Math.round(n / 1e3) + ' KB'; }
-  function dlUrl(u) { return u + (u.indexOf('?') > -1 ? '&' : '?') + 'download=1'; }
+  // Vercel Blob honours ?download=1 (attachment + clean name); anything
+  // else (Cloudflare R2) is saved through the browser instead.
+  function isBlobUrl(u) { return /\.public\.blob\.vercel-storage\.com\//i.test(String(u || '')); }
+  function dlUrl(u) { return isBlobUrl(u) ? u + (u.indexOf('?') > -1 ? '&' : '?') + 'download=1' : u; }
+  async function saveUrl(url, name) {
+    if (busyDl) { toast('One download at a time — the current one is still running.'); return; }
+    busyDl = true;
+    try {
+      var res = await fetch(url); if (!res.ok || !res.body) throw new Error('fetch');
+      var sink = await makeSink(name, !!window.showSaveFilePicker, true);
+      if (!sink) { busyDl = false; return; }
+      var reader = res.body.getReader(), got = 0, total = parseInt(res.headers.get('content-length') || '0', 10);
+      while (true) {
+        var step = await reader.read(); if (step.done) break;
+        await sink.write(step.value); got += step.value.length;
+        toast('Downloading ' + name + (total ? ' — ' + fmtBytes(got) + ' of ' + fmtBytes(total) : ''), total ? got / total : 0);
+      }
+      await sink.close(); hideToast();
+    } catch (e) { hideToast(); toast('That download hit a snag — try again.', null); }
+    finally { busyDl = false; }
+  }
   var DL_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v9M4.5 7.5 8 11l3.5-3.5M3 13.5h10"/></svg>';
 
   function missing(unauth) {
@@ -437,14 +457,17 @@ body { background: #f8f7f4; }
 
   // single-file downloads: native (the stored filename is the clean one) + log
   document.addEventListener('click', function (e) {
-    var a = e.target.closest ? e.target.closest('a.dl, a.lp-dl') : null;
+    var a = e.target.closest ? e.target.closest('a.dl, a.lp-dl, a.lp-dl-lb') : null;
     if (!a) return;
     e.stopPropagation();
     var f = (d.files || []).find(function (x) { return String(x.id) === a.getAttribute('data-id'); });
     if (f) log('file', f, f.name);
+    var href = a.getAttribute('href') || '';
+    if (href && !isBlobUrl(href)) { e.preventDefault(); saveUrl(href, f ? f.name : 'download'); }
   });
   function single(f) {
     if (!f.url) return;
+    if (!isBlobUrl(f.url)) { saveUrl(f.url, f.name); log('file', f, f.name); return; }
     var a = document.createElement('a'); a.href = dlUrl(f.url); a.style.display = 'none'; document.body.appendChild(a); a.click(); a.remove();
     log('file', f, f.name);
   }
@@ -469,10 +492,6 @@ body { background: #f8f7f4; }
   $('lp-lb').addEventListener('click', function (e) { if (e.target === this) lbHide(); });
   $('lp-lb-prev').addEventListener('click', function () { lbShow(lbIdx - 1); });
   $('lp-lb-next').addEventListener('click', function () { lbShow(lbIdx + 1); });
-  $('lp-lb-cap').addEventListener('click', function (e) {
-    var a = e.target.closest('a.lp-dl-lb'); if (!a) return;
-    var f = photos[lbIdx]; if (f) log('file', f, f.name);
-  });
   document.addEventListener('keydown', function (e) {
     if (!$('lp-lb').classList.contains('in')) return;
     if (e.key === 'Escape') lbHide(); else if (e.key === 'ArrowLeft') lbShow(lbIdx - 1); else if (e.key === 'ArrowRight') lbShow(lbIdx + 1);
@@ -581,10 +600,12 @@ body { background: #f8f7f4; }
       toast('That download hit a snag — try again, or download files individually.', null);
     } finally { busyDl = false; if (btn) btn.classList.remove('busy'); }
   }
-  async function makeSink(name, canStream) {
+  async function makeSink(name, canStream, anyType) {
     if (canStream) {
       try {
-        var h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: 'ZIP archive', accept: { 'application/zip': ['.zip'] } }] });
+        var opts = { suggestedName: name };
+        if (!anyType) opts.types = [{ description: 'ZIP archive', accept: { 'application/zip': ['.zip'] } }];
+        var h = await window.showSaveFilePicker(opts);
         var w = await h.createWritable();
         return { write: function (u8) { return w.write(u8); }, close: function () { return w.close(); } };
       } catch (e) { if (e && e.name === 'AbortError') return null; /* fall through to memory */ }
@@ -593,7 +614,7 @@ body { background: #f8f7f4; }
     return {
       write: function (u8) { chunks.push(u8); },
       close: function () {
-        var blob = new Blob(chunks, { type: 'application/zip' }); chunks = [];
+        var blob = new Blob(chunks, { type: anyType ? 'application/octet-stream' : 'application/zip' }); chunks = [];
         var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
         document.body.appendChild(a); a.click();
         setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);

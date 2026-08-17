@@ -159,10 +159,10 @@ module.exports = async function handler(req, res) {
           WHERE f.kind = 'photo' AND f.archived_at IS NULL AND f.url <> '' AND f.web_url <> ''
             AND bk.delivery_sent_at IS NOT NULL AND bk.delivery_sent_at < now() - (${months} * interval '1 month')
           LIMIT 300`;
-        let del = null; try { del = require("@vercel/blob").del; } catch (e) {}
+        const storage = require("./_lib/storage.js");
         const perBooking = {};
         for (const f of files) {
-          try { if (del) await del(f.url); } catch (e) { /* orphan is harmless */ }
+          await storage.removeUrls([f.url]);
           await s`UPDATE delivery_files SET url = '', archived_at = now() WHERE id = ${f.id}`;
           perBooking[f.booking_id] = (perBooking[f.booking_id] || 0) + 1; archived++;
         }

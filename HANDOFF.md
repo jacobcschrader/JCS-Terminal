@@ -295,6 +295,20 @@ toggle, delete (cleans Blob media).
   Settings → Backups lists them, "Back up now", "Download latest
   (decrypted JSON)" (admin route backup: GET / GET ?download=1 / POST).
   Needs BLOB_READ_WRITE_TOKEN in the function env.
+- **Media storage — Vercel Blob or Cloudflare R2 (2026-08-08):**
+  api/_lib/storage.js is the switchboard. With the five env vars
+  R2_ACCOUNT_ID / R2_ACCESS_KEY_ID / R2_SECRET_ACCESS_KEY / R2_BUCKET /
+  R2_PUBLIC_URL present, uploads go browser → R2 via presigned PUT URLs
+  (api/_lib/r2.js SigV4, region "auto"; broker action "presign" in
+  upload.js validates path prefix delivery/<id>/ or site/ + type),
+  public reads come from R2_PUBLIC_URL, deletes are signed DELETEs
+  (files remove, archive rule). Without them everything stays on Blob.
+  URLs are absolute per file, so both stores coexist. Bucket needs a
+  CORS rule for GET/PUT/HEAD from the site origins. R2 has no
+  ?download=1, so the listing page saves single files through the
+  browser (fetch → File System Access / blob) for non-Blob URLs; the
+  bundle ZIP path is storage-agnostic. Settings → Storage shows which
+  store is live. Zero egress on R2 = client downloads cost nothing.
 - **Storage meter + archive rule:** Settings → Storage shows delivery
   bytes / files / est. $ per month; settings.archive_months (blank =
   never) makes the cron delete FULL-RES originals of photos N months
@@ -319,7 +333,8 @@ toggle, delete (cleans Blob media).
   Confirm / Preview as client / Copy share-preview link / Delete,
   INVOICES, DELIVERY EMAIL (message + CC), DOWNLOAD ACTIVITY, COVER
   PHOTO — CLICK TO SET (6-up grid of every file; hover × removes),
-  UPLOAD dropzone (drag/drop or click; photos → original as-is + 2048px
+  UPLOAD dropzone (drag/drop files OR folders, click, or "choose a
+  folder" — natural-number order, dotfiles skipped; photos → original as-is + 2048px
   web JPEG + 640px thumb made in the browser; films → original
   (multipart) + poster frame; PDFs as-is; 3 uploads in flight; blob
   paths delivery/<id>/<rand>/<clean name> so downloads keep clean

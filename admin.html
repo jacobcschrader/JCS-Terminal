@@ -2015,12 +2015,14 @@ select.lx-input { padding-right: 2rem; }
     // ---- upload dropzone ----
     var busy = ls && ls.busy;
     var drop = '<div class="adm-drop' + (busy ? ' busy' : '') + '" id="ls-drop" ' +
-        (busy ? '' : 'onclick="document.getElementById(\'ls-file\').click()" ondragover="event.preventDefault();this.classList.add(\'over\')" ondragleave="this.classList.remove(\'over\')" ondrop="event.preventDefault();this.classList.remove(\'over\');ADM.lsUpload(' + b.id + ', event.dataTransfer.files)"') + '>' +
+        (busy ? '' : 'onclick="if(!event.target.closest(\'.ls-folder\'))document.getElementById(\'ls-file\').click()" ondragover="event.preventDefault();this.classList.add(\'over\')" ondragleave="this.classList.remove(\'over\')" ondrop="event.preventDefault();this.classList.remove(\'over\');ADM.lsDrop(' + b.id + ', event)"') + '>' +
       (busy
         ? '<b>Uploading ' + busy.done + ' of ' + busy.total + '&hellip;</b><small>Photos are stored full-res plus a 2048px MLS copy and a thumbnail. Keep this tab open.</small>' +
           '<div class="adm-prog"><i style="width:' + Math.round(100 * busy.done / Math.max(1, busy.total)) + '%"></i></div><span class="st">' + esc(busy.current || '') + '</span>'
-        : '<b>Drop photos &amp; films here</b><small>or click to browse &mdash; JPG, PNG, MP4, MOV, PDF. Full-res originals go up as-is; the MLS 2048px copies and thumbnails are made for you.</small>') +
+        : '<b>Drop photos, films or a whole folder here</b><small>or click to browse &middot; <a class="ls-folder" style="color:var(--navy);text-decoration:underline;text-underline-offset:3px;cursor:pointer" onclick="document.getElementById(\'ls-folder\').click()">choose a folder</a> (a Lightroom export drops straight in, subfolders included) &mdash; JPG, PNG, MP4, MOV, PDF. Full-res originals go up as-is; the MLS 2048px copies and thumbnails are made for you.</small>' +
+          ((state.env || {}).r2 ? '' : '<small style="color:#8a6d1f;margin-top:0.5rem">Heads up: Cloudflare R2 isn\'t connected yet, so this upload would go to Vercel Blob (downloads billed per GB). Finish the R2 setup in <a style="color:inherit;text-decoration:underline" onclick="event.stopPropagation();ADM.go(\'settings\')">Settings &rarr; Storage</a> first.</small>')) +
       '<input type="file" id="ls-file" multiple accept="image/*,video/*,.pdf" hidden onchange="ADM.lsUpload(' + b.id + ', this.files); this.value=\'\'">' +
+      '<input type="file" id="ls-folder" webkitdirectory directory multiple hidden onchange="ADM.lsUpload(' + b.id + ', this.files); this.value=\'\'">' +
       '</div>';
 
     // ---- extra links ----
@@ -2484,6 +2486,9 @@ select.lx-input { padding-right: 2rem; }
         var bk = state.backup, sto = bk && bk.storage;
         var gb = function (n) { return (n / 1e9).toFixed(2) + ' GB'; };
         return '<div class="adm-card"><h2>Storage &amp; archive</h2>' +
+          '<div class="adm-row" style="border:0;padding:0 0 0.7rem"><span>Media store</span><span class="dim">&middot;</span>' +
+            ((state.env || {}).r2 ? '<span style="color:#2f6b3f">Cloudflare R2 (' + esc(state.env.r2_public) + ') &mdash; client downloads are free</span>'
+              : '<span class="mut">Vercel Blob &mdash; downloads billed per GB. Switch to Cloudflare R2 (free downloads) by adding <b>R2_ACCOUNT_ID</b>, <b>R2_ACCESS_KEY_ID</b>, <b>R2_SECRET_ACCESS_KEY</b>, <b>R2_BUCKET</b>, <b>R2_PUBLIC_URL</b> in Vercel and redeploying; existing files keep serving from Blob.</span>') + '</div>' +
           (sto ? '<div class="bl-stats" style="margin-bottom:0.9rem">' +
               '<div class="dz-stat"><div class="lbl">Delivery storage</div><b>' + gb(sto.live_bytes) + '</b><span class="d"><span class="mut">' + sto.files + ' files &middot; ~$' + (sto.live_bytes / 1e9 * 0.023).toFixed(2) + '/mo</span></span></div>' +
               '<div class="dz-stat"><div class="lbl">Photos</div><b>' + sto.photos + '</b></div>' +
@@ -3391,6 +3396,25 @@ select.lx-input { padding-right: 2rem; }
         await reload(); render();
       } catch (e) { toast(friendly(e), 'err'); }
     },
+    // ---- storage: R2 (presigned PUT, free downloads) or Vercel Blob ------
+    putFile: async function (path, blob, type, multipart) {
+      if ((state.env || {}).r2) {
+        var p = await api('upload', 'POST', { action: 'presign', path: path, type: type });
+        await new Promise(function (resolve, reject) {
+          var x = new XMLHttpRequest();
+          x.open('PUT', p.url, true);
+          x.setRequestHeader('Content-Type', type);
+          x.onload = function () { (x.status >= 200 && x.status < 300) ? resolve() : reject(new Error('R2 upload failed (' + x.status + ')')); };
+          x.onerror = function () { reject(new Error('R2 upload failed — check the bucket CORS rules')); };
+          x.send(blob);
+        });
+        return { url: p.publicUrl };
+      }
+      return VercelBlobClient.upload(path, blob, {
+        access: 'public', handleUploadUrl: '/api/admin/upload', contentType: type,
+        multipart: !!multipart || blob.size > 20 * 1024 * 1024
+      });
+    },
     // ---- listing page: files, cover, lock, delivery email --------------
     lsLoad: async function (id) {
       state.ls = { id: id, files: null, events: null, booking: null, busy: null };
@@ -3456,10 +3480,45 @@ select.lx-input { padding-right: 2rem; }
         v.src = URL.createObjectURL(file);
       });
     },
+    // Drops can carry folders — walk them (readEntries returns ≤100 per
+    // call, so loop), skip dotfiles, keep the folder's natural order.
+    lsDrop: async function (id, e) {
+      var dt = e.dataTransfer; if (!dt) return;
+      var items = dt.items ? Array.prototype.slice.call(dt.items) : [];
+      var entries = items.map(function (it) { return it.webkitGetAsEntry ? it.webkitGetAsEntry() : null; }).filter(Boolean);
+      var files = [];
+      function readAll(dir) {
+        return new Promise(function (resolve) {
+          var reader = dir.createReader(), all = [];
+          (function batch() {
+            reader.readEntries(function (ents) {
+              if (!ents.length) { resolve(all); return; }
+              all = all.concat(Array.prototype.slice.call(ents)); batch();
+            }, function () { resolve(all); });
+          })();
+        });
+      }
+      async function walk(entry, path) {
+        if (!entry || /^\./.test(entry.name)) return;
+        if (entry.isFile) {
+          await new Promise(function (resolve) {
+            entry.file(function (f) { try { f._path = path + f.name; } catch (err) {} files.push(f); resolve(); }, function () { resolve(); });
+          });
+        } else if (entry.isDirectory) {
+          var kids = await readAll(entry);
+          for (var i = 0; i < kids.length; i++) await walk(kids[i], path + entry.name + '/');
+        }
+      }
+      if (entries.length) { for (var i = 0; i < entries.length; i++) await walk(entries[i], ''); }
+      if (!files.length) files = Array.prototype.slice.call(dt.files || []);
+      files.sort(function (a, b) { return String(a._path || a.webkitRelativePath || a.name).localeCompare(String(b._path || b.webkitRelativePath || b.name), undefined, { numeric: true, sensitivity: 'base' }); });
+      ADM.lsUpload(id, files);
+    },
     lsUpload: async function (id, fileList) {
       var files = Array.prototype.slice.call(fileList || []).filter(function (f) {
+        if (/^\./.test(f.name)) return false;   // .DS_Store & friends
         return /^(image|video)\//.test(f.type) || /\.(jpe?g|png|webp|mp4|mov|pdf)$/i.test(f.name);
-      });
+      }).sort(function (a, b) { return String(a._path || a.webkitRelativePath || a.name).localeCompare(String(b._path || b.webkitRelativePath || b.name), undefined, { numeric: true, sensitivity: 'base' }); });
       if (!files.length) { toast('Nothing usable in that selection — photos (JPG/PNG), films (MP4/MOV) or PDFs.', 'err'); return; }
       if (!state.ls || state.ls.id != id) state.ls = { id: id, files: [], events: [], busy: null };
       if (state.ls.busy) { toast('An upload is already running — let it finish first.', 'err'); return; }
@@ -3467,12 +3526,7 @@ select.lx-input { padding-right: 2rem; }
       render();
       var rand = function () { return Math.random().toString(36).slice(2, 8); };
       var clean = function (name) { return name.replace(/[^\w.\-() ]+/g, '-').replace(/\s+/g, ' ').trim().slice(0, 120) || 'file'; };
-      var up = function (path, blob, type, multipart) {
-        return VercelBlobClient.upload(path, blob, {
-          access: 'public', handleUploadUrl: '/api/admin/upload', contentType: type,
-          multipart: !!multipart || blob.size > 20 * 1024 * 1024
-        });
-      };
+      var up = function (path, blob, type, multipart) { return ADM.putFile(path, blob, type, multipart); };
       var results = new Array(files.length), failed = [];
       async function one(i) {
         var f = files[i];
@@ -3664,12 +3718,7 @@ select.lx-input { padding-right: 2rem; }
             blob = await ADM.spResize(f, 2400, 0.82);
             name = name.replace(/\.[^.]+$/, '') + '.jpg';
           }
-          var r = await VercelBlobClient.upload(dir + '/' + name, blob, {
-            access: 'public',
-            handleUploadUrl: '/api/admin/upload',
-            contentType: isVideo ? f.type : 'image/jpeg',
-            multipart: blob.size > 20 * 1024 * 1024
-          });
+          var r = await ADM.putFile(dir + '/' + name, blob, isVideo ? f.type : 'image/jpeg', blob.size > 20 * 1024 * 1024);
           results[i] = r.url;
         } catch (e) {
           failed.push(f.name + ' (' + String((e && e.message) || 'error').slice(0, 60) + ')');

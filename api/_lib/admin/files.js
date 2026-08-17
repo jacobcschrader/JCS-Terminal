@@ -16,9 +16,7 @@ const { requireAuth } = require("../auth.js");
 const { db } = require("../db.js");
 const { ensureSlug, filesOf } = require("../delivery.js");
 const { logEvent } = require("../events.js");
-
-let blobDel = null;
-try { blobDel = require("@vercel/blob").del; } catch (e) { blobDel = null; }
+const storage = require("../storage.js");
 
 const field = (v, max = 300) => String(v == null ? "" : v).trim().slice(0, max);
 const KINDS = ["photo", "film", "file"];
@@ -79,7 +77,7 @@ module.exports = async function handler(req, res) {
         size: Math.max(0, parseInt(f.size, 10) || 0),
         width: parseInt(f.width, 10) || null,
         height: parseInt(f.height, 10) || null,
-      })).filter((f) => /^https:\/\/[^ ]+\.public\.blob\.vercel-storage\.com\//i.test(f.url));
+      })).filter((f) => storage.isOurs(f.url));
       if (!clean.length) { res.status(400).json({ error: "no-files" }); return; }
 
       const [mx] = await s`SELECT COALESCE(MAX(sort_order), 0) AS m FROM delivery_files WHERE booking_id = ${id}`;
@@ -173,11 +171,8 @@ module.exports = async function handler(req, res) {
         const [next] = await s`SELECT * FROM delivery_files WHERE booking_id = ${id} AND kind = 'photo' ORDER BY sort_order ASC, id ASC LIMIT 1`;
         await s`UPDATE bookings SET delivery_cover_url = ${next ? (next.web_url || next.url) : ""} WHERE id = ${id}`;
       }
-      // best-effort blob cleanup (needs BLOB_READ_WRITE_TOKEN; orphans are harmless)
-      if (blobDel) {
-        const urls = [f.url, f.web_url, f.thumb_url].filter(Boolean);
-        try { await blobDel(urls); } catch (e) { /* ignore */ }
-      }
+      // best-effort storage cleanup (Blob or R2; orphans are harmless)
+      await storage.removeUrls([f.url, f.web_url, f.thumb_url]);
       await logEvent(s, id, "files", "Removed " + f.name, "admin");
       res.status(200).json({ ok: true, files: await filesOf(s, id) });
       return;

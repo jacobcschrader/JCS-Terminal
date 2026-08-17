@@ -31,6 +31,8 @@ module.exports = async function handler(req, res) {
         stripe_mode: /^sk_live_/.test(process.env.STRIPE_SECRET_KEY || "") ? "live" : "test",
         blob: !!(process.env.BLOB_READ_WRITE_TOKEN || process.env.BLOB_STORE_ID),
         gcal: !!(process.env.GCAL_CALENDAR_ID && process.env.GOOGLE_SA_KEY),
+        r2: !!(process.env.R2_ACCOUNT_ID && process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY && process.env.R2_BUCKET && process.env.R2_PUBLIC_URL),
+        r2_public: process.env.R2_PUBLIC_URL || "",
       } });
 
     } else if (req.method === "PUT") {

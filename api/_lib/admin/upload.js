@@ -7,10 +7,24 @@
 // =====================================================================
 const { requireAuth } = require("../auth.js");
 const { handleUpload } = require("@vercel/blob/client");
+const r2 = require("../r2.js");
+
+const OK_TYPES = ["image/jpeg", "image/png", "image/webp", "video/mp4", "video/quicktime", "application/pdf"];
 
 module.exports = async function handler(req, res) {
   if (!requireAuth(req, res)) return;
   if (req.method !== "POST") { res.status(405).json({ error: "method-not-allowed" }); return; }
+  // ---- Cloudflare R2: hand the browser a presigned PUT ------------------
+  const body = req.body || {};
+  if (body.action === "presign") {
+    if (!r2.configured()) { res.status(400).json({ error: "r2-not-configured" }); return; }
+    const key = String(body.path || "").replace(/^\/+/, "");
+    const type = String(body.type || "application/octet-stream");
+    if (!/^(delivery\/\d+\/|site\/)[\w.\-\/() ]+$/.test(key) || key.includes("..")) { res.status(400).json({ error: "bad-path" }); return; }
+    if (!OK_TYPES.includes(type)) { res.status(400).json({ error: "bad-type" }); return; }
+    res.status(200).json({ url: r2.presignPut(key, 900), publicUrl: r2.publicUrl(key), key });
+    return;
+  }
   // Newer stores authenticate via BLOB_STORE_ID + Vercel OIDC instead of
   // a BLOB_READ_WRITE_TOKEN env — accept either.
   if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) {

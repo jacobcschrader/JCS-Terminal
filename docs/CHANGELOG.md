@@ -1653,3 +1653,25 @@ column is now This week + Money.
 Jacob: "remove profile setup process. the 100%". The dashboard's top
 card is now just the four stat tiles under an "Overview" label — no
 setup checklist, ring or Update settings / View requests buttons.
+
+## 2026-08-08 — Folder uploads
+
+Drop a folder (or a Lightroom export with subfolders) onto the project
+dropzone, or use "choose a folder" (webkitdirectory input). Directory
+entries are walked (readEntries loop), dotfiles skipped, files sorted
+by path with numeric ordering so 2 comes before 10.
+
+## 2026-08-08 — Cloudflare R2 storage option (free client downloads)
+
+Jacob: "i dont want to pay for clients downloading their media."
+- api/_lib/r2.js: SigV4 presigned PUT + signed DELETE (no SDK);
+  api/_lib/storage.js: Blob/R2 switchboard (isOurs, removeUrls).
+- upload.js broker: `presign` action; files.js accepts R2 URLs and
+  deletes via the switchboard; cron archive too; settings env reports r2.
+- Admin: one ADM.putFile (R2 presigned PUT via XHR when env.r2, else
+  Blob) used by delivery + portfolio uploads; Settings → Storage shows
+  the live store and the env vars to switch.
+- Listing page: non-Blob URLs download through the browser (streamed to
+  disk on Chrome/Edge, blob elsewhere) since R2 has no ?download=1.
+Existing Blob files keep working; new uploads move to R2 once the env
+vars exist.
