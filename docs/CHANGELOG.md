@@ -1758,3 +1758,13 @@ vars exist.
   19, centered 4:5 crop). Replaces the old split layout + Blob image.
   Aerial's `.aer-head` renamed to the shared `.svc-head`.
 
+## 2026-08-16 — Home: five service cards
+
+- The merged "Aerial & Design" card split into **Aerial & Drone**
+  (→ /services#aerial, new images/svc/card-aerial.jpg — the La Senda
+  cove framed so the house sits in the 3:4 crop) and **Design**
+  (→ /services#design, images/design.jpg). Row is now flex-wrap so five
+  cards sit in one row on desktop, 3+2 centred on tablets, 2-up on small
+  phones-in-landscape, stacked ≤520px. Social Reels card now links to
+  #reels (was #films).
+

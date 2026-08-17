@@ -75,7 +75,8 @@ prepare commits but cannot push).
 ## 2. Repo map
 
 ```
-index.html                 Home (video hero, work grid, services, approach,
+index.html                 Home (video hero, work grid, 5 service cards →
+                           /services#photography|films|reels|aerial|design, approach,
                            marquee, testimonials, press, CTA)
 projects.html              Work grid          services.html   Photography/Films/Reels/Design
 about.html                 About
