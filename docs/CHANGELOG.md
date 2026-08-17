@@ -1728,3 +1728,13 @@ vars exist.
   visit (`state._lastSection` clears the cache on arrival), painted from
   cache on redraws, "Back up now" refreshes explicitly.
 
+## 2026-08-16 — Settings tidied into collapsible sections
+
+- vSettings() rebuilt: each card is now a `<details class="acc">` row with
+  a status line visible while collapsed (see HANDOFF §5 Settings), plus
+  Expand/Collapse all. Email templates are 8 compact rows (label ·
+  custom badge · subject preview) that open on click; the four licensing
+  research keys tuck into a sub-panel. Open state persists (localStorage
+  for sections, session for template rows) so saving never loses your
+  place. Collapsed page ≈ 900px instead of ~4,000px.
+

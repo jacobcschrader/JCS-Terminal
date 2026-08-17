@@ -248,6 +248,18 @@ toggle, delete (cleans Blob media).
   requested, delivered-but-uninvoiced, invoices 14+ days unpaid, paid but
   downloads still locked) + a "+" new-project button. Soft 10px corners
   everywhere; page titles are small sans (no more serif "Dashboard.").
+- **Settings (2026-08-16):** seven collapsible sections (native
+  `<details class="acc">`: Integrations · Payments · Reminders · Email
+  templates · Storage & archive · Backups · Discount codes), each with a
+  one-line status while collapsed (Places/Calendar/licensing keys ·
+  Stripe + deposit % · N of 3 reminders on · N templates customized · store
+  + GB + archive rule · last backup · active codes). Open/closed is
+  remembered per section in localStorage (`adm-acc:<id>`), so a save →
+  render() lands where you were; template rows and the "Licensing
+  research keys" sub-panel remember for the session (`state.accOpen`).
+  "Expand all / Collapse all" in the page head (`ADM.accAll`). The
+  toggle listener sits on #main in CAPTURE phase (details toggle events
+  don't bubble). Collapsed page ≈ one screen instead of ~4,000px.
   Mobile: sidebar slides in from the hamburger.
 - **Dashboard:** OVERVIEW card = 4 stat tiles: Requests reviewed (30d, Δ vs prior 30d), Requests
   accepted, Average turnaround (shoot → delivery email, 90d), Current

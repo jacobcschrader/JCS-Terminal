@@ -528,8 +528,46 @@ select.lx-input { padding-right: 2rem; }
 .cal__ev--twilight.unconf { color: #4a4266; border-color: #4a4266; }
 .cal__ev--ext { background: #ecebe6; color: var(--muted); cursor: default; }
 @media (max-width: 860px) { .cal__cell { min-height: 70px; padding: 0.3rem; } .cal__ev { font-size: 0.58rem; } .cal__ev b { display: none; } }
-/* ---- settings: templates ---- */
-.tpl { border: 1px solid var(--line-soft); border-radius: 10px; padding: 0.9rem 1rem; margin-bottom: 0.7rem; }
+/* ---- settings: collapsible sections (native <details>, state remembered) ---- */
+.acc { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgba(15,34,64,0.045); }
+.acc + .acc { margin-top: 0.65rem; }
+.acc > summary { list-style: none; display: flex; align-items: center; gap: 0.9rem; padding: 0.95rem 1.2rem; cursor: pointer; user-select: none; border-radius: 12px; }
+.acc > summary::-webkit-details-marker { display: none; }
+.acc > summary:hover { background: #fbfaf7; }
+.acc[open] > summary { border-bottom: 1px solid var(--line-soft); border-radius: 12px 12px 0 0; }
+.acc__title { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--ink); white-space: nowrap; min-width: 9.5rem; }
+.acc__meta { flex: 1; font-size: 0.78rem; color: var(--muted); line-height: 1.5; min-width: 0; }
+.acc__meta b { color: var(--ink); font-weight: 500; }
+.acc__meta .ok { color: #2f6b3f; }
+.acc__meta .warn { color: #8a6d1f; }
+.acc__chev { width: 18px; height: 18px; flex: none; color: var(--muted); transition: transform 0.25s var(--ease); }
+.acc[open] > summary .acc__chev { transform: rotate(180deg); }
+.acc__body { padding: 1rem 1.2rem 1.25rem; }
+.acc__desc { font-size: 0.78rem; color: var(--muted); line-height: 1.6; margin: 0 0 0.9rem; max-width: 70ch; }
+.acc__sub { margin-top: 1rem; border: 1px solid var(--line-soft); border-radius: 10px; }
+.acc__sub > summary { list-style: none; cursor: pointer; padding: 0.7rem 0.9rem; font-size: 0.78rem; font-weight: 600; color: var(--ink); display: flex; align-items: center; gap: 0.6rem; }
+.acc__sub > summary::-webkit-details-marker { display: none; }
+.acc__sub > summary .mut { font-weight: 400; }
+.acc__sub > summary .acc__chev { margin-left: auto; width: 14px; height: 14px; }
+.acc__sub[open] > summary .acc__chev { transform: rotate(180deg); }
+.acc__sub > div { padding: 0 0.9rem 0.9rem; }
+@media (max-width: 720px) {
+  .acc > summary { flex-wrap: wrap; gap: 0.35rem 0.9rem; padding: 0.85rem 1rem; }
+  .acc__title { min-width: 0; }
+  .acc__meta { flex-basis: 100%; order: 3; }
+  .acc__chev { margin-left: auto; }
+  .acc__body { padding: 0.9rem 1rem 1.1rem; }
+}
+/* ---- settings: templates (each one a compact row that opens on click) ---- */
+.tpl { border: 1px solid var(--line-soft); border-radius: 10px; margin-bottom: 0.5rem; }
+.tpl > summary { list-style: none; display: flex; align-items: center; gap: 0.6rem; padding: 0.65rem 0.9rem; cursor: pointer; }
+.tpl > summary::-webkit-details-marker { display: none; }
+.tpl > summary b { font-size: 0.8rem; font-weight: 600; color: var(--ink); white-space: nowrap; }
+.tpl > summary .tpl__subj { flex: 1; min-width: 0; font-size: 0.74rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tpl > summary .acc__chev { width: 14px; height: 14px; }
+.tpl[open] > summary .acc__chev { transform: rotate(180deg); }
+.tpl__custom { font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; color: #2f6b3f; border: 1px solid rgba(47,107,63,0.35); border-radius: 999px; padding: 0.15rem 0.5rem; }
+.tpl__body { padding: 0 0.9rem 0.9rem; }
 .tpl__head { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
 .tpl__head b { font-size: 0.8rem; font-weight: 600; color: var(--ink); flex: 1; }
 .tpl__head a { font-size: 0.68rem; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
@@ -2441,74 +2479,127 @@ select.lx-input { padding-right: 2rem; }
       '</div>';
   }
 
+  // ---- Settings: collapsible sections with a status line each ----------
+  // Open/closed is remembered per section (localStorage) so a save →
+  // render() lands you back where you were. Template rows remember for
+  // the session only.
+  var CHEV = '<svg class="acc__chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 6l4.5 4.5L12.5 6"/></svg>';
+  function accOpen(id, def) {
+    var v = null;
+    try { v = localStorage.getItem('adm-acc:' + id); } catch (e) {}
+    if (v === null && state.accOpen && id in state.accOpen) v = state.accOpen[id] ? '1' : '0';
+    return v === null ? !!def : v === '1';
+  }
+  function acc(id, title, meta, body, def) {
+    return '<details class="acc" data-acc="' + id + '"' + (accOpen(id, def) ? ' open' : '') + '>' +
+      '<summary><span class="acc__title">' + title + '</span><span class="acc__meta">' + meta + '</span>' + CHEV + '</summary>' +
+      '<div class="acc__body">' + body + '</div></details>';
+  }
   function vSettings() {
-    var list = state.discounts, st = state.settings || {};
-    return head('Settings') +
-      '<div class="adm-card"><h2>Integrations</h2>' +
+    var list = state.discounts, st = state.settings || {}, env = state.env || {};
+    var bk = state.backup, sto = bk && bk.storage;
+    var gb = function (n) { return (n / 1e9).toFixed(2) + ' GB'; };
+    var yes = function (t) { return '<span class="ok">&#10003; ' + t + '</span>'; };
+    var no = function (t) { return '<span class="warn">&#9679; ' + t + '</span>'; };
+    var dot = ' <span class="dim">&middot;</span> ';
+
+    // ---- status lines (visible while collapsed) ----
+    var licKeys = ['serper_key', 'brave_search_key', 'google_cse_key'].filter(function (k) { return st[k]; }).length;
+    var metaInteg = (st.google_places_key ? yes('Places key') : no('No Places key')) + dot +
+      (env.gcal ? yes('Calendar') : no('Calendar not set')) + dot +
+      (licKeys ? licKeys + ' licensing key' + (licKeys === 1 ? '' : 's') : 'no licensing keys');
+    var dep = parseFloat(st.deposit_pct || '0') || 0;
+    var metaPay = (env.stripe ? yes('Stripe (' + esc(env.stripe_mode) + ')') : no('Stripe not connected')) + dot +
+      (dep ? '<b>' + dep + '%</b> deposit to reserve' : 'no deposits');
+    var remOn = ['invoice', 'proposal', 'delivery'].filter(function (k) { return st['remind_' + k] === '1'; }).length;
+    var metaRem = (remOn ? '<b>' + remOn + ' of 3</b> on' : 'all off') + dot + 'daily cron, once per milestone';
+    var tplKeys = Object.keys(TPL_DEFAULTS);
+    var tplCustom = tplKeys.filter(function (k) { return st['tpl_' + k + '_subject'] || st['tpl_' + k + '_note']; }).length;
+    var metaTpl = tplKeys.length + ' emails' + dot + (tplCustom ? '<b>' + tplCustom + '</b> customized' : 'all default wording');
+    var arch = parseInt(st.archive_months || '0', 10) || 0;
+    var metaSto = (env.r2 ? yes('Cloudflare R2') : no('Vercel Blob')) + dot +
+      (sto ? '<b>' + gb(sto.live_bytes) + '</b> · ' + sto.files + ' files' : 'loading…') + dot +
+      (arch ? 'archive originals after <b>' + arch + ' mo</b>' : 'originals kept forever');
+    var metaBk = !bk ? 'loading…' : bk.error ? no('unavailable') :
+      (bk.backups && bk.backups.length ? 'last <b>' + stamp(bk.backups[0].at) + '</b>' + dot + bk.backups.length + ' kept' : no('none yet') + dot + 'first one runs tonight');
+    var discActive = list.filter(function (d) { return d.active; }).length;
+    var metaDisc = list.length ? '<b>' + discActive + '</b> active' + dot + list.length + ' total' : 'none yet';
+
+    // ---- bodies ----
+    var bodyInteg =
       '<form class="adm-form" onsubmit="ADM.settingsSave(event)">' +
-        fld('s-gplaces', 'Google Places API key <small style="text-transform:none;letter-spacing:0">(address autocomplete in the project form)</small>', '<input id="s-gplaces" placeholder="AIza\u2026" value="' + esc(st.google_places_key || '') + '">') +
+        fld('s-gplaces', 'Google Places API key <small style="text-transform:none;letter-spacing:0">(address autocomplete in the project form)</small>', '<input id="s-gplaces" placeholder="AIza…" value="' + esc(st.google_places_key || '') + '">') +
         '<div class="adm-field"><label>Google Calendar</label><div id="gcal-status" class="mut" style="font-size:0.84rem;line-height:1.6;padding-top:0.3rem">Checking&hellip;</div>' +
-          '<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" style="margin-top:0.5rem" onclick="ADM.gcalCheck()">Run test</button></div>' +
-        '<div class="adm-field full"><small class="mut" style="font-size:0.76rem;line-height:1.6">Confirming a project writes the shoot (and twilight) onto your calendar; re-confirming updates the same event. Setup lives in Vercel env vars <b>GCAL_CALENDAR_ID</b> + <b>GOOGLE_SA_KEY</b> (service-account JSON), then redeploy. The admin Calendar also <b>reads</b> everything on that calendar; to see other calendars too, share each with the service-account email (&ldquo;See all event details&rdquo;) and list their IDs below.</small></div>' +
+          '<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" style="margin-top:0.5rem" onclick="ADM.gcalCheck(true)">Run test</button></div>' +
         fld('s-gcalread', 'Other calendar IDs to read <small style="text-transform:none;letter-spacing:0">(comma-separated, e.g. jacxbschrader@gmail.com)</small>', '<input id="s-gcalread" placeholder="jacxbschrader@gmail.com, family@group.calendar.google.com" value="' + esc(st.gcal_read_ids || '') + '">') +
-        '<div class="adm-field full" style="margin-top:0.4rem"><label>Licensing research <small style="text-transform:none;letter-spacing:0">(one key is enough &mdash; Serper is free for 2,500 searches at serper.dev)</small></label></div>' +
-        fld('s-serper', 'Serper API key', '<input id="s-serper" placeholder="paste key from serper.dev" value="' + esc(st.serper_key || '') + '">') +
-        fld('s-brave', 'Brave Search key <small style="text-transform:none;letter-spacing:0">(alternative)</small>', '<input id="s-brave" placeholder="optional" value="' + esc(st.brave_search_key || '') + '">') +
-        fld('s-cse-key', 'Google Search key <small style="text-transform:none;letter-spacing:0">(alternative)</small>', '<input id="s-cse-key" placeholder="optional" value="' + esc(st.google_cse_key || '') + '">') +
-        fld('s-cse-cx', 'Google engine ID <small style="text-transform:none;letter-spacing:0">(pairs with the Google key)</small>', '<input id="s-cse-cx" placeholder="optional" value="' + esc(st.google_cse_cx || '') + '">') +
+        '<div class="adm-field full"><small class="mut" style="font-size:0.76rem;line-height:1.6">Confirming a project writes the shoot (and twilight) onto your calendar; re-confirming updates the same event. Setup lives in Vercel env vars <b>GCAL_CALENDAR_ID</b> + <b>GOOGLE_SA_KEY</b> (service-account JSON), then redeploy. The admin Calendar also <b>reads</b> everything on that calendar; to see other calendars too, share each with the service-account email (&ldquo;See all event details&rdquo;) and list their IDs above.</small></div>' +
+        '<details class="acc__sub full" data-acc="lic-keys"' + (accOpen('lic-keys', false) ? ' open' : '') + '><summary>Licensing research keys <span class="mut">&mdash; one is enough; Serper is free for 2,500 searches at serper.dev</span>' + CHEV + '</summary><div class="adm-form" style="padding-top:0.6rem">' +
+          fld('s-serper', 'Serper API key', '<input id="s-serper" placeholder="paste key from serper.dev" value="' + esc(st.serper_key || '') + '">') +
+          fld('s-brave', 'Brave Search key <small style="text-transform:none;letter-spacing:0">(alternative)</small>', '<input id="s-brave" placeholder="optional" value="' + esc(st.brave_search_key || '') + '">') +
+          fld('s-cse-key', 'Google Search key <small style="text-transform:none;letter-spacing:0">(alternative)</small>', '<input id="s-cse-key" placeholder="optional" value="' + esc(st.google_cse_key || '') + '">') +
+          fld('s-cse-cx', 'Google engine ID <small style="text-transform:none;letter-spacing:0">(pairs with the Google key)</small>', '<input id="s-cse-cx" placeholder="optional" value="' + esc(st.google_cse_cx || '') + '">') +
+        '</div></details>' +
         '<div class="adm-field full"><button class="adm-btn" type="submit">Save settings</button></div>' +
-      '</form></div>' +
-      '<div class="adm-card"><h2>Payments <small style="text-transform:none;letter-spacing:0;font-weight:400">— optional; invoices get a Pay button and paying marks the project Paid + unlocks downloads</small></h2>' +
-        '<div class="adm-row" style="border:0;padding:0 0 0.6rem"><span>Stripe</span><span class="dim">&middot;</span>' +
-          ((state.env || {}).stripe ? '<span style="color:#2f6b3f">connected (' + esc(state.env.stripe_mode) + ' mode)</span>' : '<span class="mut">not connected &mdash; add <b>STRIPE_SECRET_KEY</b> in Vercel &rarr; Environment Variables and redeploy; then add a webhook for <b>checkout.session.completed</b> &rarr; https://www.jacobcschrader.com/api/stripe</span>') + '</div>' +
-        '<div class="adm-form" style="margin-top:0.4rem">' +
-          fld('s-deposit', 'Deposit to reserve a date <small style="text-transform:none;letter-spacing:0">(% of the total &mdash; blank or 0 = no deposits; shows a "Send deposit invoice" button on projects)</small>', '<input id="s-deposit" type="number" min="0" max="100" step="5" placeholder="e.g. 50" value="' + esc(st.deposit_pct || '') + '">') +
-          '<div class="adm-field" style="display:flex;align-items:flex-end"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.miscSave()">Save</button></div>' +
-        '</div></div>' +
-      '<div class="adm-card"><h2>Automatic reminders <small style="text-transform:none;letter-spacing:0;font-weight:400">— sent by the daily cron, once per milestone, logged on the project</small></h2>' +
-        [['invoice', 'Unpaid invoice', 'A friendly note at 14 days, another at 21 — links to the invoice.'],
-         ['proposal', 'Unanswered proposal', 'One nudge 3 days after a proposal is sent and still waiting.'],
-         ['delivery', 'Delivery not approved', 'One nudge 5 days after delivery if the client hasn\'t approved or requested changes.']].map(function (r) {
-          return '<label class="sw"><input type="checkbox" id="rm-' + r[0] + '"' + (st['remind_' + r[0]] === '1' ? ' checked' : '') + ' onchange="ADM.remindSave()"><span><span>' + r[1] + '</span><small>' + r[2] + '</small></span></label>';
-        }).join('') +
-      '</div>' +
-      '<div class="adm-card"><h2>Email templates <small style="text-transform:none;letter-spacing:0;font-weight:400">— the subject line and opening paragraph of each client email; details, buttons and signature stay branded</small></h2>' +
-        Object.keys(TPL_DEFAULTS).map(function (k) {
-          var d = TPL_DEFAULTS[k];
-          return '<div class="tpl"><div class="tpl__head"><b>' + esc(d.label) + '</b><a onclick="ADM.tplReset(\'' + k + '\')">Reset to default</a></div>' +
-            '<input id="tpl-' + k + '-subject" value="' + esc(st['tpl_' + k + '_subject'] || d.subject) + '" placeholder="Subject">' +
-            '<textarea id="tpl-' + k + '-note" placeholder="Opening paragraph">' + esc(st['tpl_' + k + '_note'] || d.note) + '</textarea>' +
-            '<div class="tpl__ph">Placeholders: <code>{first}</code> <code>{name}</code> <code>{property}</code> <code>{location}</code>' + (/invoice/.test(k) ? ' <code>{number}</code> <code>{total}</code>' : k === 'confirm' ? ' <code>{date}</code>' : k === 'proposal' ? ' <code>{total}</code>' : '') + '</div></div>';
-        }).join('') +
-        '<button class="adm-btn" onclick="ADM.tplSave()">Save templates</button>' +
-      '</div>' +
-      (function () {
-        var bk = state.backup, sto = bk && bk.storage;
-        var gb = function (n) { return (n / 1e9).toFixed(2) + ' GB'; };
-        return '<div class="adm-card"><h2>Storage &amp; archive</h2>' +
-          '<div class="adm-row" style="border:0;padding:0 0 0.7rem"><span>Media store</span><span class="dim">&middot;</span>' +
-            ((state.env || {}).r2 ? '<span style="color:#2f6b3f">Cloudflare R2 (' + esc(state.env.r2_public) + ') &mdash; client downloads are free</span>'
-              : '<span class="mut">Vercel Blob &mdash; downloads billed per GB. Switch to Cloudflare R2 (free downloads) by adding <b>R2_ACCOUNT_ID</b>, <b>R2_ACCESS_KEY_ID</b>, <b>R2_SECRET_ACCESS_KEY</b>, <b>R2_BUCKET</b>, <b>R2_PUBLIC_URL</b> in Vercel and redeploying; existing files keep serving from Blob.</span>') + '</div>' +
-          (sto ? '<div class="bl-stats" style="margin-bottom:0.9rem">' +
-              '<div class="dz-stat"><div class="lbl">Delivery storage</div><b>' + gb(sto.live_bytes) + '</b><span class="d"><span class="mut">' + sto.files + ' files &middot; ~$' + (sto.live_bytes / 1e9 * 0.023).toFixed(2) + '/mo</span></span></div>' +
-              '<div class="dz-stat"><div class="lbl">Photos</div><b>' + sto.photos + '</b></div>' +
-              '<div class="dz-stat"><div class="lbl">Films</div><b>' + sto.films + '</b></div>' +
-              '<div class="dz-stat"><div class="lbl">Archived originals</div><b>' + sto.archived + '</b></div></div>'
-            : '<p class="adm-empty">Loading storage&hellip;</p>') +
-          '<div class="adm-form">' +
-            fld('s-archive', 'Archive full-res originals after <small style="text-transform:none;letter-spacing:0">(months since delivery &mdash; blank = keep forever; the 2048px web copies and thumbnails always stay, so MLS downloads keep working)</small>', '<input id="s-archive" type="number" min="0" max="120" step="1" placeholder="e.g. 12" value="' + esc(st.archive_months || '') + '">') +
-            '<div class="adm-field" style="display:flex;align-items:flex-end"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.miscSave()">Save</button></div>' +
-          '</div></div>' +
-          '<div class="adm-card"><h2>Backups <small style="text-transform:none;letter-spacing:0;font-weight:400">— every table, encrypted, saved to Blob nightly by the cron; last 30 kept</small></h2>' +
-          (bk ? (bk.error ? '<p class="adm-empty">Backups unavailable: ' + esc(bk.error) + ' &mdash; the Blob store needs a read-write token in the function environment.</p>'
-                : (bk.backups && bk.backups.length
-                    ? '<div class="adm-rows">' + bk.backups.slice(0, 5).map(function (x) { return '<div class="adm-row"><span>' + stamp(x.at) + '</span><span class="dim">&middot;</span><span class="mut">' + Math.round(x.size / 1024) + ' KB</span></div>'; }).join('') + '</div>'
-                    : '<p class="adm-empty">No backups yet &mdash; the first one runs tonight, or run one now.</p>'))
-              : '<p class="adm-empty">Loading&hellip;</p>') +
-          '<div style="margin-top:0.8rem;display:flex;gap:0.5rem;flex-wrap:wrap"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.backupNow()">Back up now</button>' +
-          '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/api/admin/backup?download=1">Download latest (decrypted JSON)</a></div></div>';
-      })() +
-      '<div class="adm-card"><h2>Discount codes</h2>' +
+      '</form>';
+
+    var bodyPay =
+      '<p class="acc__desc">Optional. With Stripe connected, invoices get a Pay button and paying marks the project Paid + unlocks downloads.</p>' +
+      '<div class="adm-row" style="border:0;padding:0 0 0.6rem"><span>Stripe</span><span class="dim">&middot;</span>' +
+        (env.stripe ? '<span style="color:#2f6b3f">connected (' + esc(env.stripe_mode) + ' mode)</span>' : '<span class="mut">not connected &mdash; add <b>STRIPE_SECRET_KEY</b> in Vercel &rarr; Environment Variables and redeploy; then add a webhook for <b>checkout.session.completed</b> &rarr; https://www.jacobcschrader.com/api/stripe</span>') + '</div>' +
+      '<div class="adm-form" style="margin-top:0.4rem">' +
+        fld('s-deposit', 'Deposit to reserve a date <small style="text-transform:none;letter-spacing:0">(% of the total &mdash; blank or 0 = no deposits; shows a "Send deposit invoice" button on projects)</small>', '<input id="s-deposit" type="number" min="0" max="100" step="5" placeholder="e.g. 50" value="' + esc(st.deposit_pct || '') + '">') +
+        '<div class="adm-field" style="display:flex;align-items:flex-end"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.miscSave()">Save</button></div>' +
+      '</div>';
+
+    var bodyRem =
+      '<p class="acc__desc">Sent by the daily cron, once per milestone, and logged on the project timeline.</p>' +
+      [['invoice', 'Unpaid invoice', 'A friendly note at 14 days, another at 21 — links to the invoice.'],
+       ['proposal', 'Unanswered proposal', 'One nudge 3 days after a proposal is sent and still waiting.'],
+       ['delivery', 'Delivery not approved', 'One nudge 5 days after delivery if the client hasn\'t approved or requested changes.']].map(function (r) {
+        return '<label class="sw"><input type="checkbox" id="rm-' + r[0] + '"' + (st['remind_' + r[0]] === '1' ? ' checked' : '') + ' onchange="ADM.remindSave()"><span><span>' + r[1] + '</span><small>' + r[2] + '</small></span></label>';
+      }).join('');
+
+    var bodyTpl =
+      '<p class="acc__desc">The subject line and opening paragraph of each client email — details, buttons and signature stay branded. Click an email to edit it.</p>' +
+      tplKeys.map(function (k) {
+        var d = TPL_DEFAULTS[k];
+        var subj = st['tpl_' + k + '_subject'] || d.subject, note = st['tpl_' + k + '_note'] || d.note;
+        var custom = !!(st['tpl_' + k + '_subject'] || st['tpl_' + k + '_note']);
+        return '<details class="tpl" data-acc="tpl-' + k + '"' + (accOpen('tpl-' + k, false) ? ' open' : '') + '><summary><b>' + esc(d.label) + '</b>' +
+          (custom ? '<span class="tpl__custom">custom</span>' : '') + '<span class="tpl__subj">' + esc(subj) + '</span>' + CHEV + '</summary>' +
+          '<div class="tpl__body"><div class="tpl__head"><b>Subject &amp; opening</b><a onclick="ADM.tplReset(\'' + k + '\')">Reset to default</a></div>' +
+          '<input id="tpl-' + k + '-subject" value="' + esc(subj) + '" placeholder="Subject">' +
+          '<textarea id="tpl-' + k + '-note" placeholder="Opening paragraph">' + esc(note) + '</textarea>' +
+          '<div class="tpl__ph">Placeholders: <code>{first}</code> <code>{name}</code> <code>{property}</code> <code>{location}</code>' + (/invoice/.test(k) ? ' <code>{number}</code> <code>{total}</code>' : k === 'confirm' ? ' <code>{date}</code>' : k === 'proposal' ? ' <code>{total}</code>' : '') + '</div></div></details>';
+      }).join('') +
+      '<button class="adm-btn" style="margin-top:0.6rem" onclick="ADM.tplSave()">Save templates</button>';
+
+    var bodySto =
+      '<div class="adm-row" style="border:0;padding:0 0 0.7rem"><span>Media store</span><span class="dim">&middot;</span>' +
+        (env.r2 ? '<span style="color:#2f6b3f">Cloudflare R2 (' + esc(env.r2_public) + ') &mdash; client downloads are free</span>'
+          : '<span class="mut">Vercel Blob &mdash; downloads billed per GB. Switch to Cloudflare R2 (free downloads) by adding <b>R2_ACCOUNT_ID</b>, <b>R2_ACCESS_KEY_ID</b>, <b>R2_SECRET_ACCESS_KEY</b>, <b>R2_BUCKET</b>, <b>R2_PUBLIC_URL</b> in Vercel and redeploying; existing files keep serving from Blob.</span>') + '</div>' +
+      (sto ? '<div class="bl-stats" style="margin-bottom:0.9rem">' +
+          '<div class="dz-stat"><div class="lbl">Delivery storage</div><b>' + gb(sto.live_bytes) + '</b><span class="d"><span class="mut">' + sto.files + ' files &middot; ~$' + (sto.live_bytes / 1e9 * 0.023).toFixed(2) + '/mo</span></span></div>' +
+          '<div class="dz-stat"><div class="lbl">Photos</div><b>' + sto.photos + '</b></div>' +
+          '<div class="dz-stat"><div class="lbl">Films</div><b>' + sto.films + '</b></div>' +
+          '<div class="dz-stat"><div class="lbl">Archived originals</div><b>' + sto.archived + '</b></div></div>'
+        : '<p class="adm-empty">Loading storage&hellip;</p>') +
+      '<div class="adm-form">' +
+        fld('s-archive', 'Archive full-res originals after <small style="text-transform:none;letter-spacing:0">(months since delivery &mdash; blank = keep forever; the 2048px web copies and thumbnails always stay, so MLS downloads keep working)</small>', '<input id="s-archive" type="number" min="0" max="120" step="1" placeholder="e.g. 12" value="' + esc(st.archive_months || '') + '">') +
+        '<div class="adm-field" style="display:flex;align-items:flex-end"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.miscSave()">Save</button></div>' +
+      '</div>';
+
+    var bodyBk =
+      '<p class="acc__desc">Every table, encrypted, saved to Blob nightly by the cron; the last 30 are kept.</p>' +
+      (bk ? (bk.error ? '<p class="adm-empty">Backups unavailable: ' + esc(bk.error) + ' &mdash; the Blob store needs a read-write token in the function environment.</p>'
+            : (bk.backups && bk.backups.length
+                ? '<div class="adm-rows">' + bk.backups.slice(0, 5).map(function (x) { return '<div class="adm-row"><span>' + stamp(x.at) + '</span><span class="dim">&middot;</span><span class="mut">' + Math.round(x.size / 1024) + ' KB</span></div>'; }).join('') + '</div>'
+                : '<p class="adm-empty">No backups yet &mdash; the first one runs tonight, or run one now.</p>'))
+          : '<p class="adm-empty">Loading&hellip;</p>') +
+      '<div style="margin-top:0.8rem;display:flex;gap:0.5rem;flex-wrap:wrap"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.backupNow()">Back up now</button>' +
+      '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/api/admin/backup?download=1">Download latest (decrypted JSON)</a></div>';
+
+    var bodyDisc =
       '<form class="adm-form" onsubmit="ADM.discCreate(event)" style="margin-bottom:1.2rem">' +
         fld('d-code', 'Code *', '<input id="d-code" required placeholder="SPRING10" style="text-transform:uppercase">') +
         fld('d-kind', 'Type', '<select id="d-kind"><option value="percent">Percent off</option><option value="amount">Dollar amount off</option></select>') +
@@ -2529,8 +2620,17 @@ select.lx-input { padding-right: 2rem; }
               '</td></tr>';
           }).join('') + '</table>'
         : '<p class="adm-empty">No discount codes yet.</p>') +
-      '<p class="adm-msg" style="color:var(--muted)">Applying a code to a project locks in the dollar amount at save time — editing a code later never changes existing projects.</p>' +
-      '</div>';
+      '<p class="adm-msg" style="color:var(--muted)">Applying a code to a project locks in the dollar amount at save time — editing a code later never changes existing projects.</p>';
+
+    var anyOpen = ['integrations', 'payments', 'reminders', 'templates', 'storage', 'backups', 'discounts'].some(function (k) { return accOpen(k, false); });
+    return head('Settings', '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.accAll(' + (anyOpen ? 'false' : 'true') + ')">' + (anyOpen ? 'Collapse all' : 'Expand all') + '</button>') +
+      acc('integrations', 'Integrations', metaInteg, bodyInteg) +
+      acc('payments', 'Payments', metaPay, bodyPay) +
+      acc('reminders', 'Reminders', metaRem, bodyRem) +
+      acc('templates', 'Email templates', metaTpl, bodyTpl) +
+      acc('storage', 'Storage &amp; archive', metaSto, bodySto) +
+      acc('backups', 'Backups', metaBk, bodyBk) +
+      acc('discounts', 'Discount codes', metaDisc, bodyDisc);
   }
 
   // Extra (co-recipient) emails on a client — stored as a JSON array.
@@ -2712,10 +2812,28 @@ select.lx-input { padding-right: 2rem; }
   $('nav').addEventListener('click', function (e) {
     var a = e.target.closest('a'); if (a && a.dataset.r) go(a.dataset.r);
   });
+  // Settings accordions: remember open/closed. Section rows persist across
+  // reloads (localStorage); template rows only for the session.
+  state.accOpen = {};
+  $('main').addEventListener('toggle', function (e) {
+    var d = e.target; if (!d || !d.dataset || !d.dataset.acc) return;
+    var id = d.dataset.acc;
+    state.accOpen[id] = d.open;
+    if (!/^tpl-/.test(id)) { try { localStorage.setItem('adm-acc:' + id, d.open ? '1' : '0'); } catch (err) {} }
+    // keep the Expand/Collapse-all button honest without a full re-render
+    var b = document.querySelector('.adm-head button[onclick^="ADM.accAll"]');
+    if (b && !/^tpl-|^lic-/.test(id)) {
+      var any = [].slice.call(document.querySelectorAll('details.acc')).some(function (x) { return x.open; });
+      b.textContent = any ? 'Collapse all' : 'Expand all'; b.setAttribute('onclick', 'ADM.accAll(' + (any ? 'false' : 'true') + ')');
+    }
+  }, true);
 
   // exposed for inline handlers
   window.ADM = {
     go: go,
+    accAll: function (open) {
+      document.querySelectorAll('details.acc').forEach(function (d) { d.open = !!open; });
+    },
     miscSave: async function () {
       var body = {};
       if ($('s-deposit')) body.deposit_pct = $('s-deposit').value.trim();
