@@ -8,7 +8,7 @@
 const crypto = require("node:crypto");
 
 const TABLES = ["clients", "bookings", "requests", "proposals", "license_leads", "delivery_files",
-  "download_events", "project_events", "tasks", "testimonials", "settings", "discounts", "site_projects"];
+  "download_events", "project_events", "testimonials", "settings", "discounts", "site_projects"];
 
 function key() {
   if (!process.env.SESSION_SECRET) throw new Error("SESSION_SECRET is not configured");
@@ -37,7 +37,6 @@ const Q = {
   delivery_files: (s) => s`SELECT * FROM delivery_files`,
   download_events: (s) => s`SELECT * FROM download_events`,
   project_events: (s) => s`SELECT * FROM project_events`,
-  tasks: (s) => s`SELECT * FROM tasks`,
   testimonials: (s) => s`SELECT * FROM testimonials`,
   settings: (s) => s`SELECT * FROM settings`,
   discounts: (s) => s`SELECT * FROM discounts`,

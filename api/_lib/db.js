@@ -265,17 +265,7 @@ function ensureSchema() {
       )`;
       await s`CREATE INDEX IF NOT EXISTS download_events_booking ON download_events (booking_id, created_at)`;
       await s`CREATE INDEX IF NOT EXISTS download_events_time ON download_events (created_at)`;
-      // Admin upgrade (2026-08-08): task tracker + paid stamp for billing.
-      await s`CREATE TABLE IF NOT EXISTS tasks (
-        id          serial PRIMARY KEY,
-        title       text NOT NULL,
-        priority    text NOT NULL DEFAULT 'normal',
-        done        boolean NOT NULL DEFAULT false,
-        due         date,
-        booking_id  integer,
-        created_at  timestamptz NOT NULL DEFAULT now(),
-        done_at     timestamptz
-      )`;
+      // Admin upgrade (2026-08-08): paid stamp for billing.
       await s`ALTER TABLE bookings ADD COLUMN IF NOT EXISTS paid_at timestamptz`;
       // Project timeline (events + notes) and client testimonials.
       await s`CREATE TABLE IF NOT EXISTS project_events (

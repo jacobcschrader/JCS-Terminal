@@ -1640,3 +1640,16 @@ new features:
 - **Google Calendar read:** gcal.listEvents + admin gcalevents route;
   Calendar view overlays your Google events (grey); Settings takes extra
   calendar IDs to read.
+
+## 2026-08-08 — Today's tasks removed
+
+Jacob: "remove 'todays tasks'". The dashboard widget, its handlers, the
+`tasks` admin route/lib and the table creation are gone (an existing
+tasks table in the database is simply left alone). Dashboard right
+column is now This week + Money.
+
+## 2026-08-08 — Profile completion ring removed
+
+Jacob: "remove profile setup process. the 100%". The dashboard's top
+card is now just the four stat tiles under an "Overview" label — no
+setup checklist, ring or Update settings / View requests buttons.

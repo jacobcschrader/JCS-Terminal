@@ -226,10 +226,7 @@ toggle, delete (cleans Blob media).
   downloads still locked) + a "+" new-project button. Soft 10px corners
   everywhere; page titles are small sans (no more serif "Dashboard.").
   Mobile: sidebar slides in from the hamburger.
-- **Dashboard:** PROFILE card = studio-setup ring (6 checks: 8+ portfolio
-  projects, Google Calendar, Places key, licensing key, first client,
-  first delivery — % + next step link) + Update settings / View requests,
-  then 4 stat tiles: Requests reviewed (30d, Δ vs prior 30d), Requests
+- **Dashboard:** OVERVIEW card = 4 stat tiles: Requests reviewed (30d, Δ vs prior 30d), Requests
   accepted, Average turnaround (shoot → delivery email, 90d), Current
   pipeline value (active projects). LATEST REQUESTS cards (avatar,
   name, brokerage · city, FIT % — services 30 / sqft on rate card 20 /
@@ -238,9 +235,8 @@ toggle, delete (cleans Blob media).
   sheet, target date, sqft, property; click → Requests row). ACTIVE
   PROJECTS table (project+client · service · stage · last update ·
   next update: shoot / delivery due (+2d) / payment due (+14d) /
-  proposal follow-up) beside TODAY'S TASKS (All/Open/Closed, add w/
-  priority, tick, delete — `tasks` table via admin `tasks` route), THIS
-  WEEK (shoots in 7 days, confirmed pill), MONEY (awaiting payment /
+  proposal follow-up) beside THIS WEEK (shoots in 7 days, confirmed
+  pill) and MONEY (awaiting payment /
   collected this month / booked this year), then RECENT DOWNLOADS.
 - **Billing (new view):** Outstanding / Overdue 14+ / Collected this
   month / this year tiles, "delivered but not invoiced" strip, tabs
@@ -418,15 +414,13 @@ first use), email.js, auth.js, portal-auth.js, ics.js, gcal.js, links.js,
 delivery.js (slugs, files, publicFile, logDownload).
 Admin router additions: `files` (GET list+events / POST add / PUT
 cover|lock|sort / DELETE + blob del), `downloads` (feed + 7-day count),
-`tasks` (GET / POST / PUT / DELETE — dashboard to-dos), `testimonials`
-(GET / PUT approve / DELETE). Shared: events.js (logEvent), templates.js
+`testimonials` (GET / PUT approve / DELETE). Shared: events.js (logEvent), templates.js
 (DEFAULTS, loadTemplates, tpl).
 `upload.js` broker: delivery/<id>/… paths get addRandomSuffix:false and
 a 4GB cap; everything else unchanged.
 
 **DB tables:** clients, bookings (~46 cols incl. delivery_*/invoice_*,
-delivery_slug unique, downloads_locked, paid_at), tasks (title, priority
-low|normal|medium|high, done, due, booking_id), project_events
+delivery_slug unique, downloads_locked, paid_at), project_events
 (booking_id, kind, label, actor, meta), testimonials (booking_id,
 client_name, brokerage, quote, approved), proposals.reminded_at, bookings
 deposit_amount / deposit_paid_at / stripe_session_id / paid_via,

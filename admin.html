@@ -391,21 +391,12 @@ select.lx-input { padding-right: 2rem; }
    sector = service. Soft SaaS card language in JCS navy. ============ */
 .dz-card { background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 8px 24px rgba(15,34,64,0.045); }
 .dz-profile { padding: 1.35rem 1.5rem 1.4rem; }
-.dz-profile__top { display: flex; align-items: center; gap: 1.2rem; flex-wrap: wrap; }
-.dz-ring { position: relative; width: 74px; height: 74px; flex: none; }
-.dz-ring svg { width: 74px; height: 74px; transform: rotate(-90deg); }
-.dz-ring i { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.05rem; color: var(--navy); }
-.dz-pct b { display: block; font-family: var(--sans); font-weight: 600; font-size: 1.7rem; letter-spacing: -0.02em; color: var(--ink); line-height: 1; }
-.dz-pct b small { font-size: 0.75rem; font-weight: 500; color: var(--muted); margin-left: 2px; }
-.dz-pct span { display: block; margin-top: 0.35rem; font-size: 0.74rem; color: var(--muted); }
-.dz-pct span a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .dz-lbl { font-size: 0.6rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--muted); margin-bottom: 0.7rem; }
-.dz-acts { margin-left: auto; display: flex; gap: 0.5rem; flex-wrap: wrap; }
 .dz-btn { font-family: var(--sans); font-size: 0.7rem; font-weight: 600; letter-spacing: 0.01em; border-radius: 8px; padding: 0.55rem 0.9rem; cursor: pointer; border: 1px solid var(--navy); background: var(--navy); color: #fff; white-space: nowrap; }
 .dz-btn:hover { background: var(--navy-deep); }
 .dz-btn--ghost { background: #fff; color: var(--ink); border-color: var(--line); }
 .dz-btn--ghost:hover { border-color: rgba(15,34,64,0.5); color: var(--navy); background: #fff; }
-.dz-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1.25rem; }
+.dz-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
 @media (max-width: 1000px) { .dz-stats { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 520px) { .dz-stats { grid-template-columns: 1fr; } }
 .dz-stat { border: 1px solid var(--line); border-radius: 12px; padding: 0.95rem 1.05rem 1rem; background: #fff; }
@@ -639,7 +630,7 @@ select.lx-input { padding-right: 2rem; }
               q: '', clientFilter: '',
               licTab: 'active', licProp: '', licResults: null, licSearching: false,
               stageFilter: 'active', ls: null, downloads: [], dlWeek: 0,
-              tasks: [], taskTab: 'all', billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1,
+              billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1,
               testimonials: [], calMonth: '', fDrag: null, env: {}, calExt: {}, calBusy: {}, backup: null };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
   var ADDONS = {
@@ -759,8 +750,8 @@ select.lx-input { padding-right: 2rem; }
     state.proposals = pr.proposals || [];
     state.licenseLeads = lic.leads || [];
     state.settings = st.settings || {}; state.env = st.env || {}; state.loaded = true;
-    var extra = await Promise.all([api('downloads?limit=80').catch(function () { return {}; }), api('tasks').catch(function () { return {}; }), api('testimonials').catch(function () { return {}; })]);
-    state.downloads = extra[0].events || []; state.dlWeek = extra[0].week || 0; state.tasks = extra[1].tasks || []; state.testimonials = extra[2].testimonials || [];
+    var extra = await Promise.all([api('downloads?limit=80').catch(function () { return {}; }), api('testimonials').catch(function () { return {}; })]);
+    state.downloads = extra[0].events || []; state.dlWeek = extra[0].week || 0; state.testimonials = extra[1].testimonials || [];
     paintBell();
     var pending = state.requests.filter(function (x) { return x.status === 'pending'; }).length;
     var badge = $('req-badge');
@@ -1452,36 +1443,12 @@ select.lx-input { padding-right: 2rem; }
     var active = state.bookings.filter(function (b) { return ['canceled', 'paid'].indexOf(b.status) === -1; });
     var pipeline = active.reduce(function (s, b) { return s + (b.price ? net(b) + (Number(b.travel_fee) || 0) : 0); }, 0);
 
-    // ---- profile ring: studio setup steps ----
-    var st = state.settings || {};
-    var live = (window.PROJECTS_DATA || []).length + (state.siteProjects || []).filter(function (p) { return !p.draft; }).length;
-    var checks = [
-      { t: 'Portfolio published (8+ projects)', ok: live >= 8, r: 'portfolio' },
-      { t: 'Google Calendar connected', ok: !!(state.gcal && state.gcal.ok), r: 'settings' },
-      { t: 'Address autocomplete key', ok: !!st.google_places_key, r: 'settings' },
-      { t: 'Licensing research key', ok: !!(st.serper_key || st.brave_search_key || st.google_cse_key), r: 'settings' },
-      { t: 'First client on file', ok: state.clients.length > 0, r: 'clients' },
-      { t: 'First delivery sent', ok: state.bookings.some(function (b) { return b.delivery_sent_at; }), r: 'pipeline' },
-    ];
-    var doneN = checks.filter(function (c) { return c.ok; }).length;
-    var pct = Math.round(100 * doneN / checks.length);
-    var nextStep = checks.find(function (c) { return !c.ok; });
-    var C = 2 * Math.PI * 30;
-    var ring = '<div class="dz-ring"><svg viewBox="0 0 74 74"><circle cx="37" cy="37" r="30" fill="none" stroke="rgba(15,34,64,0.1)" stroke-width="5"/>' +
-      '<circle cx="37" cy="37" r="30" fill="none" stroke="var(--navy)" stroke-width="5" stroke-linecap="round" stroke-dasharray="' + (C * pct / 100).toFixed(1) + ' ' + C.toFixed(1) + '"/></svg><i>JCS</i></div>';
-
     function stat(icon, label, big, small, deltaHtml) {
       return '<div class="dz-stat"><div class="lbl"><i>' + icon + '</i>' + label + '</div><b>' + big + (small ? '<small>' + small + '</small>' : '') + '</b>' +
         (deltaHtml ? '<span class="d">' + deltaHtml + '</span>' : '') + '</div>';
     }
     var profile = '<div class="dz-card dz-profile">' +
-      '<div class="dz-lbl">Profile</div>' +
-      '<div class="dz-profile__top">' + ring +
-        '<div class="dz-pct"><b>' + pct + '<small>%</small></b><span>' + doneN + ' of ' + checks.length + ' setup steps done' +
-          (nextStep ? ' &middot; next: <a onclick="ADM.go(\'' + nextStep.r + '\')">' + esc(nextStep.t) + '</a>' : ' &middot; the studio runs itself') + '</span></div>' +
-        '<div class="dz-acts"><button class="dz-btn" onclick="ADM.go(\'settings\')">Update settings</button>' +
-          '<button class="dz-btn dz-btn--ghost" onclick="ADM.go(\'requests\')">View requests</button></div>' +
-      '</div>' +
+      '<div class="dz-lbl">Overview</div>' +
       '<div class="dz-stats">' +
         stat('&#9634;', 'Requests reviewed', rev30, '', delta(rev30, revPrev)) +
         stat('&#10003;', 'Requests accepted', acc30, '', delta(acc30, accPrev)) +
@@ -1538,27 +1505,6 @@ select.lx-input { padding-right: 2rem; }
       : '<p class="dz-empty" style="padding:1rem 1.1rem">Nothing in progress.</p>') + '</div>';
     var projects = '<div><div class="dz-sechead"><h2>Active projects</h2><span class="dz-count">' + active.length + '</span><span class="grow"></span><a class="more" onclick="ADM.go(\'pipeline\')">View all</a></div>' + table + '</div>';
 
-    // ---- tasks ----
-    var tasks = state.tasks || [];
-    var tab = state.taskTab || 'all';
-    var shown = tasks.filter(function (t) { return tab === 'all' ? true : tab === 'open' ? !t.done : t.done; });
-    var PRI = { high: 'High', medium: 'Medium', normal: 'Normal', low: 'Low' };
-    var PRICLS = { high: 'dz-pill--lo', medium: 'dz-pill--mid', normal: 'dz-pill--new', low: 'dz-pill--dim' };
-    var taskList = shown.length ? shown.slice(0, 12).map(function (t) {
-      return '<div class="dz-task' + (t.done ? ' done' : '') + '"><span class="chk" onclick="ADM.taskToggle(' + t.id + ')">' + (t.done ? '&#10003;' : '') + '</span>' +
-        '<span class="t">' + esc(t.title) + (t.due ? '<small>' + relTime(t.due) + '</small>' : '') + '</span>' +
-        '<span class="dz-pill ' + PRICLS[t.priority] + '">' + PRI[t.priority] + '</span>' +
-        '<button class="x" title="Delete" onclick="ADM.taskDel(' + t.id + ')">&#128465;</button></div>';
-    }).join('') : '<div class="dz-empty">' + (tab === 'closed' ? 'Nothing closed yet.' : 'No tasks — add one below.') + '</div>';
-    var tasksHtml = '<div class="dz-card dz-tasks"><div class="dz-tasks__head"><h2>Today’s tasks</h2>' +
-      '<span class="dz-tabs">' + ['all', 'open', 'closed'].map(function (t) {
-        return '<button class="' + (tab === t ? 'on' : '') + '" onclick="ADM.taskTab(\'' + t + '\')">' + t.charAt(0).toUpperCase() + t.slice(1) + '</button>';
-      }).join('') + '</span></div>' + taskList +
-      '<form class="dz-add" onsubmit="event.preventDefault();ADM.taskAdd()">' +
-        '<input id="dz-task-title" placeholder="Add a task…" autocomplete="off">' +
-        '<select id="dz-task-pri"><option value="normal">Normal</option><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>' +
-        '<button class="dz-btn" type="submit">Add</button></form></div>';
-
     // ---- recent downloads (delivery activity) ----
     var dl = state.downloads || [];
     var downloads = '<div class="dz-dl"><div class="dz-sechead"><h2>Recent downloads</h2><span class="dz-count">' + (state.dlWeek || 0) + '</span><span class="grow"></span><span style="font-size:0.66rem;color:var(--muted)">last 7 days</span></div>' +
@@ -1576,7 +1522,7 @@ select.lx-input { padding-right: 2rem; }
       if (['canceled', 'paid'].indexOf(b.status) > -1 || !b.shoot_date) return false;
       var d = new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00'); return d >= startToday && d < weekEnd;
     }).sort(function (a, b) { return new Date(a.shoot_date) - new Date(b.shoot_date); });
-    var weekHtml = '<div class="dz-card dz-tasks" style="margin-top:0.9rem"><div class="dz-tasks__head"><h2>This week</h2><span class="dz-count">' + week.length + '</span></div>' +
+    var weekHtml = '<div class="dz-card dz-tasks"><div class="dz-tasks__head"><h2>This week</h2><span class="dz-count">' + week.length + '</span></div>' +
       (week.length ? week.map(function (b) {
         var d = new Date(String(b.shoot_date).slice(0, 10) + 'T12:00:00');
         return '<div class="dz-task" style="cursor:pointer" onclick="ADM.go(\'project/' + b.id + '\')"><span class="dz-day"><b>' + d.getDate() + '</b><small>' + d.toLocaleDateString(undefined, { weekday: 'short' }) + '</small></span>' +
@@ -1596,7 +1542,7 @@ select.lx-input { padding-right: 2rem; }
     if (!state.gcal && !state.gcalBusy) ADM.dzGcal();
     return head('Dashboard', '<button class="adm-btn" onclick="ADM.newBooking()">+ New project</button>') +
       profile + matches +
-      '<div class="dz-sec dz-two">' + projects + '<div>' + tasksHtml + weekHtml + moneyHtml + '</div></div>' + downloads;
+      '<div class="dz-sec dz-two">' + projects + '<div>' + weekHtml + moneyHtml + '</div></div>' + downloads;
   }
 
   // "Status: Vacant · Listing: For Sale · …" from the wizard's details JSON.
@@ -2967,26 +2913,6 @@ select.lx-input { padding-right: 2rem; }
       box.hidden = false;
     },
     notifGo: function (r) { $('adm-notif').hidden = true; go(r); },
-    // ---- tasks ----
-    taskTab: function (t) { state.taskTab = t; render(); },
-    taskAdd: async function () {
-      var inp = $('dz-task-title'), pri = $('dz-task-pri'); if (!inp) return;
-      var title = inp.value.trim(); if (!title) { inp.focus(); return; }
-      try {
-        var j = await api('tasks', 'POST', { title: title, priority: pri ? pri.value : 'normal' });
-        state.tasks.unshift(j.task); inp.value = ''; render();
-        var again = $('dz-task-title'); if (again) again.focus();
-      } catch (e) { toast(friendly(e), 'err'); }
-    },
-    taskToggle: async function (id) {
-      var t = state.tasks.find(function (x) { return x.id == id; }); if (!t) return;
-      try { var j = await api('tasks', 'PUT', { id: id, done: !t.done }); Object.assign(t, j.task); render(); }
-      catch (e) { toast(friendly(e), 'err'); }
-    },
-    taskDel: async function (id) {
-      try { await api('tasks', 'DELETE', { id: id }); state.tasks = state.tasks.filter(function (x) { return x.id != id; }); render(); }
-      catch (e) { toast(friendly(e), 'err'); }
-    },
     billTab: function (t) { state.billTab = t; render(); },
     confirm: async function (id) {
       var b = state.bookings.find(function (x) { return x.id == id; }); if (!b) return;

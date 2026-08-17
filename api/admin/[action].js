@@ -24,7 +24,6 @@ const routes = {
   upload: require("../_lib/admin/upload.js"),
   files: require("../_lib/admin/files.js"),
   downloads: require("../_lib/admin/downloads.js"),
-  tasks: require("../_lib/admin/tasks.js"),
   testimonials: require("../_lib/admin/testimonials.js"),
   gcalevents: require("../_lib/admin/gcal-events.js"),
   backup: require("../_lib/admin/backup.js"),
