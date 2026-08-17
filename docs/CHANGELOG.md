@@ -1700,13 +1700,31 @@ vars exist.
 - HANDOFF: new "DNS & domains" note (records list, grey-cloud rule),
   env list gains the R2_* vars + the "changing R2_PUBLIC_URL" caveat.
 
-## 2026-08-16 — Branded error page
+## 2026-08-16 — Branded error page → every fail state
 
 - New `404.html`: Vercel now serves a JCS-branded page (nav, huge faded
   serif numeral, eyebrow + headline + CTAs, footer) instead of its plain
   "NOT_FOUND" text for unknown URLs. `?code=401|403|410|500` variants
-  swap the copy for private / not-yours / expired / server-error cases;
-  plain 404s echo the requested URL. Noindexed. Verified desktop +
-  mobile in the local preview (safe-centering so short viewports never
-  clip the top; entrance animation via setTimeout, not rAF).
+  swap the copy; plain 404s echo the requested URL. Noindexed.
+- Made it a shared component: `.err*` CSS in styles.css +
+  `JSError.render()` in site.js. Wired every in-page fail state to it —
+  portal (new: expired magic link bounces to /portal?expired=1 → 410
+  block over the sign-in form; API failure → 500 block), listing page
+  (401/404/500), invoice (404/500), proposal (404/500 + inline accept
+  error instead of alert()), project page (404). 5xx/network failures
+  now read "That's on us" with Try again, not "link isn't valid".
+- Verified in the local preview at desktop + mobile: safe-centering so
+  short viewports never clip, entrance via setTimeout (rAF stalls in
+  background tabs), inline variant keeps its numeral inside the wrap.
+- Not brandable on Cloudflare Free: media.jacobcschrader.com's stock 404
+  (Custom Errors / Snippets are Pro+).
+
+## 2026-08-16 — Admin Settings render loop fixed
+
+- Settings re-fetched /api/admin/backup + gcalcheck on EVERY render and
+  backupInfo() re-rendered when it landed → endless fetch/redraw about
+  once a second ("the backups change every second"), which also wiped
+  whatever was being typed in Settings fields. Now: fetched once per
+  visit (`state._lastSection` clears the cache on arrival), painted from
+  cache on redraws, "Back up now" refreshes explicitly.
 

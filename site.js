@@ -428,3 +428,80 @@ window.addEventListener('DOMContentLoaded', function () {
 
   window.JSLightbox = { open: open };
 })();
+
+/* ---------------------------------------------------------------------
+   Branded error / fail block — the ONE way the site says "something's
+   not right". Used by 404.html and by the client pages' fail states so
+   every dead link, expired token or missing record looks the same.
+
+     JSError.render(el, { code: '401', ... })  → fills `el` (which should
+     carry class "err" — add "err--inline" for compact) and reveals it.
+
+   Options (all optional; code picks the defaults):
+     code     '401' | '403' | '404' | '410' | '500'  (also '502'/'503')
+     eyebrow  small tracked label      title  headline (HTML ok, use <em>)
+     text     one calm sentence (HTML ok)
+     actions  [[label, href, solid?], …]   href 'reload' reloads the page
+     links    false to drop the quiet site-links row, or [[label, href], …]
+     path     true → "You asked for host/path" line (plain 404s)
+   --------------------------------------------------------------------- */
+(function () {
+  var MAIL = 'mailto:jacxbschrader@gmail.com';
+  var COPY = {
+    '404': { eyebrow: 'Error 404 &mdash; Page not found', title: 'This page has <em>moved on.</em>',
+             text: 'The link may be out of date, or the address was mistyped. Nothing’s lost — everything you’re looking for is a click away.',
+             actions: [['Back to Home', '/', true], ['View the Work', '/projects', false]] },
+    '401': { eyebrow: 'Error 401 &mdash; Sign-in required', title: 'This one’s <em>private.</em>',
+             text: 'You’re looking at a client page. Sign in to the client portal and we’ll email you a fresh link — no password to remember.',
+             actions: [['Client Portal', '/portal/login', true], ['Back to Home', '/', false]] },
+    '403': { eyebrow: 'Error 403 &mdash; Not available', title: 'Not yours <em>to open.</em>',
+             text: 'This link belongs to another client’s account. If it should be yours, sign in with your own email and it will appear in your portal.',
+             actions: [['Client Portal', '/portal/login', true], ['Contact Jacob', '/contact', false]] },
+    '410': { eyebrow: 'Error 410 &mdash; Link expired', title: 'This link has <em>expired.</em>',
+             text: 'For your security, client links only work for a while. Sign in to the portal and a fresh one is one click away.',
+             actions: [['Client Portal', '/portal/login', true], ['Back to Home', '/', false]] },
+    '500': { eyebrow: 'Error 500 &mdash; Something went wrong', title: 'That’s on <em>us.</em>',
+             text: 'Something broke on our end while loading this page. Give it another try in a moment — and if it keeps happening, tell Jacob directly.',
+             actions: [['Try Again', 'reload', true], ['Email Jacob', MAIL, false]] }
+  };
+  COPY['502'] = COPY['503'] = COPY['500'];
+  var LINKS = [['Services', '/services'], ['Book a Shoot', '/book'], ['Client Portal', '/portal'], ['Contact', '/contact']];
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]; }); }
+
+  function render(el, o) {
+    if (!el) return;
+    o = o || {};
+    var code = String(o.code || '404');
+    var base = COPY[code] || COPY['404'];
+    var eyebrow = o.eyebrow || base.eyebrow, title = o.title || base.title, text = o.text || base.text;
+    var actions = o.actions || base.actions;
+    var links = o.links === false ? [] : (o.links || LINKS);
+    if (!el.classList.contains('err')) el.classList.add('err');
+    el.classList.remove('in');
+    var h = '<div class="wrap">' +
+      '<div class="err__code" aria-hidden="true">' + esc(code) + '</div>' +
+      '<div class="err__body">' +
+        '<span class="eyebrow err__eyebrow">' + eyebrow + '</span>' +
+        '<h1 class="display err__title">' + title + '</h1>' +
+        '<p class="err__text">' + text + '</p>' +
+        (o.path ? '<p class="err__path">You asked for <code>' + esc(location.host + location.pathname) + '</code></p>' : '') +
+        (actions.length ? '<div class="err__actions">' + actions.map(function (a) {
+          return '<a class="btn' + (a[2] ? ' btn--solid' : '') + '" href="' + (a[1] === 'reload' ? '#' : esc(a[1])) + '"' +
+                 (a[1] === 'reload' ? ' data-reload="1"' : '') + '>' + esc(a[0]) + '</a>';
+        }).join('') + '</div>' : '') +
+        (links.length ? '<div class="err__links">' + links.map(function (l) {
+          return '<a href="' + esc(l[1]) + '">' + esc(l[0]) + '</a>';
+        }).join('') + '</div>' : '') +
+      '</div></div>';
+    el.innerHTML = h;
+    el.hidden = false;
+    var r = el.querySelector('[data-reload]');
+    if (r) r.addEventListener('click', function (e) { e.preventDefault(); location.reload(); });
+    document.title = eyebrow.replace(/^Error \d+ &mdash; /, '').replace(/&mdash;/g, '—') + ' — Jacob Schrader';
+    // setTimeout, not rAF: background tabs never fire rAF, and we want the
+    // reveal queued regardless of visibility.
+    setTimeout(function () { el.classList.add('in'); }, 40);
+    return el;
+  }
+  window.JSError = { render: render, copy: COPY };
+})();

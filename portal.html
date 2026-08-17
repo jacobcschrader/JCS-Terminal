@@ -93,10 +93,8 @@ body { background: #f8f7f4; }
 .pt-login .btn { margin-top: 18px; border: 0; cursor: pointer; }
 .pt-login .note { font-size: 0.78rem; color: var(--muted); margin: 1.2rem 0 0; line-height: 1.65; }
 .pt-login .sent h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.6rem; color: var(--navy); margin: 34px 0 0.6rem; }
-.pt-missing { text-align: center; padding: 3rem 1rem 0; }
-.pt-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.6rem; color: var(--navy); margin: 0 0 0.6rem; }
-.pt-missing p { font-size: 0.85rem; color: var(--muted); }
-.pt-missing a { color: var(--navy); }
+/* fail states render into #pt-missing via JSError (styles.css .err--inline) */
+.pt-missing.err--inline + .pt-login { padding-top: 1.5rem; }
 </style>
 </head>
 <body>
@@ -135,10 +133,7 @@ body { background: #f8f7f4; }
     <p class="pt-note">Questions or requests? <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> &nbsp;·&nbsp; <a href="tel:+14088248719">(408) 824-8719</a></p>
   </div>
 
-  <div class="pt-missing" id="pt-missing" hidden>
-    <h1>This portal link isn't valid.</h1>
-    <p>Sign in below with your email, or <a href="mailto:jacxbschrader@gmail.com">get in touch</a>.</p>
-  </div>
+  <div class="pt-missing err err--inline" id="pt-missing" hidden></div>
 
   <div id="pt-login" hidden class="pt-login">
     <span class="eyebrow">Client Portal</span>
@@ -192,7 +187,22 @@ body { background: #f8f7f4; }
 (async function () {
   var $ = function (id) { return document.getElementById(id); };
   var qs = new URLSearchParams(location.search);
-  function missing() { $('pt-missing').hidden = false; $('pt-login').hidden = false; wireLogin(); }
+  function missing() {
+    // API failed (not a 401) or the network dropped — say so, keep sign-in available
+    JSError.render($('pt-missing'), { code: '500', eyebrow: 'Client Portal &mdash; something went wrong',
+      title: 'That’s on <em>us.</em>', links: false,
+      text: 'The portal didn’t load properly just now. Try again in a moment — or sign in below and it should sort itself out.',
+      actions: [['Try Again', 'reload', true]] });
+    $('pt-login').hidden = false; wireLogin();
+  }
+  function expired() {
+    // an emailed sign-in link that no longer verifies (used, expired, or edited)
+    JSError.render($('pt-missing'), { code: '410', eyebrow: 'Sign-in link &mdash; expired', links: false,
+      title: 'This sign-in link has <em>expired.</em>',
+      text: 'Sign-in links work once and only for a little while, for your security. Enter your email below and I’ll send a fresh one — it takes seconds.',
+      actions: [] });
+    history.replaceState(null, '', '/portal');
+  }
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
   function ymd(s) { return s ? String(s).slice(0, 10) : ''; }
   function dstr(s) {
@@ -228,9 +238,10 @@ body { background: #f8f7f4; }
       }
     }
   }
+  var wasExpired = qs.get('expired') === '1';
   try {
     var r = await fetch('/api/portal');
-    if (r.status === 401) { $('pt-login').hidden = false; wireLogin(); return; }
+    if (r.status === 401) { if (wasExpired) expired(); $('pt-login').hidden = false; wireLogin(); return; }
     if (!r.ok) { missing(); return; }
     var d = await r.json();
     document.title = d.client_name + ' — Client Portal — Jacob Schrader';

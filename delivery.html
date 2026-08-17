@@ -131,10 +131,7 @@ body { background: #f8f7f4; }
 
 .lp-note { margin-top: clamp(2.4rem, 5vw, 3.4rem); padding-top: 1.8rem; border-top: 1px solid var(--line); text-align: center; font-size: 0.84rem; color: var(--muted); }
 .lp-note a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
-.lp-missing { text-align: center; padding: 10rem 1rem 6rem; }
-.lp-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.7rem; color: var(--navy); margin: 0 0 0.6rem; }
-.lp-missing p { font-size: 0.85rem; color: var(--muted); }
-.lp-missing a { color: var(--navy); }
+/* fail states render into #lp-missing via JSError (styles.css .err) */
 </style>
 </head>
 <body>
@@ -223,10 +220,7 @@ body { background: #f8f7f4; }
   <p class="lp-note">Questions or requests? <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> &nbsp;·&nbsp; <a href="tel:+14088248719">(408) 824-8719</a></p>
 </div>
 
-<div class="lp-missing" id="lp-missing" hidden>
-  <h1 id="lp-missing-h">This listing link isn't valid.</h1>
-  <p id="lp-missing-p">Sign in to your <a href="/portal">client portal</a> to see your listings, or <a href="mailto:jacxbschrader@gmail.com">get in touch</a>.</p>
-</div>
+<div class="lp-missing err" id="lp-missing" hidden></div>
 
 <div class="lp-selbar" id="lp-selbar"><span id="lp-selcount">0 selected</span><button class="solid" id="lp-seldl">Download selected</button><button id="lp-selclear">Clear</button></div>
 <div class="lp-toast" id="lp-toast"><span id="lp-toast-t"></span><div class="bar"><i id="lp-toast-b"></i></div></div>
@@ -301,12 +295,23 @@ body { background: #f8f7f4; }
   }
   var DL_ICON = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v9M4.5 7.5 8 11l3.5-3.5M3 13.5h10"/></svg>';
 
-  function missing(unauth) {
+  function missing(unauth, failed) {
     $('lp-nav').classList.remove('nav--over-hero');
-    $('lp-missing').hidden = false;
     if (unauth) {
-      $('lp-missing-h').textContent = 'Please sign in to view this listing.';
-      $('lp-missing-p').innerHTML = 'Open your <a href="/portal">client portal</a> and request a sign-in link &mdash; it lands you right back here.';
+      JSError.render($('lp-missing'), { code: '401', eyebrow: 'Error 401 &mdash; Sign-in required',
+        title: 'Sign in to view <em>this listing.</em>',
+        text: 'This listing belongs to a client account. Open your client portal and request a sign-in link — it lands you right back here.',
+        actions: [['Client Portal', '/portal', true], ['Back to Home', '/', false]] });
+    } else if (failed) {
+      JSError.render($('lp-missing'), { code: '500', eyebrow: 'Error 500 &mdash; Something went wrong',
+        title: 'That’s on <em>us.</em>',
+        text: 'The listing didn’t load properly just now. Give it another try in a moment — and if it keeps happening, tell Jacob directly.',
+        actions: [['Try Again', 'reload', true], ['Email Jacob', 'mailto:jacxbschrader@gmail.com', false]] });
+    } else {
+      JSError.render($('lp-missing'), { code: '404', eyebrow: 'Error 404 &mdash; Listing not found',
+        title: 'This listing link isn’t <em>valid.</em>',
+        text: 'The link may be incomplete or out of date. Sign in to your client portal to see every listing on your account, or get in touch and I’ll resend it.',
+        actions: [['Client Portal', '/portal', true], ['Get in Touch', 'mailto:jacxbschrader@gmail.com', false]] });
     }
   }
   var apiQ = t ? 't=' + encodeURIComponent(t) : (slug ? 'slug=' + encodeURIComponent(slug) : '');
@@ -315,9 +320,10 @@ body { background: #f8f7f4; }
   try {
     var r = await fetch('/api/delivery?' + apiQ);
     if (r.status === 401) { missing(true); return; }
+    if (r.status >= 500) { missing(false, true); return; }
     if (!r.ok) { missing(); return; }
     d = await r.json();
-  } catch (e) { missing(); return; }
+  } catch (e) { missing(false, true); return; }
 
   // ---- identity for the activity log + POST helper ----
   var ident = t ? { t: t } : { slug: d.slug || slug };

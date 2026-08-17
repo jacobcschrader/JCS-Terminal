@@ -181,15 +181,29 @@ vercel.json                cleanUrls, redirects (/architecture,/films,/design
   everywhere, VideoObjects on services, ImageGallery on project pages),
   sitemap.xml, robots.txt (blocks /admin, /api), OG/Twitter tags, 301s
   from retired URLs. Client pages are noindexed.
-- **Error page (`404.html`, 2026-08-16):** Vercel serves it (status
-  404) for every unknown URL on www and the subdomains — same nav +
-  footer, giant faded serif numeral, eyebrow/headline/actions. One file
-  speaks for several codes: linking `/404?code=401|403|410|500` swaps
-  the copy + CTAs (401/403/410 point at /portal/login, 500 offers Try
-  again + email). Plain 404s also print the URL that was asked for.
-  Noindexed. Note the media host (media.jacobcschrader.com, Cloudflare
-  R2) still shows Cloudflare's stock 404 — Free plan has no Custom
-  Errors rule type; a Snippet could brand it if ever wanted.
+- **Error / fail states — one branded component (2026-08-16):**
+  `.err*` CSS in styles.css + `JSError.render(el, opts)` in site.js
+  (code 401/403/404/410/500 picks default eyebrow/headline/copy/CTAs;
+  any field overridable; `.err--inline` = compact). Used by:
+  · `404.html` — Vercel serves it (status 404) for every unknown URL on
+    www + subdomains; `/404?code=401|403|410|500` shows the variants;
+    plain 404s echo the requested URL. Static markup inside is the no-JS
+    fallback (`html:not(.js)` rules keep it visible).
+  · portal.html — expired/used magic link: /api/portal?login=… now bounces
+    to `/portal?expired=1` and the page renders the 410 block above the
+    sign-in form; API/network failure renders the 500 block (sign-in still
+    offered).
+  · delivery.html — 401 (sign in to view), 404 (link not valid), 500/
+    network ("that's on us" + Try again).
+  · invoice.html — 404 / 500 (page-head hidden, block full-width).
+  · proposal.html — 404 / 500 (page loads /site.js now); the accept form's
+    failure is an inline `.pp-err` line (no more alert()).
+  · project.html — unknown slug → 404 block.
+  Not brandable: media.jacobcschrader.com's stock Cloudflare 404 (Custom
+  Errors + Snippets are Pro-plan features; a Worker in front would cap
+  ALL media at 100k req/day — not worth it) and Vercel's own platform
+  error page for a crashed function (pages catch API 5xx and show the
+  branded 500 block instead).
 
 ---
 
@@ -516,6 +530,15 @@ deleted on remove.
 
 ## 10. Gotchas (learned the hard way)
 
+- **Admin render() must never schedule a loader unconditionally.** Every
+  async loader that ends in `render()` (backupInfo, calExtLoad, dzGcal,
+  lsLoad…) has to be guarded by "already loaded / already busy" state,
+  because render() re-runs the section's view. Settings once scheduled
+  `ADM.backupInfo()` on every render → fetch → render → fetch, redrawing
+  the pane every second and wiping fields mid-typing (fixed 2026-08-16:
+  backup + gcal status are fetched once per visit — `state._lastSection`
+  resets `state.backup`/`state.gcalStatus` on arrival — and repainted
+  from cache on redraws; "Back up now" clears the cache first).
 - **12-function cap** — new admin endpoints go in the [action].js router,
   never as new files under api/.
 - **Env changes need a redeploy** to take effect.

@@ -45,7 +45,8 @@
 .inv-pay .btn { border: 0; cursor: pointer; }
 .inv-pay .note { flex-basis: 100%; text-align: right; font-size: 0.74rem; color: var(--muted); }
 @media print { .inv-pay { display: none; } }
-.inv-missing { text-align: center; padding: 4rem 1rem; }
+/* fail state renders into #inv-missing via JSError (styles.css .err) */
+.inv-missing { min-height: calc(100vh - 6rem); }
 @media (max-width: 520px) {
   .inv-card { padding: 1.5rem 1.2rem; }
   .inv-top { flex-direction: column; }
@@ -103,11 +104,8 @@
     <a class="btn" href="#" onclick="window.print();return false">Print / Save as PDF</a>
   </div>
 
-  <div class="inv-missing" id="inv-missing" hidden>
-    <h1 style="font-family:var(--serif);font-style:italic;font-weight:400;font-size:1.6rem;color:var(--navy)">This invoice link isn't valid.</h1>
-    <p style="font-size:0.85rem;color:var(--muted)">Check the link from your email, or <a href="mailto:jacxbschrader@gmail.com" style="color:var(--navy)">get in touch</a> and I'll resend it.</p>
-  </div>
 </div>
+<div class="inv-missing err" id="inv-missing" hidden></div>
 
 <footer class="footer footer--min">
   <div class="wrap footer__center">
@@ -126,13 +124,27 @@
 (async function () {
   var $ = function (id) { return document.getElementById(id); };
   var t = new URLSearchParams(location.search).get('t');
-  function missing() { $('inv-missing').hidden = false; }
+  function missing(failed) {
+    document.querySelector('.page-head').hidden = true;
+    if (failed) {
+      JSError.render($('inv-missing'), { code: '500', eyebrow: 'Error 500 &mdash; Something went wrong',
+        title: 'That’s on <em>us.</em>',
+        text: 'The invoice didn’t load properly just now. Give it another try in a moment — and if it keeps happening, tell Jacob directly.',
+        actions: [['Try Again', 'reload', true], ['Email Jacob', 'mailto:jacxbschrader@gmail.com', false]], links: false });
+    } else {
+      JSError.render($('inv-missing'), { code: '404', eyebrow: 'Error 404 &mdash; Invoice not found',
+        title: 'This invoice link isn’t <em>valid.</em>',
+        text: 'Check the link in your email — it may have been cut short — or get in touch and I’ll resend it. Every invoice also lives in your client portal.',
+        actions: [['Client Portal', '/portal', true], ['Email Jacob', 'mailto:jacxbschrader@gmail.com', false]], links: false });
+    }
+  }
   function money(n) { return '$' + Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 2 }); }
   function esc(s) { var d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
   if (!t) { missing(); return; }
   try {
     var sid = new URLSearchParams(location.search).get('session_id');
     var r = await fetch('/api/invoice?t=' + encodeURIComponent(t) + (sid ? '&session_id=' + encodeURIComponent(sid) : ''));
+    if (r.status >= 500) { missing(true); return; }
     if (!r.ok) { missing(); return; }
     var d = await r.json();
     if (d.portal_url) { var pl = $('inv-portal-link'); pl.href = d.portal_url; pl.hidden = false; }
@@ -177,7 +189,7 @@
     if (d.paid && new URLSearchParams(location.search).get('paid')) { st.textContent = 'Paid — thank you'; }
     $('inv-card').hidden = false;
     $('inv-print').hidden = false;
-  } catch (e) { missing(); }
+  } catch (e) { missing(true); }
 })();
 </script>
 </body>

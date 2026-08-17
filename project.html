@@ -87,7 +87,11 @@
     root.innerHTML = '<section class="section"><div class="wrap center" style="padding-top:7rem;max-width:600px;margin-inline:auto">'+html+'</div></section>';
   }
   function notFound(){
-    message('<h1 class="h-section">Project not found.</h1><p class="lead" style="margin-top:1rem"><a href="/projects" style="text-decoration:underline;text-underline-offset:5px">Back to projects</a></p>');
+    root.innerHTML = '<div class="err" id="proj-err"></div>';
+    JSError.render(document.getElementById('proj-err'), { code: '404', eyebrow: 'Error 404 &mdash; Project not found',
+      title: 'This project has <em>moved on.</em>',
+      text: 'It may have been renamed or retired from the portfolio. The full body of work is one click away.',
+      actions: [['View the Work', '/projects', true], ['Back to Home', '/', false]] });
   }
 
   // Render the project page from a normalized object {p, prev, next}.

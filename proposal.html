@@ -134,6 +134,9 @@ body { background: var(--paper-warm); color: var(--ink); }
   transition: border-color 0.3s var(--ease), background 0.3s var(--ease); }
 #pp-accept-form input:focus, #pp-accept-form textarea:focus { border-color: var(--navy); background: #fff; }
 #pp-accept-form textarea { min-height: 84px; resize: vertical; line-height: 1.6; }
+#pp-accept-form .pp-err { margin: 14px 0 0; text-align: center; font-family: var(--serif); font-style: italic;
+  font-size: 1.05rem; color: #8a2f2f; line-height: 1.5; }
+#pp-accept-form .pp-err a { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
 #pp-accept-form input.sig { text-align: center; font-family: var(--serif); font-style: italic;
   font-size: 1.3rem; }
 #pp-accept-form small { display: block; font-family: var(--sans); font-size: 0.7rem;
@@ -150,11 +153,7 @@ body { background: var(--paper-warm); color: var(--ink); }
   border: 1px solid rgba(29,77,42,0.25); color: #1d4d2a; font-size: 0.68rem; letter-spacing: 0.18em;
   text-transform: uppercase; font-weight: 600; padding: 0.9rem 1.6rem; font-family: var(--sans); }
 
-.pp-missing { text-align: center; padding: 11rem 1.5rem 6rem; }
-.pp-missing h1 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: 1.8rem;
-  color: var(--navy); margin: 0 0 0.7rem; }
-.pp-missing p { font-size: 0.88rem; color: var(--muted); }
-.pp-missing a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+/* fail state renders into #pp-missing via JSError (styles.css .err) */
 
 .pp-foot { text-align: center; font-family: var(--sans); font-size: 0.66rem; letter-spacing: 0.18em;
   text-transform: uppercase; color: var(--pp-faint); padding: 2.4rem 1rem 3rem;
@@ -284,6 +283,7 @@ body { background: var(--paper-warm); color: var(--ink); }
         <input id="pp-name" class="sig" required autocomplete="name" placeholder="Your full name">
         <small>Typing your name serves as your electronic signature &mdash; it accepts this proposal and the terms above, and reserves the dates.</small>
         <button class="act" type="submit" id="pp-confirm">Accept, Sign &amp; Reserve</button>
+        <p class="pp-err" id="pp-err" hidden role="alert"></p>
       </form>
       <div id="pp-done" hidden style="margin-top:34px">
         <span class="pp-accepted">&#10003;&nbsp; Dates reserved<span id="pp-done-date" style="text-transform:none;letter-spacing:0.04em;font-weight:400"></span></span>
@@ -299,13 +299,10 @@ body { background: var(--paper-warm); color: var(--ink); }
   <p class="pp-foot">JCS &middot; Jacob Schrader &middot; jacobcschrader.com</p>
 </div>
 
-<div class="pp-missing" id="pp-missing" hidden>
-  <h1>This proposal isn&rsquo;t available.</h1>
-  <p>The link may be incomplete or the proposal may have been retired.<br>
-     Reach me at <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> and I&rsquo;ll send a fresh one.</p>
-</div>
+<div class="pp-missing err" id="pp-missing" hidden></div>
 
 <script src="/projects-data.js"></script>
+<script src="/site.js"></script>
 <script>
 (function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -466,7 +463,7 @@ body { background: var(--paper-warm); color: var(--ink); }
     if (name.length < 3) { $('pp-name').style.borderColor = '#c0392b'; bad = true; }
     if (phone.length < 7) { $('pp-phone').style.borderColor = '#c0392b'; bad = true; }
     if (bad) return;
-    var btn = $('pp-confirm'); btn.disabled = true; btn.textContent = 'Reserving…';
+    var btn = $('pp-confirm'); btn.disabled = true; btn.textContent = 'Reserving…'; $('pp-err').hidden = true;
     try {
       var r = await fetch('/api/proposal', {
         method: 'POST',
@@ -481,16 +478,31 @@ body { background: var(--paper-warm); color: var(--ink); }
       showAccepted(j.accepted_at || Date.now());
     } catch (err) {
       btn.disabled = false; btn.textContent = 'Accept, Sign & Reserve';
-      alert('Something went wrong — please try again, or email jacxbschrader@gmail.com.');
+      var pe = $('pp-err');
+      pe.innerHTML = 'That didn’t go through — please try once more, or email <a href="mailto:jacxbschrader@gmail.com">jacxbschrader@gmail.com</a> and I’ll reserve the dates by hand.';
+      pe.hidden = false;
     }
   });
 
   // Load
-  if (!SLUG) { $('pp-missing').hidden = false; return; }
+  function missing(failed) {
+    if (failed) {
+      JSError.render($('pp-missing'), { code: '500', eyebrow: 'Error 500 &mdash; Something went wrong',
+        title: 'That’s on <em>us.</em>',
+        text: 'Your proposal didn’t load properly just now. Give it another try in a moment — and if it keeps happening, tell Jacob directly.',
+        actions: [['Try Again', 'reload', true], ['Email Jacob', 'mailto:jacxbschrader@gmail.com', false]], links: false });
+    } else {
+      JSError.render($('pp-missing'), { code: '404', eyebrow: 'Error 404 &mdash; Proposal not available',
+        title: 'This proposal isn’t <em>available.</em>',
+        text: 'The link may be incomplete, or the proposal may have been retired. Reach out and I’ll send a fresh one.',
+        actions: [['Email Jacob', 'mailto:jacxbschrader@gmail.com', true], ['Back to Home', 'https://www.jacobcschrader.com/', false]], links: false });
+    }
+  }
+  if (!SLUG) { missing(); return; }
   fetch('/api/proposal?slug=' + encodeURIComponent(SLUG) + (location.search.indexOf('preview') > -1 ? '&preview=1' : ''))
-    .then(function (r) { if (!r.ok) throw new Error(); return r.json(); })
+    .then(function (r) { if (r.status >= 500) throw new Error('server'); if (!r.ok) throw new Error('missing'); return r.json(); })
     .then(paint)
-    .catch(function () { $('pp-missing').hidden = false; });
+    .catch(function (e) { missing(!(e && e.message === 'missing')); });   // 404 → not available; anything else → "on us"
 })();
 </script>
 </body>

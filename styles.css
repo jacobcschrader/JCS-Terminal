@@ -998,3 +998,72 @@ html, body { overflow-x: clip; }   /* nothing may cause sideways scroll */
 .svcx__media img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4 / 3; display: block; }
 .svc-tags { display: flex; flex-wrap: wrap; gap: 0.5rem; }
 .svc-tags span { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 500; color: var(--ink); border: 1px solid var(--line); padding: 0.45rem 0.85rem; white-space: nowrap; }
+
+/* ---------- Error / fail states (shared) -----------------------------
+   One visual language for every "something's not right" moment:
+   404.html (Vercel serves it for unknown URLs) AND the in-page fail
+   states of portal / listing / invoice / proposal / project pages.
+   Rendered by JSError.render() in site.js — see there for the copy.
+   .err            full-page block (min viewport height, centered)
+   .err--inline    compact block inside another page (portal + login)
+   ---------------------------------------------------------------------- */
+.err { display: flex; align-items: safe center; min-height: 100vh;
+       padding: clamp(8.5rem, 18vh, 12rem) 0 clamp(4rem, 8vw, 6rem);
+       position: relative; overflow-x: clip; }
+.err--inline { min-height: 0; padding: clamp(6.5rem, 12vh, 8rem) 0 1rem; }
+.err .wrap { position: relative; width: 100%; }
+.wrap .err > .wrap { padding: 0; }   /* rendered inside a page's own .wrap → no double gutter */
+.err__code {
+  position: absolute; right: calc(-1 * var(--gut) * 0.2); top: 50%;
+  transform: translateY(-56%);
+  font-family: var(--serif); font-weight: 300; font-style: italic;
+  font-size: clamp(11rem, 30vw, 27rem); line-height: 1; letter-spacing: -0.04em;
+  color: var(--navy); opacity: 0; pointer-events: none; user-select: none; z-index: 0;
+  transition: opacity 1.2s var(--ease) 0.2s;
+}
+.err--inline .err__code { font-size: clamp(8rem, 18vw, 14rem); transform: translateY(-50%); right: 0.25em; }
+.err--inline { overflow-x: visible; }   /* lives inside a page .wrap — nothing to clip */
+.err.in .err__code { opacity: 0.045; }
+.err__body { position: relative; z-index: 1; max-width: 46rem; }
+.err__eyebrow { display: inline-flex; align-items: center; gap: 0.9rem; }
+.err__eyebrow::before { content: ""; width: 2.25rem; height: 1px; background: currentColor; opacity: 0.55; }
+.err__title { margin: 1.4rem 0 1.25rem; font-size: clamp(2.7rem, 5.5vw, 4.5rem); }
+.err--inline .err__title { font-size: clamp(2.2rem, 4.2vw, 3.4rem); margin: 1.1rem 0 1rem; }
+.err__title em { font-style: italic; font-weight: 300; }
+.err__text { font-family: var(--serif); font-weight: 300; font-size: 1.28rem; line-height: 1.5;
+             color: var(--muted); max-width: 34rem; text-wrap: pretty; }
+.err__text a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
+.err__path { margin-top: 1rem; font-size: 0.72rem; letter-spacing: 0.06em; color: var(--muted);
+             opacity: 0.8; word-break: break-all; }
+.err__path code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 0.72rem; }
+.err__actions { display: flex; flex-wrap: wrap; gap: 0.75rem 1rem; margin-top: 2.4rem; align-items: center; }
+.err__links { display: flex; flex-wrap: wrap; gap: 0.6rem 1.9rem; margin-top: 2.6rem; padding-top: 1.6rem;
+              border-top: 1px solid var(--line-soft); }
+.err__links a { font-size: 0.6875rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500;
+                color: var(--ink); position: relative; padding: 2px 0; }
+.err__links a::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 0; height: 1px;
+                       background: var(--navy); transition: width 0.35s var(--ease); }
+.err__links a:hover::after { width: 100%; }
+/* staggered entrance — mirrors .reveal timing */
+.err__body > * { opacity: 0; transform: translateY(14px);
+                 transition: opacity 0.6s var(--ease), transform 0.65s var(--ease); }
+.err.in .err__body > * { opacity: 1; transform: none; }
+.err.in .err__body > *:nth-child(2) { transition-delay: 0.08s; }
+.err.in .err__body > *:nth-child(3) { transition-delay: 0.16s; }
+.err.in .err__body > *:nth-child(4) { transition-delay: 0.22s; }
+.err.in .err__body > *:nth-child(5) { transition-delay: 0.3s; }
+.err.in .err__body > *:nth-child(6) { transition-delay: 0.38s; }
+@media (prefers-reduced-motion: reduce) {
+  .err__body > *, .err__code { transition: none; opacity: 1; transform: none; }
+  .err__code, .err.in .err__code { opacity: 0.045; }
+}
+/* no-JS: site.js never adds .js/.in, so show the static fallback as-is */
+html:not(.js) .err__body > * { opacity: 1; transform: none; }
+html:not(.js) .err__code { opacity: 0.045; }
+@media (max-width: 720px) {
+  .err { padding-top: 7.5rem; align-items: flex-start; }
+  .err--inline { padding-top: 6rem; }
+  .err__code { right: -0.4rem; top: auto; bottom: -1.2rem; transform: none; font-size: 9.5rem; }
+  .err--inline .err__code { font-size: 7rem; bottom: -0.6rem; right: 0; }
+  .err__text { font-size: 1.15rem; }
+}

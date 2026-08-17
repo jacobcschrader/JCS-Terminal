@@ -86,7 +86,9 @@ module.exports = async function handler(req, res) {
     // ---- sign in via emailed link → session cookie + redirect --------
     if (q.login) {
       const cid = verifyToken(q.login, "portal-login");
-      if (!cid) { res.statusCode = 302; res.setHeader("Location", "/portal"); res.end(); return; }
+      // expired / tampered link → the portal shows its branded "link
+      // expired" block above the sign-in form (portal.html reads ?expired)
+      if (!cid) { res.statusCode = 302; res.setHeader("Location", "/portal?expired=1"); res.end(); return; }
       const session = makeToken(cid, "portal-session", 30 * DAY);
       res.setHeader("Set-Cookie",
         `${COOKIE}=${session}; Max-Age=${30 * DAY}; Path=/; HttpOnly; Secure; SameSite=Lax`);
