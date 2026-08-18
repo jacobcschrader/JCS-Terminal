@@ -1768,3 +1768,35 @@ vars exist.
   phones-in-landscape, stacked ≤520px. Social Reels card now links to
   #reels (was #films).
 
+## 2026-08-16 — Blob store blocked → Lahontan media moved to R2; project URLs unified
+
+- **Incident:** Vercel blocked the Blob store `jcs-website-media`
+  ("Your store is blocked", 403) after the Hobby "Blob Advanced
+  Operations" cap (2K/mo) was exceeded 20× — the Settings render loop
+  (fixed earlier today) re-listed the backups prefix about once a second
+  while the admin tab sat on Settings. Only 8225 Lahontan Drive's media
+  was on Blob (everything else is repo-hosted), so the home Work grid,
+  the home "Approach" photo and the Lahontan project page lost images.
+- **Interim fix (live now):** the 9 Lahontan originals present on the
+  Mac (6,14,16,17,26,36,59,64,68) resized to 2400px and uploaded to R2 at
+  `site/8225lahontandrive/…` through the admin uploader; site_projects
+  row repointed (gallery = those 9, cover = -64 twilight). Home
+  "Approach" image is now the repo asset images/approach-lahontan-
+  twilight.jpg. Full original Blob URL list saved to
+  docs/blob-recovery-8225lahontandrive.json.
+- **To restore the other 28 once the store unblocks** (Hobby cycle
+  resets Aug 17; or upgrade to Pro): in the admin tab's console, for
+  each URL in that JSON that isn't among the 9: `fetch(blobUrl)` →
+  blob → `fetch('/api/admin/upload',{method:'POST',body:{action:'presign',
+  path:'site/8225lahontandrive/<name>.jpg',type:'image/jpeg'}})` → PUT
+  the blob to `url` → collect `publicUrl`; then PUT
+  `/api/admin/siteprojects` with the full 37-URL gallery in the original
+  order and cover = the -67 URL. (Blob has CORS `*`, R2 accepts the site
+  origin — the whole thing runs in the browser.)
+- **Project URLs:** every project is now `/project/<slug>` — vercel.json
+  catch-all `/project/:slug → /project` for CMS slugs (static share
+  pages still win for repo projects); project.html reads the slug from
+  the path, tidies old `?slug=` links via replaceState and sets canonical
+  + og:url; site.js / projects-data.js / admin hint updated; the share-
+  page generator keeps the catch-all rewrite.
+

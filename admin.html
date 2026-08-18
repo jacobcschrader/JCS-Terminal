@@ -2171,7 +2171,7 @@ select.lx-input { padding-right: 2rem; }
       '<form class="adm-card" onsubmit="ADM.spSave(event)" style="max-width:860px">' +
         '<div class="adm-form">' +
         '<div class="adm-field full"><label for="sp-title">Property address / title *</label><input id="sp-title" required value="' + esc(p.title) + '" oninput="ADM.spTitle(this.value)"></div>' +
-        fld('sp-slug', 'URL slug <small style="text-transform:none;letter-spacing:0">(jacobcschrader.com/project?slug=&hellip;)</small>', '<input id="sp-slug" value="' + esc(p.slug) + '" oninput="state.sp.slugTouched=true;state.sp.slug=this.value">') +
+        fld('sp-slug', 'URL slug <small style="text-transform:none;letter-spacing:0">(jacobcschrader.com/project/&hellip;)</small>', '<input id="sp-slug" value="' + esc(p.slug) + '" oninput="state.sp.slugTouched=true;state.sp.slug=this.value">') +
         fld('sp-location', 'Location', '<input id="sp-location" placeholder="Truckee, CA" value="' + esc(p.location) + '">') +
         fld('sp-year', 'Year', '<input id="sp-year" value="' + esc(p.year) + '">') +
         fld('sp-price', 'Price', '<input id="sp-price" placeholder="$6,995,000" value="' + esc(p.price) + '">') +

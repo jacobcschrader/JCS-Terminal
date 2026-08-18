@@ -110,7 +110,8 @@ proposal.html              Private client proposal page — canonical link
                            contract: phone, access, notes, terms + typed
                            e-signature; flips a linked 'pending' project
                            to Upcoming.
-project.html               Dynamic project page (renders ?slug=…)
+project.html               Dynamic project page — /project/<slug> for CMS
+                           projects (vercel.json catch-all; ?slug= still works)
 project/<slug>.html        Static share pages (generated — see §4)
 portal.html                Client portal, site chrome: "Client Portal /
                            Your listings." + email, Admin → (if admin
@@ -228,20 +229,42 @@ vercel.json                cleanUrls, redirects (/architecture,/films,/design
    `node tools/generate-share-pages.mjs` to rebuild `project/<slug>.html`
    (bakes OG tags; `$` in prices is escaped via `rep()` — don't remove).
 2. **CMS projects** — created in Admin → Portfolio, rows in
-   `site_projects` (Neon), media in the **public** Vercel Blob store
-   `jcs-website-media`. Published instantly (API is `no-store`).
+   `site_projects` (Neon), media uploaded browser→**Cloudflare R2**
+   (`site/<slug>/…` under media.jacobcschrader.com — ADM.putFile picks R2
+   whenever the R2 env is set; before 2026-08-16 it was the Vercel Blob
+   store `jcs-website-media`). Published instantly (API is `no-store`).
 
 `projects-data.js` defines `window.PROJECTS_READY`: fetches
 `/api/site-projects`, prepends CMS projects, dedupes by slug (CMS wins).
 Home grid (site.js → #sw-grid), projects.html and project.html all await
-it. CMS projects use `/project?slug=…` URLs; repo ones keep their static
-`/project/<slug>` pages. All 10 current projects live in the CMS
-(the 9 originals reference their repo media via absolute URLs).
+it. **One URL shape for every project (2026-08-16): `/project/<slug>`.**
+Repo projects are static share pages (`project/<slug>.html`); any other
+slug hits the vercel.json catch-all rewrite `/project/:slug → /project`
+(the dynamic page reads the slug from the path; old `?slug=` links still
+resolve and are tidied with replaceState; canonical/og:url are set per
+project). The share-page generator keeps that catch-all when it prunes
+old per-project rewrites. All 10 current projects live in the CMS (the
+9 originals reference their repo media via absolute URLs).
 
 **Admin → Portfolio:** drag cards to reorder the whole site lineup
 (first 6 = homepage); editor has cover/film tiles + drag-sortable gallery
-(4-parallel browser→Blob uploads, client-side resize to 2400px), draft
-toggle, delete (cleans Blob media).
+(4-parallel browser→R2 uploads, client-side resize to 2400px), draft
+toggle, delete (cleans R2/Blob media via the storage switchboard).
+
+**Blob incident (2026-08-16):** the Hobby "Blob Advanced Operations"
+cap (2K/month) was blown by an admin render loop that re-listed the
+backups store once a second → Vercel blocked `jcs-website-media`
+("Your store is blocked", 403 on every public URL) → the only media
+still on Blob, 8225 Lahontan Drive (cover + 37 gallery photos), went
+dark on the home grid + its project page. Interim fix: 9 originals found
+on Jacob's Mac were uploaded to R2 (`site/8225lahontandrive/`) and the
+row repointed (cover = -64); the home "Approach" photo moved into the
+repo (images/approach-lahontan-twilight.jpg). The full Blob URL list is
+saved in `docs/blob-recovery-8225lahontandrive.json` — once the store is
+unblocked (Hobby cycle reset, or a Pro upgrade) copy the remaining 28
+into R2 and restore the gallery (recipe in that file's README section
+of docs/CHANGELOG 2026-08-16). Nothing else on the site depends on Blob
+except the nightly encrypted backups.
 
 ---
 
@@ -537,8 +560,8 @@ DATABASE_URL (Neon)          RESEND_API_KEY
 ADMIN_EMAIL                  ADMIN_PASSWORD_HASH
 SESSION_SECRET               CONTACT_TO (default jacxbschrader@gmail.com)
 BLOB_READ_WRITE_TOKEN + BLOB_STORE_ID + BLOB_WEBHOOK_PUBLIC_KEY
-  (from Blob store "jcs-website-media" — must be the PUBLIC store;
-   private stores 503 client uploads)
+  (from Blob store "jcs-website-media" — public store; since 2026-08-16
+   only the nightly backups use it, all media goes to R2)
 R2_ACCOUNT_ID + R2_ACCESS_KEY_ID + R2_SECRET_ACCESS_KEY + R2_BUCKET (jcs-media)
   + R2_PUBLIC_URL (https://media.jacobcschrader.com — the bucket's custom
     domain; the r2.dev dev URL is rate-limited, don't go back to it)

@@ -14,7 +14,8 @@
 //  cleanUrls; static files always win).
 //
 //  Drafts (draft: true) and projects without media are skipped —
-//  drafts stay reachable at /project?slug=<slug> (the dynamic page).
+//  drafts stay reachable at /project/<slug> (the dynamic page, via the
+//  vercel.json catch-all rewrite).
 // =====================================================================
 import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { dirname, join } from "node:path";
@@ -96,7 +97,9 @@ for (const p of projects) {
 const vercelPath = join(root, "vercel.json");
 const vercel = JSON.parse(readFileSync(vercelPath, "utf8"));
 if (Array.isArray(vercel.rewrites)) {
-  vercel.rewrites = vercel.rewrites.filter((r) => !String(r.source || "").startsWith("/project/"));
+  // keep the dynamic catch-all (/project/:slug → /project) — only the old
+  // per-project rewrites are pruned
+  vercel.rewrites = vercel.rewrites.filter((r) => !String(r.source || "").startsWith("/project/") || r.destination === "/project");
   if (!vercel.rewrites.length) delete vercel.rewrites;
 }
 writeFileSync(vercelPath, JSON.stringify(vercel, null, 2) + "\n");

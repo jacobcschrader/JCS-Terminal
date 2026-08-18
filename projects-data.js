@@ -22,7 +22,7 @@
 //  will show elegant placeholders until you add it.
 //
 //  draft: true  hides a project from the home carousel and the projects
-//  grid (it stays reachable at its direct /project?slug=… URL). Remove
+//  grid (it stays reachable at its direct /project/<slug> URL). Remove
 //  the flag when the real media + text are in.
 //
 //  TIP: to add a project, duplicate a project folder, swap in the new
@@ -91,7 +91,7 @@ window.PROJECTS = window.PROJECTS_DATA.filter(function (p) { return !p.draft; })
 //  (home grid, projects page, project detail) awaits PROJECTS_READY,
 //  so new work published from /admin appears with no deploy.
 //  Static project pages keep their /project/<slug> URLs; CMS projects
-//  render on the dynamic page at /project?slug=<slug>.
+//  render on the dynamic page at /project/<slug> (vercel.json rewrite).
 // ---------------------------------------------------------------------
 window.PROJECTS_READY = (function () {
   return fetch("/api/site-projects")
@@ -108,7 +108,7 @@ window.PROJECTS_READY = (function () {
       window.PROJECTS_DATA = dbProjects.concat(statics);
       window.PROJECTS = window.PROJECTS_DATA.filter(function (p) { return !p.draft; }).map(function (p) {
         var c = toCard(p);
-        if (p.cms) c.file = "/project?slug=" + encodeURIComponent(p.slug);
+        if (p.cms) c.file = "/project/" + encodeURIComponent(p.slug);   // dynamic page via vercel.json rewrite
         return c;
       });
     })

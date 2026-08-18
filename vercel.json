@@ -32,6 +32,10 @@
     {
       "source": "/portal/:slug([a-z0-9-]+)",
       "destination": "/delivery"
+    },
+    {
+      "source": "/project/:slug([a-z0-9-]+)",
+      "destination": "/project"
     }
   ]
 }

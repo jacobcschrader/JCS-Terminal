@@ -80,8 +80,12 @@
   var root = document.getElementById("proj");
   function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g,function(c){return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c];}); }
   function qs(k){ return new URLSearchParams(location.search).get(k); }
-  function projUrl(p){ return p.cms ? '/project?slug='+encodeURIComponent(p.slug) : '/project/'+encodeURIComponent(p.slug); }
-  var slug = qs("slug");
+  function projUrl(p){ return '/project/'+encodeURIComponent(p.slug); }
+  // Every project lives at /project/<slug> (static share page or this
+  // dynamic page via the vercel.json rewrite). Old ?slug= links still
+  // work — we read them, then tidy the address bar to the canonical shape.
+  var slug = qs("slug") || (function () { var m = location.pathname.match(/^\/project\/([^\/?#]+)/); return m ? decodeURIComponent(m[1]) : null; })();
+  if (qs("slug") && slug && history.replaceState) history.replaceState(null, "", "/project/" + encodeURIComponent(slug));
 
   function message(html){
     root.innerHTML = '<section class="section"><div class="wrap center" style="padding-top:7rem;max-width:600px;margin-inline:auto">'+html+'</div></section>';
@@ -97,6 +101,9 @@
   // Render the project page from a normalized object {p, prev, next}.
   function renderProject(p, prev, next) {
     document.title = (p.title || "Project") + " — Jacob Schrader";
+    var canon = "https://www.jacobcschrader.com/project/" + encodeURIComponent(p.slug);
+    var lc = document.querySelector('link[rel="canonical"]'); if (lc) lc.href = canon;
+    var og = document.querySelector('meta[property="og:url"]'); if (og) og.content = canon;
 
     // Hero: cover image + black overlay + project name (like the home hero)
     var hero = '<header class="proj-hero">'+
