@@ -612,6 +612,7 @@ select.lx-input { padding-right: 2rem; }
       <a data-r="dash" class="on"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Dashboard</a>
       <a data-r="requests"><svg viewBox="0 0 24 24"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>Requests<span class="adm-count adm-hidden" id="req-badge"></span></a>
       <a data-r="pipeline"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Projects</a>
+      <a data-r="deliveries"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="14" rx="2"/><path d="M12 7v6"/><path d="m9 11 3 3 3-3"/><path d="M3 21h18"/></svg>Deliveries</a>
       <a data-r="calendar"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Calendar</a>
       <a data-r="proposals"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Proposals</a>
       <a data-r="clients"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Clients</a>
@@ -669,7 +670,7 @@ select.lx-input { padding-right: 2rem; }
               licTab: 'active', licProp: '', licResults: null, licSearching: false,
               stageFilter: 'active', ls: null, downloads: [], dlWeek: 0,
               billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1,
-              testimonials: [], calMonth: '', fDrag: null, env: {}, calExt: {}, calBusy: {}, backup: null };
+              testimonials: [], calMonth: '', fDrag: null, env: {}, calExt: {}, calBusy: {}, backup: null, dl: null, dlBusy: false };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
   var ADDONS = {
     'Photography': ['Flash / Ambient Photography','Aerial Photography','Vertical / Vignette Images','Twilight Photography','Virtual Staging','Virtual Twilight'],
@@ -2479,6 +2480,48 @@ select.lx-input { padding-right: 2rem; }
       '</div>';
   }
 
+  // ---- Deliveries: every listing's media + download state in one table ----
+  function vDeliveries() {
+    var rows = state.bookings.filter(function (b) {
+      return b.status !== 'canceled' && b.status !== 'pending' && (Number(b.files_count) > 0 || b.delivery_sent_at);
+    }).sort(function (a, b) {
+      return String(b.delivery_sent_at || b.shoot_date || '').localeCompare(String(a.delivery_sent_at || a.shoot_date || ''));
+    });
+    // download activity, grouped per listing (loaded async — dlLoad)
+    var agg = {};
+    ((state.dl || {}).events || []).forEach(function (e) {
+      if (e.kind === 'view') return;
+      var a = agg[e.booking_id] = agg[e.booking_id] || { n: 0, last: '' };
+      a.n++; if (!a.last || e.created_at > a.last) a.last = e.created_at;
+    });
+    var week = (state.dl || {}).week;
+    return head('Deliveries', '<span class="mut" style="font-size:0.74rem">' +
+        (state.dl ? fileWord(week) .replace(' file', ' download').replace(' files', ' downloads') + ' in the last 7 days' : 'Loading activity&hellip;') + '</span>') +
+      (rows.length
+        ? '<div class="adm-card adm-card--flush"><table class="adm-table"><tr><th>Listing</th><th>Client</th><th class="hide-m">Files</th><th>Delivered</th><th class="hide-m">Downloads</th><th>Invoice</th><th></th></tr>' +
+          rows.map(function (b) {
+            var a = agg[b.id];
+            var inv = invoiceState(b);
+            var invHtml = inv === 'paid' ? '<span class="adm-badge adm-badge--paid">Paid</span>'
+              : inv === 'unpaid' ? '<span class="adm-badge adm-badge--delivered">Unpaid</span>'
+              : '<span class="mut">—</span>';
+            var locked = !!b.downloads_locked;
+            return '<tr>' +
+              '<td><a onclick="ADM.go(\'project/' + b.id + '\')" style="cursor:pointer"><b>' + esc(b.title) + '</b></a>' +
+                (b.location ? '<br><small class="mut">' + esc(b.location) + '</small>' : '') + '</td>' +
+              '<td>' + esc(b.client_name || '—') + '</td>' +
+              '<td class="hide-m">' + fileWord(Number(b.files_count) || 0) + '</td>' +
+              '<td>' + (b.delivery_sent_at ? stamp(b.delivery_sent_at).slice(0, 10) : '<span class="mut">not sent</span>') + '</td>' +
+              '<td class="hide-m">' + (state.dl ? (a ? a.n + ' &middot; <span class="mut">last ' + stamp(a.last).slice(0, 10) + '</span>' : '<span class="mut">none yet</span>') : '<span class="mut">&hellip;</span>') + '</td>' +
+              '<td>' + invHtml + '</td>' +
+              '<td style="white-space:nowrap;text-align:right">' +
+                (b.delivery_slug ? '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/portal/' + esc(b.delivery_slug) + '" target="_blank" rel="noopener">Open &nearr;</a> ' : '') +
+                '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsLock(' + b.id + ',' + (locked ? 'false' : 'true') + ')">' + (locked ? 'Unlock' : 'Lock') + '</button>' +
+              '</td></tr>';
+          }).join('') + '</table></div>'
+        : '<div class="adm-card"><p class="adm-empty">No deliveries yet &mdash; upload media on a project page and it shows up here.</p></div>');
+  }
+
   // ---- Settings: collapsible sections with a status line each ----------
   // Open/closed is remembered per section (localStorage) so a save →
   // render() lands you back where you were. Template rows remember for
@@ -2768,9 +2811,9 @@ select.lx-input { padding-right: 2rem; }
     var r = route(), m = $('main');
     var section = r.split('/')[0];
     // legacy routes from older emails/bookmarks
-    if (section === 'deliveries') { location.replace('#pipeline'); return; }
+
     if (section === 'delivery') { location.replace('#project/' + (r.split('/')[1] || '')); return; }
-    var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline', calendar:'calendar',
+    var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline', deliveries:'deliveries', calendar:'calendar',
                  proposals:'proposals', proposal:'proposals', licensing:'licensing', billing:'billing',
                  clients:'clients', client:'clients', portfolio:'portfolio', siteproject:'portfolio', settings:'settings' }[section] || 'dash';
     document.querySelectorAll('#nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.r === owns); });
@@ -2796,6 +2839,7 @@ select.lx-input { padding-right: 2rem; }
     else if (section === 'client') m.innerHTML = vClientDetail(r.split('/')[1]);
     else if (section === 'portfolio') { state.sp = null; m.innerHTML = vPortfolio(); }
     else if (section === 'siteproject') m.innerHTML = vSiteProject(r.split('/')[1]);
+    else if (section === 'deliveries') { m.innerHTML = vDeliveries(); if (!state.dl && !state.dlBusy) ADM.dlLoad(); }
     else if (section === 'settings') {
       // Fresh data when ARRIVING at Settings; redraws while here reuse the
       // cache. (backupInfo() re-renders when it lands — fetching on every
@@ -2840,6 +2884,12 @@ select.lx-input { padding-right: 2rem; }
       if ($('s-archive')) body.archive_months = $('s-archive').value.trim();
       try { var j = await api('settings', 'PUT', body); state.settings = j.settings || state.settings; toast('Saved.'); }
       catch (e) { toast(friendly(e), 'err'); }
+    },
+    dlLoad: async function () {
+      if (state.dlBusy) return; state.dlBusy = true;
+      try { state.dl = await api('downloads?limit=300'); } catch (e) { state.dl = { events: [], week: 0 }; }
+      state.dlBusy = false;
+      if (route() === 'deliveries') render();
     },
     backupInfo: async function () {
       // one fetch, then a single redraw of Settings (render() will not schedule

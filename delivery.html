@@ -27,7 +27,20 @@ body { background: #f8f7f4; }
 .lp-hero__img { position: absolute; inset: 0; background-size: cover; background-position: center; }
 .lp-hero::after { content: ""; position: absolute; inset: 0;
   background: linear-gradient(180deg, rgba(6,13,24,0.42) 0%, rgba(6,13,24,0.18) 40%, rgba(6,13,24,0.5) 100%); }
-.lp-hero__in { position: relative; z-index: 1; padding: 7rem clamp(1.25rem, 5vw, 2rem) 5rem; }
+.lp-hero__in { position: relative; z-index: 1; padding: 7rem clamp(1.25rem, 5vw, 2rem) 5rem;
+  transition: opacity 0.5s var(--ease); }
+/* film hero — the property film IS the hero when one exists */
+.lp-hero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.lp-hero__play { position: absolute; z-index: 2; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  width: 76px; height: 76px; border-radius: 50%; border: 0; cursor: pointer;
+  background: rgba(255,255,255,0.92); box-shadow: 0 10px 40px rgba(6,13,24,0.35);
+  display: flex; align-items: center; justify-content: center; transition: transform 0.25s var(--ease), background 0.25s var(--ease); }
+.lp-hero__play:hover { transform: translate(-50%, -50%) scale(1.06); background: #fff; }
+.lp-hero__play span { display: block; width: 0; height: 0; margin-left: 5px;
+  border-style: solid; border-width: 11px 0 11px 19px; border-color: transparent transparent transparent var(--navy); }
+.lp-hero.playing::after, .lp-hero.playing .lp-hero__in, .lp-hero.playing .lp-hero__img { opacity: 0; pointer-events: none; }
+.lp-hero.playing { cursor: default; }
+.lp-hero::after, .lp-hero__img { transition: opacity 0.5s var(--ease); }
 .lp-hero h1 { font-family: var(--serif); font-weight: 400; color: #fff; letter-spacing: -0.005em;
   font-size: clamp(2.4rem, 6.2vw, 4.4rem); line-height: 1.05; margin: 0 0 1rem;
   font-variant-numeric: lining-nums; font-feature-settings: 'lnum' 1; text-shadow: 0 2px 30px rgba(0,0,0,0.25); }
@@ -46,10 +59,20 @@ body { background: #f8f7f4; }
 .lp-pillbtn:hover { border-color: rgba(15,34,64,0.5); color: var(--navy); }
 .lp-pillbtn[disabled] { opacity: 0.45; cursor: default; }
 .lp-pillbtn.busy { border-color: var(--navy); color: var(--navy); }
+.lp-paybtn { background: var(--navy); border-color: var(--navy); color: #fff; text-decoration: none; display: inline-flex; align-items: center; }
+.lp-paybtn:hover { background: var(--navy-deep); color: #fff; border-color: var(--navy-deep); }
 .lp-state { font-size: 0.54rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; padding: 0.55rem 1rem; border-radius: 999px; }
 .lp-state--ok { background: #e6f0e8; color: #2f6b3f; }
 .lp-state--locked { background: #f5e8e8; color: #a03a3a; }
 .lp-bundles { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: clamp(1.8rem, 4vw, 2.6rem); }
+/* custom links — their own row of proper buttons above the films;
+   multiples sit side by side and wrap on small screens */
+.lp-links { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: -0.9rem 0 clamp(1.8rem, 4vw, 2.6rem); }
+.lp-links:empty { display: none; }
+.lp-linkbtn { font-family: var(--sans); font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600;
+  color: var(--navy); border: 1px solid var(--navy); background: #fff; padding: 0.85rem 1.5rem; text-decoration: none;
+  display: inline-flex; align-items: center; gap: 0.55rem; transition: background 0.25s var(--ease), color 0.25s var(--ease); }
+.lp-linkbtn:hover { background: var(--navy); color: #fff; }
 .lp-lockmsg { font-size: 0.85rem; color: var(--muted); background: #fff; border: 1px solid var(--line); padding: 1rem 1.2rem; margin-bottom: 2rem; line-height: 1.7; }
 .lp-lockmsg a { color: var(--navy); text-decoration: underline; text-underline-offset: 3px; }
 .lp-lbl { font-size: 0.56rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 0.75rem; }
@@ -153,6 +176,8 @@ body { background: #f8f7f4; }
 
 <header class="lp-hero" id="lp-hero" hidden>
   <div class="lp-hero__img" id="lp-hero-img"></div>
+  <video id="lp-hero-vid" playsinline preload="none" hidden></video>
+  <button class="lp-hero__play" id="lp-hero-play" hidden aria-label="Play the property film"><span></span></button>
   <div class="lp-hero__in">
     <h1 id="lp-title"></h1>
     <div class="sub" id="lp-sub"></div>
@@ -165,9 +190,11 @@ body { background: #f8f7f4; }
     <a class="lp-back" id="lp-back" href="/portal">&larr; All listings</a>
     <span class="grow"></span>
     <button class="lp-pillbtn" id="lp-share" hidden>Share preview &nearr;</button>
+    <a class="lp-pillbtn lp-paybtn" id="lp-pay" hidden></a>
     <span class="lp-state" id="lp-state"></span>
   </div>
   <div class="lp-bundles" id="lp-bundles"></div>
+  <div class="lp-links" id="lp-links"></div>
   <div class="lp-lockmsg" id="lp-lockmsg" hidden></div>
 
   <div class="lp-sec" id="lp-filmsec" hidden>
@@ -345,13 +372,41 @@ body { background: #f8f7f4; }
   var heroImg = d.cover_url || (photos[0] && (photos[0].web || photos[0].thumb)) || (films[0] && films[0].thumb) || '';
   if (heroImg) $('lp-hero-img').style.backgroundImage = 'url("' + heroImg.replace(/"/g, '%22') + '")';
   else { $('lp-hero').classList.add('lp-hero--short'); $('lp-soon').hidden = false; }
+  // when the listing has a film, the film IS the hero: poster stays
+  // until the client presses play (sound on, native controls)
+  var heroFilm = films[0] && films[0].url;
+  if (heroFilm) {
+    var hv = $('lp-hero-vid'), hp = $('lp-hero-play'), hero = $('lp-hero');
+    hv.src = heroFilm;
+    if (heroImg) hv.poster = heroImg;
+    hv.hidden = false; hp.hidden = false;
+    hp.addEventListener('click', function () {
+      hero.classList.add('playing');
+      hp.hidden = true;
+      hv.controls = true; hv.muted = false;
+      var pr = hv.play(); if (pr && pr.catch) pr.catch(function () {});
+    });
+    hv.addEventListener('ended', function () {
+      hero.classList.remove('playing');
+      hv.controls = false;
+      hp.hidden = false;
+    });
+  }
   $('lp-hero').hidden = false;
   $('lp-body').hidden = false;
 
   // ---- top row: state + share ----
   var locked = !!d.locked;
   var st = $('lp-state');
-  if (locked) { st.className = 'lp-state lp-state--locked'; st.textContent = 'Downloads locked'; }
+  if (d.invoice && !d.invoice.paid) {
+    // unpaid invoice: this slot IS the invoice link until it's settled
+    var pay = $('lp-pay');
+    pay.href = d.invoice.url;
+    pay.innerHTML = 'Pay invoice ' + esc(d.invoice.number) + ' &mdash; ' + esc(money(d.invoice.total)) + ' &rarr;';
+    pay.hidden = false;
+    if (locked) { st.className = 'lp-state lp-state--locked'; st.textContent = 'Downloads locked'; }
+    else st.hidden = true;
+  } else if (locked) { st.className = 'lp-state lp-state--locked'; st.textContent = 'Downloads locked'; }
   else { st.className = 'lp-state lp-state--ok'; st.textContent = d.paid ? 'Paid — downloads unlocked' : 'Downloads unlocked'; }
   if (d.share_url) {
     var sh = $('lp-share'); sh.hidden = false;
@@ -387,9 +442,10 @@ body { background: #f8f7f4; }
       bundle(photos.map(function (f) { return { name: f.name.replace(/\.[^.]+$/, '') + '.jpg', url: f.web || f.url }; }), 'mls-2048px', bMls); log('mls');
     });
   }
+  // custom links get their own row above the films — side by side
   (d.links || []).forEach(function (l) {
-    var a = document.createElement('a'); a.className = 'lp-pillbtn'; a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
-    a.innerHTML = esc(l.label || 'View') + ' &nearr;'; bundles.appendChild(a);
+    var a = document.createElement('a'); a.className = 'lp-linkbtn'; a.href = l.url; a.target = '_blank'; a.rel = 'noopener';
+    a.innerHTML = esc(l.label || 'View') + ' <span aria-hidden="true">&nearr;</span>'; $('lp-links').appendChild(a);
   });
   if (archivedN && !locked) {
     var note = document.createElement('div'); note.className = 'lp-lockmsg';

@@ -46,6 +46,12 @@ body { background: #f8f7f4; }
   background: linear-gradient(160deg, #efece5 0%, #e6e2d8 100%); }
 .pt-card__ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.6s var(--ease); }
 .pt-card:hover .pt-card__ph img { transform: scale(1.03); }
+/* film-only listing: quiet play glyph on the placeholder (reference portal) */
+.pt-card__play { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.pt-card__play i { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,0.9);
+  box-shadow: 0 6px 24px rgba(15,34,64,0.16); display: flex; align-items: center; justify-content: center; }
+.pt-card__play i::after { content: ""; display: block; width: 0; height: 0; margin-left: 4px;
+  border-style: solid; border-width: 8px 0 8px 14px; border-color: transparent transparent transparent var(--navy); }
 .pt-card__soon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   font-size: 0.56rem; letter-spacing: 0.24em; text-transform: uppercase; font-weight: 600; color: #8b8a83; }
 .pt-pill { position: absolute; top: 0.7rem; right: 0.7rem; font-size: 0.5rem; letter-spacing: 0.2em; text-transform: uppercase;
@@ -277,7 +283,9 @@ body { background: #f8f7f4; }
       var href = p.slug ? '/portal/' + p.slug : '#';
       return '<a class="pt-card" href="' + esc(href) + '">' +
         '<div class="pt-card__ph">' +
-          (p.cover ? '<img loading="lazy" src="' + esc(p.cover) + '" alt="">' : '<span class="pt-card__soon">Gallery coming soon</span>') +
+          (p.cover ? '<img loading="lazy" src="' + esc(p.cover) + '" alt="">'
+            : p.films ? '<span class="pt-card__play"><i></i></span>'
+            : '<span class="pt-card__soon">Gallery coming soon</span>') +
           pill(p) +
         '</div>' +
         '<div class="pt-card__body"><b>' + esc(p.title) + '</b><small>' + esc(meta) + '</small></div>' +

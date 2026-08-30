@@ -22,7 +22,7 @@ const { ymd } = require("./_lib/ics.js");
 const { linksOf } = require("./_lib/links.js");
 const { ensureSlug } = require("./_lib/delivery.js");
 const { sendEmail, jcsEmail, SENDERS } = require("./_lib/email.js");
-const { COOKIE, DAY, makeToken, verifyToken, readCookie, loginUrl } = require("./_lib/portal-auth.js");
+const { COOKIE, DAY, makeToken, verifyToken, readCookie, loginUrlEmail, emailValue, tokenEmail, emailMatches } = require("./_lib/portal-auth.js");
 const adminAuth = require("./_lib/auth.js");
 
 // Client-facing pipeline, derived — the project moves on its own:
@@ -56,7 +56,9 @@ async function magicLink(req, res) {
   });
   if (!c) { done(); return; }
 
-  const url = loginUrl(c.id);
+  // the link carries the EMAIL — one login shows every project this
+  // address is tied to, across any number of client records
+  const url = loginUrlEmail(email);
   const first = (c.name || "").split(" ")[0] || "there";
 
   await sendEmail({
@@ -85,11 +87,20 @@ module.exports = async function handler(req, res) {
 
     // ---- sign in via emailed link → session cookie + redirect --------
     if (q.login) {
-      const cid = verifyToken(q.login, "portal-login");
+      const val = verifyToken(q.login, "portal-login");
       // expired / tampered link → the portal shows its branded "link
       // expired" block above the sign-in form (portal.html reads ?expired)
-      if (!cid) { res.statusCode = 302; res.setHeader("Location", "/portal?expired=1"); res.end(); return; }
-      const session = makeToken(cid, "portal-session", 30 * DAY);
+      if (!val) { res.statusCode = 302; res.setHeader("Location", "/portal?expired=1"); res.end(); return; }
+      // resolve the identity to an EMAIL (new links carry it; legacy
+      // links carry a client id — look its email up)
+      let email = tokenEmail(val);
+      const s0 = await db();
+      if (!email && typeof val === "number") {
+        const [c0] = await s0`SELECT email FROM clients WHERE id = ${val} LIMIT 1`;
+        email = c0 && c0.email ? String(c0.email).toLowerCase() : null;
+      }
+      if (!email) { res.statusCode = 302; res.setHeader("Location", "/portal?expired=1"); res.end(); return; }
+      const session = makeToken(emailValue(email), "portal-session", 30 * DAY);
       res.setHeader("Set-Cookie",
         `${COOKIE}=${session}; Max-Age=${30 * DAY}; Path=/; HttpOnly; Secure; SameSite=Lax`);
       // land on the listing itself when the link came from a delivery
@@ -98,9 +109,11 @@ module.exports = async function handler(req, res) {
       const pid = parseInt(q.p, 10);
       if (pid) {
         try {
-          const s0 = await db();
-          const [row] = await s0`SELECT delivery_slug FROM bookings WHERE id = ${pid} AND client_id = ${cid} LIMIT 1`;
-          if (row && row.delivery_slug) dest = "/portal/" + row.delivery_slug;
+          const [row] = await s0`
+            SELECT bk.delivery_slug, c.email AS ce, c.extra_emails AS xe
+            FROM bookings bk LEFT JOIN clients c ON c.id = bk.client_id
+            WHERE bk.id = ${pid} LIMIT 1`;
+          if (row && row.delivery_slug && emailMatches(email, row.ce, row.xe)) dest = "/portal/" + row.delivery_slug;
         } catch (e) { /* fall back to the dashboard */ }
       }
       res.statusCode = 302;
@@ -119,28 +132,41 @@ module.exports = async function handler(req, res) {
     }
 
     // ---- portal data: signed-in client only ---------------------------
-    const cid = verifyToken(readCookie(req), "portal-session");
-    if (!cid) { res.status(401).json({ error: "unauthorized" }); return; }
+    const val = verifyToken(readCookie(req), "portal-session");
+    if (!val) { res.status(401).json({ error: "unauthorized" }); return; }
 
     const s = await db();
-    const [c] = await s`SELECT id, name, email FROM clients WHERE id = ${cid} LIMIT 1`;
-    if (!c) { res.status(401).json({ error: "unauthorized" }); return; }
+    // identity = email; legacy id-sessions resolve to their email
+    let email = tokenEmail(val);
+    if (!email && typeof val === "number") {
+      const [c0] = await s`SELECT email FROM clients WHERE id = ${val} LIMIT 1`;
+      email = c0 && c0.email ? String(c0.email).toLowerCase() : null;
+    }
+    if (!email) { res.status(401).json({ error: "unauthorized" }); return; }
+    // every client record this email is tied to (primary or co-recipient)
+    const cRows = (await s`
+      SELECT id, name, email, extra_emails FROM clients
+      WHERE lower(email) = ${email} OR extra_emails ILIKE ${"%" + email + "%"}
+      LIMIT 25`).filter((r) => emailMatches(email, r.email, r.extra_emails));
+    if (!cRows.length) { res.status(401).json({ error: "unauthorized" }); return; }
+    const c = cRows.find((r) => String(r.email || "").toLowerCase() === email) || cRows[0];
+    const cids = cRows.map((r) => r.id);
 
     // Applications still in review — shown in the portal so a client who
     // just applied lands on something real, not an empty dashboard. An
     // accepted request whose project is proposal-gated ('pending') and
     // whose proposal hasn't been SENT yet still reads as "in review" —
     // the client should never see a blank gap mid-handoff.
-    const pendingRows = c.email ? await s`
+    const pendingRows = await s`
       SELECT r.title, r.city, r.state, r.services, r.created_at FROM requests r
-      WHERE lower(r.email) = ${String(c.email).toLowerCase()} AND (
+      WHERE lower(r.email) = ${email} AND (
         r.status = 'pending'
         OR (r.status = 'accepted' AND EXISTS (
           SELECT 1 FROM bookings bk WHERE bk.id = r.project_id AND bk.status = 'pending'
             AND NOT EXISTS (SELECT 1 FROM proposals p WHERE p.booking_id = bk.id AND p.status = 'sent')
         ))
       )
-      ORDER BY r.created_at DESC` : [];
+      ORDER BY r.created_at DESC`;
 
     const rows = await s`
       SELECT bk.*,
@@ -148,9 +174,10 @@ module.exports = async function handler(req, res) {
         (SELECT f.thumb_url FROM delivery_files f WHERE f.booking_id = bk.id AND f.kind = 'photo'
            AND (f.web_url = bk.delivery_cover_url OR f.url = bk.delivery_cover_url) LIMIT 1) AS cover_thumb,
         (SELECT f.thumb_url FROM delivery_files f WHERE f.booking_id = bk.id AND f.kind = 'photo'
-           ORDER BY f.sort_order ASC, f.id ASC LIMIT 1) AS first_thumb
+           ORDER BY f.sort_order ASC, f.id ASC LIMIT 1) AS first_thumb,
+        (SELECT count(*)::int FROM delivery_files f WHERE f.booking_id = bk.id AND f.kind = 'film') AS films_count
       FROM bookings bk
-      WHERE bk.client_id = ${c.id} AND bk.status NOT IN ('canceled', 'pending')
+      WHERE bk.client_id = ANY(${cids}) AND bk.status NOT IN ('canceled', 'pending')
       ORDER BY bk.shoot_date DESC NULLS LAST, bk.id DESC`;
     // portal slugs are lazy — make sure every card has a link
     for (const r of rows) if (!r.delivery_slug) await ensureSlug(s, r);
@@ -161,7 +188,7 @@ module.exports = async function handler(req, res) {
     const awaiting = await s`
       SELECT p.title, p.location, p.slug, p.sent_at
       FROM bookings bk JOIN proposals p ON p.booking_id = bk.id
-      WHERE bk.client_id = ${c.id} AND bk.status = 'pending'
+      WHERE bk.client_id = ANY(${cids}) AND bk.status = 'pending'
         AND p.status = 'sent'
       ORDER BY p.sent_at DESC NULLS LAST`;
 
@@ -180,6 +207,7 @@ module.exports = async function handler(req, res) {
         shoot_date: b.shoot_date || null,
         service: b.type || "",
         files: Number(b.files_count) || 0,
+        films: Number(b.films_count) || 0,
         // card cover: the chosen cover's thumb, else the first photo's
         // thumb, else the full cover URL (legacy Pixieset/portfolio covers)
         cover: b.cover_thumb || b.first_thumb || cover || null,
@@ -200,7 +228,7 @@ module.exports = async function handler(req, res) {
     res.status(200).json({
       client_first: (c.name || "").split(" ")[0] || "",
       client_name: c.name || "",
-      client_email: c.email || "",
+      client_email: email,
       // Jacob signed in as a client while also holding an admin session
       // gets an "Admin →" shortcut (same as the reference portal)
       is_admin: adminAuth.verifySessionToken(adminAuth.readCookie(req)),

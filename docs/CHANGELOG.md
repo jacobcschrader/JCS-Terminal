@@ -1800,3 +1800,23 @@ vars exist.
   + og:url; site.js / projects-data.js / admin hint updated; the share-
   page generator keeps the catch-all rewrite.
 
+## 2026-08-30 — Portal: email-wide access, film hero, pay pill, custom links, admin Deliveries
+
+- Portal identity is now the EMAIL (Guthrie behavior): one login shows
+  every project the address is tied to — primary client email or
+  extra_emails co-recipient, across client records. Tokens carry
+  e-<b64url email>; legacy id links/sessions still resolve.
+  (portal-auth.js, portal.js, delivery.js.)
+- Listing page: property film is the hero when present (poster + play,
+  sound on click); unpaid invoice turns the status slot into a navy
+  "Pay invoice → " link until settled; custom delivery links moved into
+  their own side-by-side button row above FILMS.
+- Portal grid: film-only listings get a play-glyph tile; feed sends
+  films count.
+- Admin: new Deliveries page under Projects (#deliveries) — listing ·
+  client · files · delivered · downloads (count/last) · invoice ·
+  Open/Lock; 7-day download counter. Legacy #deliveries→#pipeline
+  redirect removed.
+- Workspace note: Desktop reorganized — repo now at
+  ~/Desktop/Live Apps/JCS Terminal/website.
+

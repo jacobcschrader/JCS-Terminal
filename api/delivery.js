@@ -26,36 +26,43 @@ const escHtml = (s) =>
 async function loadListing(s, req, params) {
   const t = String(params.t || "");
   const slug = String(params.slug || "").toLowerCase().replace(/[^a-z0-9-]/g, "").slice(0, 80);
-  const cid = portalAuth.verifyToken(portalAuth.readCookie(req), "portal-session");
+  const sess = portalAuth.verifyToken(portalAuth.readCookie(req), "portal-session");
   const isAdmin = adminAuth.verifySessionToken(adminAuth.readCookie(req));
+  // portal identity = email (legacy id-sessions still resolve)
+  let sessEmail = portalAuth.tokenEmail(sess);
+  if (!sessEmail && typeof sess === "number") {
+    const [c0] = await s`SELECT email FROM clients WHERE id = ${sess} LIMIT 1`;
+    sessEmail = c0 && c0.email ? String(c0.email).toLowerCase() : null;
+  }
 
   let b = null, via = "";
   if (t && t.length >= 10) {
     [b] = await s`
-      SELECT bk.*, c.name AS client_name, c.email AS client_email, c.brokerage AS client_brokerage
+      SELECT bk.*, c.name AS client_name, c.email AS client_email, c.brokerage AS client_brokerage, c.extra_emails AS client_extra_emails
       FROM bookings bk LEFT JOIN clients c ON c.id = bk.client_id
       WHERE bk.delivery_token = ${t} LIMIT 1`;
     via = "share";
   } else if (slug) {
     [b] = await s`
-      SELECT bk.*, c.name AS client_name, c.email AS client_email, c.brokerage AS client_brokerage
+      SELECT bk.*, c.name AS client_name, c.email AS client_email, c.brokerage AS client_brokerage, c.extra_emails AS client_extra_emails
       FROM bookings bk LEFT JOIN clients c ON c.id = bk.client_id
       WHERE bk.delivery_slug = ${slug} LIMIT 1`;
     if (b) {
-      // a signed-in client who owns the listing counts as the client even
-      // when Jacob is also holding an admin session (his own test runs
-      // should show up in the activity feed like any client's)
-      if (cid && b.client_id === cid) via = "client";
+      // a signed-in viewer counts as the client when their EMAIL is tied
+      // to the listing's client record in any way (primary address or a
+      // co-recipient in extra_emails) — even when Jacob also holds an
+      // admin session, his own test runs should log like any client's
+      if (sessEmail && portalAuth.emailMatches(sessEmail, b.client_email, b.client_extra_emails)) via = "client";
+      else if (typeof sess === "number" && b.client_id === sess) via = "client";
       else if (isAdmin) via = "admin";
       else b = null;
     }
   }
-  if (!b) return { b: null, status: (cid || isAdmin || t) ? 404 : 401 };
+  if (!b) return { b: null, status: (sess || isAdmin || t) ? 404 : 401 };
   // the downloader's identity for the activity feed
   let email = "";
   if (via === "client") {
-    const [c] = await s`SELECT email FROM clients WHERE id = ${cid}`;
-    email = (c && c.email) || "";
+    email = sessEmail || "";
   } else if (via === "admin") email = "admin";
   else email = (b.client_email ? b.client_email + " (share link)" : "share link");
   return { b, via, email, isAdmin, status: 200 };

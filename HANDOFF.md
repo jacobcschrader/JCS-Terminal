@@ -274,7 +274,7 @@ except the nightly encrypted backups.
   cookie `jcs_session` (SESSION_SECRET). All data handlers requireAuth.
 - **Shell (2026-08-08, deal-desk pattern from Jacob's DealSpace
   reference):** left sidebar (JCS wordmark, account block, groups Work:
-  Dashboard / Requests (badge) / Projects / Proposals / Clients; Studio:
+  Dashboard / Requests (badge) / Projects / Deliveries / Proposals / Clients; Studio:
   Billing / Licensing / Portfolio / Settings; Other: Client portal ↗ /
   Website ↗; footer = Google Calendar status + date + Sign out), top bar
   with GLOBAL SEARCH (projects, clients, requests, proposals — "/" to
@@ -450,6 +450,14 @@ except the nightly encrypted backups.
   name → status accepted + email to Jacob. Public page auto-pulls 2
   portfolio films + a photo set + testimonials.
 
+- **Deliveries page (admin, 2026-08-30):** sidebar Work → Deliveries
+  (#deliveries; the old legacy redirect to #pipeline is gone). One table
+  of every listing with media or a sent delivery: Listing · Client ·
+  Files · Delivered · Downloads (count + last, aggregated client-side
+  from admin route `downloads?limit=300`, loaded once per visit via
+  ADM.dlLoad/state.dl) · Invoice badge · Open ↗ + Lock/Unlock
+  (ADM.lsLock). Head shows the 7-day download count.
+
 ## 6. Client experience
 
 - **Portal:** cookie session via emailed magic link (30-day HMAC token;
@@ -466,6 +474,30 @@ except the nightly encrypted backups.
   logged). LOCKED hides every download control + withholds original
   URLs (films still stream, photos show web/thumb). Approve / Request
   changes kept (feedback demotes project to Revisions + emails Jacob).
+
+**Portal identity = EMAIL (2026-08-30).** Sign-in links and session
+cookies carry the email (token value `e-<b64url>`; legacy numeric
+client-id tokens still verify and resolve to that client's email —
+portal-auth.js). Logging in shows EVERY project whose client record
+carries the address — primary `clients.email` or a co-recipient in
+`clients.extra_emails` — across any number of client records
+(portal.js: cRows/cids, `client_id = ANY(cids)`); requests/proposal
+bands match by email too. delivery.js grants `via=client` by the same
+emailMatches() rule. Typing an email still never opens data — the
+emailed link is the only key.
+
+**Listing page (delivery.html) additions (2026-08-30):**
+- Film hero: when the listing has a film, the hero IS the film — cover
+  stays as poster, white play circle, click = sound + native controls
+  (`.lp-hero.playing` fades the scrim/title; ended restores it).
+- The status pill slot is a NAVY "Pay invoice INV-… — $X →" link
+  (`#lp-pay` → d.invoice.url) whenever an invoice is sent and unpaid;
+  paid keeps "Paid — downloads unlocked", locked keeps the locked pill.
+- Custom links (bookings.delivery_links, edited on the admin project
+  page) render in their own `#lp-links` row of `.lp-linkbtn` buttons —
+  side by side, above FILMS (no longer mixed into the download pills).
+- Portal grid: film-only listings (no cover) show a play-glyph tile
+  (`.pt-card__play`; feed sends per-project `films` count).
 
 ## 7. API map (10 functions of Vercel Hobby's 12)
 
