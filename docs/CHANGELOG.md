@@ -1850,3 +1850,17 @@ vars exist.
   delivery page stuck on "Loading files…" and uploads froze at the busy
   dropzone — both gates now accept delivery/<id> too.
 
+## 2026-08-30 — Listing page fixed at /portal/<slug> (unstyled) + empty state
+
+- BUG (live): delivery.html loaded styles.css/site.js with RELATIVE
+  paths — under the /portal/<slug> rewrite they 404'd, so client listing
+  pages rendered completely unstyled (raw purple links, grey hero).
+  Fixed with <base href="/"> + absolute asset paths (same class as the
+  earlier project.html fix). portal.html + invoice.html hardened the
+  same way.
+- /portal/login previously fell into the :slug rewrite and served the
+  delivery page; a dedicated rewrite now serves the portal (sign-in)
+  there, before the slug rule.
+- New .lp-empty state: a listing with zero delivered files says "Your
+  gallery is on its way." instead of trailing off after the hero.
+

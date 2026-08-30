@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<base href="/">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>Your Listing — Jacob Schrader</title>
@@ -9,7 +10,7 @@
 <link rel="icon" type="image/png" sizes="64x64" href="/favicon-64.png">
 <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="/styles.css">
 <style>
 /* ============ Client listing page — /portal/<slug> (pattern:
    jacobguthrie.com/portal/<listing>, 2026-08-08). Full-bleed cover hero
@@ -65,6 +66,11 @@ body { background: #f8f7f4; }
 .lp-state--ok { background: #e6f0e8; color: #2f6b3f; }
 .lp-state--locked { background: #f5e8e8; color: #a03a3a; }
 .lp-bundles { display: flex; gap: 0.6rem; flex-wrap: wrap; margin-bottom: clamp(1.8rem, 4vw, 2.6rem); }
+/* graceful empty state — listing exists, media not delivered yet */
+.lp-empty { text-align: center; padding: clamp(2.5rem, 7vw, 5rem) 1rem clamp(2rem, 5vw, 3.5rem); }
+.lp-empty h2 { font-family: var(--serif); font-style: italic; font-weight: 400; font-size: clamp(1.5rem, 2.6vw, 2rem); color: var(--navy); margin: 0 0 0.7rem; }
+.lp-empty p { font-size: 0.85rem; color: var(--muted); max-width: 44ch; margin: 0 auto; line-height: 1.7; }
+
 /* custom links — their own row of proper buttons above the films;
    multiples sit side by side and wrap on small screens */
 .lp-links { display: flex; gap: 0.75rem; flex-wrap: wrap; margin: -0.9rem 0 clamp(1.8rem, 4vw, 2.6rem); }
@@ -195,6 +201,10 @@ body { background: #f8f7f4; }
   </div>
   <div class="lp-bundles" id="lp-bundles"></div>
   <div class="lp-links" id="lp-links"></div>
+  <div class="lp-empty" id="lp-empty" hidden>
+    <h2>Your gallery is on its way.</h2>
+    <p>This listing is in production &mdash; photos and films land here the moment they&rsquo;re delivered, and you&rsquo;ll get an email when they do.</p>
+  </div>
   <div class="lp-lockmsg" id="lp-lockmsg" hidden></div>
 
   <div class="lp-sec" id="lp-filmsec" hidden>
@@ -283,7 +293,7 @@ body { background: #f8f7f4; }
   </div>
 </footer>
 
-<script src="site.js"></script>
+<script src="/site.js"></script>
 <script>
 (async function () {
   var $ = function (id) { return document.getElementById(id); };
@@ -372,6 +382,7 @@ body { background: #f8f7f4; }
   var heroImg = d.cover_url || (photos[0] && (photos[0].web || photos[0].thumb)) || (films[0] && films[0].thumb) || '';
   if (heroImg) $('lp-hero-img').style.backgroundImage = 'url("' + heroImg.replace(/"/g, '%22') + '")';
   else { $('lp-hero').classList.add('lp-hero--short'); $('lp-soon').hidden = false; }
+  if (!(d.files || []).length) $('lp-empty').hidden = false;
   // when the listing has a film, the film IS the hero: poster stays
   // until the client presses play (sound on, native controls)
   var heroFilm = films[0] && films[0].url;

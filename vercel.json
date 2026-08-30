@@ -30,6 +30,10 @@
       "destination": "/proposal"
     },
     {
+      "source": "/portal/login",
+      "destination": "/portal"
+    },
+    {
       "source": "/portal/:slug([a-z0-9-]+)",
       "destination": "/delivery"
     },

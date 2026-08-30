@@ -123,6 +123,13 @@ portal.html                Client portal, site chrome: "Client Portal /
                            above the grid. Sign-in = centered column.
 delivery.html              Listing page, served at /portal/<slug> (vercel.json
                            rewrite; ?slug= works locally, ?t= = share link).
+                           NOTE every page served under a rewritten PATH
+                           needs <base href="/"> + absolute asset URLs —
+                           relative styles.css/site.js 404 there (bit us
+                           live 2026-08-30). /portal/login rewrites to
+                           the portal sign-in, above the :slug rule.
+                           Zero delivered files → .lp-empty "Your
+                           gallery is on its way."
                            Full-bleed cover hero + address + "LOCATION ·
                            BROKERAGE"; ← All listings / Share preview /
                            PAID — DOWNLOADS UNLOCKED pill; bundle pills
