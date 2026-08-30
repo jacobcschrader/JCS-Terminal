@@ -27,7 +27,11 @@ body { background: #f8f7f4; }
 .lp-hero--short { min-height: 62svh; }
 .lp-hero__img { position: absolute; inset: 0; background-size: cover; background-position: center; }
 .lp-hero::after { content: ""; position: absolute; inset: 0;
-  background: linear-gradient(180deg, rgba(6,13,24,0.42) 0%, rgba(6,13,24,0.18) 40%, rgba(6,13,24,0.5) 100%); }
+  /* vertical scrim + a soft edge vignette so the centered title pops on
+     bright covers without flattening the photo */
+  background:
+    radial-gradient(ellipse at center, rgba(6,13,24,0) 42%, rgba(6,13,24,0.32) 100%),
+    linear-gradient(180deg, rgba(6,13,24,0.38) 0%, rgba(6,13,24,0.14) 40%, rgba(6,13,24,0.46) 100%); }
 .lp-hero__in { position: relative; z-index: 1; padding: 7rem clamp(1.25rem, 5vw, 2rem) 5rem; }
 .lp-hero h1 { font-family: var(--serif); font-weight: 400; color: #fff; letter-spacing: -0.005em;
   font-size: clamp(2.4rem, 6.2vw, 4.4rem); line-height: 1.05; margin: 0 0 1rem;

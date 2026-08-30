@@ -1894,3 +1894,10 @@ vars exist.
   ACROSS rows (1,2,3,4 on top, 5 under the shortest) — matching the
   admin delivery grid, per Jacob. Column-major fill rejected.
 
+## 2026-08-30 — Listing hero vignette
+
+- Soft radial edge vignette layered onto the hero scrim (center stays
+  clean at 42%, edges ease to 32% navy) so the centered serif title
+  pops on bright covers; the vertical scrim was lightened a touch to
+  compensate.
+
