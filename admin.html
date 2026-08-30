@@ -528,6 +528,51 @@ select.lx-input { padding-right: 2rem; }
 .cal__ev--twilight.unconf { color: #4a4266; border-color: #4a4266; }
 .cal__ev--ext { background: #ecebe6; color: var(--muted); cursor: default; }
 @media (max-width: 860px) { .cal__cell { min-height: 70px; padding: 0.3rem; } .cal__ev { font-size: 0.58rem; } .cal__ev b { display: none; } }
+/* ---- project detail: two-column board (Visaro reference, JCS light) ---- */
+.pj-cols { display: grid; grid-template-columns: minmax(0, 1fr) 350px; gap: 1rem; align-items: start; }
+@media (max-width: 1120px) { .pj-cols { grid-template-columns: 1fr; } }
+.pj-main, .pj-side { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+.pj-lbl { display: flex; align-items: center; gap: 0.6rem; font-size: 0.58rem; letter-spacing: 0.2em;
+  text-transform: uppercase; font-weight: 600; color: var(--muted); margin-bottom: 1rem; }
+.pj-lbl .grow { flex: 1; }
+.pj-amount { font-weight: 600; font-size: 1.85rem; letter-spacing: -0.02em; color: var(--ink); margin: 0.1rem 0 0.35rem; }
+.pj-line { font-size: 0.8rem; color: var(--ink); padding: 0.35rem 0; }
+.pj-line .mut, .pj-caveat { color: var(--muted); }
+.pj-caveat { font-size: 0.68rem; margin-top: 0.55rem; line-height: 1.5; }
+.pj-btnrow { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.8rem; }
+.pj-titlechips { display: inline-flex; gap: 0.35rem; vertical-align: middle; margin-left: 0.6rem; }
+.dv-chip--amber { background: #f7f0dd; color: #8a6d1f; }
+
+/* ---- deliveries: cover-image card grid (reference: delivery-tool board) ---- */
+.dv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 0.9rem; }
+.dv-card { background: #fff; border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  box-shadow: 0 8px 24px rgba(15,34,64,0.045); display: flex; flex-direction: column; transition: border-color 0.2s var(--ease), transform 0.2s var(--ease); }
+.dv-card:hover { border-color: rgba(15,34,64,0.4); transform: translateY(-2px); }
+.dv-card__ph { position: relative; aspect-ratio: 3 / 2; background: linear-gradient(150deg, var(--navy) 0%, var(--navy-deep) 100%); cursor: pointer; }
+.dv-card__ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.dv-card__ph .none { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.55); font-size: 0.56rem; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 600; }
+.dv-card__acts { position: absolute; top: 0.55rem; right: 0.55rem; display: flex; gap: 0.35rem; }
+.dv-card__acts a, .dv-card__acts button { width: 30px; height: 30px; border-radius: 8px; border: 0; cursor: pointer;
+  background: rgba(9,22,39,0.72); color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; line-height: 1; text-decoration: none; backdrop-filter: blur(4px); transition: background 0.2s var(--ease); }
+.dv-card__acts a:hover, .dv-card__acts button:hover { background: var(--navy); }
+.dv-card__body { padding: 0.85rem 0.95rem 0.9rem; display: flex; flex-direction: column; gap: 0.28rem; flex: 1; }
+.dv-card__top { display: flex; align-items: baseline; gap: 0.4rem 0.6rem; flex-wrap: wrap; }
+.dv-card__chips { display: inline-flex; gap: 0.3rem; }
+.dv-card__top b { font-family: var(--serif); font-weight: 400; font-size: 1.18rem; line-height: 1.15; color: var(--ink); cursor: pointer; flex: 1 1 auto; min-width: 62%; }
+.dv-chip { flex: none; font-size: 0.52rem; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700;
+  padding: 0.24rem 0.5rem; border-radius: 5px; }
+.dv-chip--sent { background: #e7f0e9; color: #2f6b3f; }
+.dv-chip--draft { background: #f1efe9; color: var(--muted); }
+.dv-chip--locked { background: #f7e9e9; color: #a03a3a; }
+.dv-card__loc { font-size: 0.72rem; color: var(--muted); margin-top: -0.15rem; }
+.dv-card__meta { font-size: 0.74rem; color: var(--muted); }
+.dv-card__meta b { font-weight: 500; color: var(--ink); }
+.dv-card__foot { display: flex; align-items: center; margin-top: auto; padding-top: 0.55rem; font-size: 0.7rem; color: var(--muted); }
+.dv-card__foot .dl { margin-left: auto; font-weight: 600; color: var(--navy); font-size: 0.76rem; }
+@media (max-width: 520px) { .dv-grid { grid-template-columns: 1fr 1fr; } .dv-card__top b { font-size: 1.02rem; } }
+
 /* ---- settings: collapsible sections (native <details>, state remembered) ---- */
 .acc { background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 8px 24px rgba(15,34,64,0.045); }
 .acc + .acc { margin-top: 0.65rem; }
@@ -670,7 +715,7 @@ select.lx-input { padding-right: 2rem; }
               licTab: 'active', licProp: '', licResults: null, licSearching: false,
               stageFilter: 'active', ls: null, downloads: [], dlWeek: 0,
               billTab: 'all', gcal: null, gcalBusy: false, qItems: [], qSel: -1,
-              testimonials: [], calMonth: '', fDrag: null, env: {}, calExt: {}, calBusy: {}, backup: null, dl: null, dlBusy: false };
+              testimonials: [], calMonth: '', fDrag: null, env: {}, calExt: {}, calBusy: {}, backup: null, dl: null, dlBusy: false, dvTab: 'all', dvSort: 'new', dvQ: '' };
   // Service lineup — mirrors the JCS-Pricing sheet (2026-07-29).
   var ADDONS = {
     'Photography': ['Flash / Ambient Photography','Aerial Photography','Vertical / Vignette Images','Twilight Photography','Virtual Staging','Virtual Twilight'],
@@ -735,6 +780,7 @@ select.lx-input { padding-right: 2rem; }
   async function api(path, method, body) {
     var r = await fetch('/api/admin/' + path, {
       method: method || 'GET',
+      cache: 'no-store',   // admin data is live state — never serve it from disk cache
       headers: body ? { 'Content-Type': 'application/json' } : undefined,
       body: body ? JSON.stringify(body) : undefined
     });
@@ -1873,40 +1919,34 @@ select.lx-input { padding-right: 2rem; }
       var d = new Date(String(dateStr).slice(0, 10) + 'T12:00:00');
       return d.toLocaleDateString(undefined, { month: 'short', day: '2-digit', year: 'numeric' }) + (timeStr ? ', ' + fmtT(timeStr) : '');
     }
-    function sec(label, inner, extra) {
-      return '<div class="adm-sec"><div class="adm-sec__lbl">' + label + '<span class="grow"></span>' + (extra || '') + '</div>' + inner + '</div>';
+    // card with a small-caps label row (Visaro pattern), chip optional
+    function card(label, inner, chip) {
+      return '<div class="adm-card"><div class="pj-lbl">' + label + '<span class="grow"></span>' + (chip || '') + '</div>' + inner + '</div>';
     }
 
-    // ---- header ----
+    // ---- header: title + chips, sub line, Edit / Delete ----
     var meta = [
       b.client_id ? '<a onclick="ADM.go(\'client/' + b.client_id + '\')">' + esc(b.client_name || 'Client') + '</a>' : 'No client',
       fileWord(nFiles),
       slug ? 'portal slug <a class="adm-mono" href="/portal/' + esc(slug) + '" target="_blank" rel="noopener">' + esc(slug) + '</a>' : ''
     ].filter(Boolean).join(' &middot; ');
-    var meta2 = [
-      b.location ? esc(b.location) : '',
-      b.sqft ? Number(b.sqft).toLocaleString() + ' sqft' : '',
-      b.shoot_date ? longDate(b.shoot_date, b.shoot_time) : '',
-      '<span class="adm-badge adm-badge--' + esc(b.status) + '">' + esc(STAGE_LABEL[b.status] || b.status) + '</span>'
-    ].filter(Boolean).join(' &middot; ');
-    var sentLine = b.delivery_sent_at
-      ? 'Delivery email last sent ' + stamp(b.delivery_sent_at) + (b.delivery_sends > 1 ? ' (&times;' + b.delivery_sends + ')' : '') +
-        (cl && cl.email ? ' &mdash; ' + esc(cl.email) : '')
-      : 'Delivery email not sent yet' + (cl && cl.email ? ' &mdash; goes to ' + esc(cl.email) : (b.client_id ? ' &mdash; client has no email on file' : ''));
-    var html = '<span class="adm-back" onclick="ADM.go(\'pipeline\')">&larr; All projects</span>' +
+    var html = '<span class="adm-back" onclick="ADM.go(\'pipeline\')">&larr; Back to Projects</span>' +
       '<div class="adm-lhead"><div>' +
-        '<h1>' + esc(b.title) + '</h1>' +
+        '<h1 style="display:inline">' + esc(b.title) + '</h1>' +
+        '<span class="pj-titlechips"><span class="adm-badge adm-badge--' + esc(b.status) + '">' + esc(STAGE_LABEL[b.status] || b.status) + '</span>' +
+          (locked ? '<span class="dv-chip dv-chip--locked" style="align-self:center">Locked</span>' : '') + '</span>' +
+        '<div class="meta">' + [b.location ? esc(b.location) : '', b.type ? esc(b.type) : ''].filter(Boolean).join(' &middot; ') + '</div>' +
         '<div class="meta">' + meta + '</div>' +
-        '<div class="meta">' + meta2 + '</div>' +
-        '<div class="sent">' + sentLine + '</div>' +
       '</div><div class="acts">' +
-        '<button class="adm-btn adm-btn--ghost" onclick="ADM.lsSend(' + b.id + ')">' + (b.delivery_sent_at ? 'Re-send delivery email' : 'Send delivery email') + '</button>' +
-        '<button class="adm-btn" onclick="ADM.lsLock(' + b.id + ',' + (locked ? 'false' : 'true') + ')">' + (locked ? 'Unlock downloads' : 'Lock downloads') + '</button>' +
+        '<button class="adm-btn adm-btn--ghost" onclick="ADM.editBooking(' + b.id + ')">Edit</button>' +
+        '<button class="adm-btn adm-btn--danger" onclick="ADM.delBooking(' + b.id + ')">Delete</button>' +
       '</div></div>';
 
-    // ---- project facts + actions ----
+    // ---- LEFT · project info ----
     function kv(label, val) { return '<div class="adm-kv"><label>' + label + '</label><div>' + val + '</div></div>'; }
-    var facts = '<div class="adm-card"><div class="adm-kvgrid">' +
+    var info = card('Project info',
+      '<div class="adm-kvgrid">' +
+        kv('Property', esc(b.title)) +
         kv('Client', b.client_id
           ? '<a onclick="ADM.go(\'client/' + b.client_id + '\')">' + esc(b.client_name || '') + '</a>' + (cl && cl.brokerage ? ' <small class="mut">&mdash; ' + esc(cl.brokerage) + '</small>' : '')
           : '—') +
@@ -1915,78 +1955,26 @@ select.lx-input { padding-right: 2rem; }
         kv('Service', esc(b.type || '—')) +
         kv('Shoot date', b.shoot_date ? longDate(b.shoot_date, b.shoot_time) : '—') +
         ((b.twilight_date || b.twilight_time) ? kv('Twilight', longDate(b.twilight_date || b.shoot_date, b.twilight_time)) : '') +
-        kv('Total', total != null ? money(total) + (travel ? ' <small class="mut">(incl. travel)</small>' : '') : '—') +
+        kv('Total amount', total != null ? money(total) + (travel ? ' <small class="mut">(incl. travel)</small>' : '') : '—') +
+        kv('Payment', inv === 'paid' ? '<span style="color:#2f6b3f">Paid</span>' : inv === 'unpaid' ? 'Unpaid' : '<span class="mut">Not invoiced</span>') +
         kv('Confirmation', b.confirmed_at ? '&#10003; Confirmed ' + dstr(b.confirmed_at) : '<span class="mut">Not sent</span>') +
-        kv('Stage', '<select style="font-family:var(--sans);font-size:0.86rem;color:var(--ink);background:#fff;border:1px solid var(--line);padding:0.35rem 0.5rem" onchange="ADM.stage(' + b.id + ', this.value)">' +
-          STAGES.map(function (s) { return '<option value="' + s + '"' + (b.status === s ? ' selected' : '') + '>' + STAGE_LABEL[s] + '</option>'; }).join('') +
-          (b.status === 'pending' ? '<option value="pending" selected>Pending proposal</option>' : '') +
-          (b.status === 'canceled' ? '<option value="canceled" selected>Canceled</option>' : '') + '</select>') +
       '</div>' +
-      (b.deliverables ? '<div class="adm-notes"><b style="display:block;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:0.4rem">Deliverables</b>' + esc(b.deliverables) + '</div>' : '') +
-      (b.notes ? '<div class="adm-notes" style="margin-top:0.8rem"><b style="display:block;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:0.4rem">Access notes</b>' + esc(b.notes) + '</div>' : '') +
-      '<div style="display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:1.2rem">' +
-        '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.editBooking(' + b.id + ')">Edit project</button>' +
-        '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.confirm(' + b.id + ')">' + (b.confirmed_at ? 'Resend confirmation' : 'Confirm &amp; send') + '</button>' +
-        (slug ? '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/portal/' + esc(slug) + '" target="_blank" rel="noopener">Preview as client &rarr;</a>' : '') +
-        (b.delivery_token ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsShare(' + b.id + ')">Copy share-preview link</button>' : '') +
-        '<span style="flex:1"></span>' +
-        '<button class="adm-btn adm-btn--danger adm-btn--sm" onclick="ADM.delBooking(' + b.id + ')">Delete</button>' +
-      '</div></div>';
+      (b.deliverables ? '<div class="adm-notes" style="margin-top:1rem"><b style="display:block;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:0.4rem">Deliverables</b>' + esc(b.deliverables) + '</div>' : '') +
+      (b.notes ? '<div class="adm-notes" style="margin-top:0.8rem"><b style="display:block;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);font-weight:600;margin-bottom:0.4rem">Access notes</b>' + esc(b.notes) + '</div>' : ''));
 
-    // ---- invoices ----
-    var invoices = '<div class="adm-card"><div class="adm-rows">' +
-      (b.invoice_sent_at || b.status === 'paid'
-        ? '<div class="adm-row"><span class="adm-mono">' + invNum + '</span><span class="dim">&middot;</span><span>' + (inv === 'paid' ? 'paid' : 'unpaid') + '</span>' +
-          (total != null ? '<span class="dim">&middot;</span><span>' + money(total) + '</span>' : '') +
-          (b.invoice_token ? '<span class="dim">&middot;</span><a href="/invoice?t=' + esc(b.invoice_token) + '" target="_blank" rel="noopener">view</a>' : '') +
-          '<span class="grow"></span><small class="mut">sent ' + dstr(b.invoice_sent_at) + (b.invoice_sends > 1 ? ' &middot; ' + b.invoice_sends + '&times;' : '') + '</small></div>'
-        : '<div class="adm-row"><span class="mut">No invoice yet' + (b.price ? '' : ' — set a price first (Edit project)') + '.</span></div>') +
+    // ---- LEFT · update shoot details (inline quick edit) ----
+    var shoot = card('Update shoot details',
+      '<div class="adm-form">' +
+        fld('pj-date', 'Shoot date', '<input id="pj-date" type="date" value="' + esc(String(b.shoot_date || '').slice(0, 10)) + '">') +
+        fld('pj-time', 'Shoot time', timeSel('pj-time', b.shoot_time)) +
+        fld('pj-price', 'Price <small style="text-transform:none;letter-spacing:0">(base, before travel/discount)</small>', '<input id="pj-price" type="number" min="0" step="25" value="' + esc(b.price || '') + '">') +
+        fld('pj-title', 'Property address / title', '<input id="pj-title" value="' + esc(b.title || '') + '">') +
+        fld('pj-location', 'City, State', '<input id="pj-location" value="' + esc(b.location || '') + '">') +
+        '<div class="adm-field" style="display:flex;align-items:flex-end"><button class="adm-btn adm-btn--sm" onclick="ADM.pjQuickSave(' + b.id + ')">Save changes</button></div>' +
       '</div>' +
-      (Number(b.deposit_amount)
-        ? '<div class="adm-row" style="border-top:1px solid var(--line-soft);margin-top:0.3rem"><span>Deposit ' + money(b.deposit_amount) + '</span><span class="dim">&middot;</span>' +
-          (b.deposit_paid_at ? '<span style="color:#2f6b3f">paid ' + dstr(b.deposit_paid_at) + '</span>' : '<span class="mut">unpaid</span>') +
-          '<span class="grow"></span><small class="mut">balance ' + money(Math.max(0, (total || 0) - Number(b.deposit_amount))) + '</small></div>'
-        : '') +
-      (b.paid_via === 'stripe' ? '<div class="adm-row"><span class="mut" style="font-size:0.74rem">Paid online via Stripe' + (b.paid_at ? ' · ' + dstr(b.paid_at) : '') + '</span></div>' : '') +
-      '</div>' +
-      (b.client_id && b.price
-        ? (function () {
-            var pct = parseFloat((state.settings || {}).deposit_pct) || 0;
-            var dep = Number(b.deposit_amount) || 0;
-            var suggested = Math.round((total || 0) * pct / 100);
-            var out = '<div style="margin-top:0.9rem;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center">';
-            if (pct > 0 && !dep && b.status !== 'paid') {
-              out += '<button class="adm-btn adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'deposit\',' + suggested + ')">Send deposit invoice (' + pct + '% &middot; ' + money(suggested) + ')</button>';
-            }
-            if (dep && !b.deposit_paid_at && b.status !== 'paid') {
-              out += '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'deposit\')">Resend deposit invoice</button>' +
-                     '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.depositPaid(' + b.id + ')">Deposit received</button>';
-            }
-            var mainKind = dep && b.deposit_paid_at ? 'balance' : 'full';
-            var mainLabel = b.invoice_sent_at ? (mainKind === 'balance' ? 'Resend balance invoice' : 'Resend invoice') : (mainKind === 'balance' ? 'Send balance invoice' : 'Generate &amp; send invoice');
-            if (b.status !== 'paid' || b.invoice_sent_at) out += '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'' + mainKind + '\')">' + mainLabel + '</button>';
-            if (b.status !== 'paid' && b.invoice_sent_at) out += '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.stage(' + b.id + ',\'paid\')">Mark paid</button>';
-            return out + '</div>';
-          })()
-        : '') +
-      '</div>';
+      '<p class="pj-caveat" style="margin-top:0.3rem">Everything else lives in Edit (top right). Re-confirm after date changes to update the calendar + client.</p>');
 
-    // ---- delivery email ----
-    var mail = '<div class="adm-card"><div class="adm-form">' +
-      '<div class="adm-field full"><label for="dv-msg">Message to client <small style="text-transform:none;letter-spacing:0">(goes in the delivery email)</small></label>' +
-        '<textarea id="dv-msg" placeholder="Add a note — e.g. Twilights are in the second half.">' + esc(b.delivery_message || '') + '</textarea></div>' +
-      fld('dv-cc', 'CC recipients', '<input id="dv-cc" placeholder="Buyer\'s agent, spouse… — comma-separated emails" value="' + esc(b.delivery_cc || '') + '">') +
-      '<div class="adm-field" style="display:flex;align-items:flex-end;gap:0.6rem"><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSaveMail(' + b.id + ')">Save message</button>' +
-        '<small class="mut" style="font-size:0.72rem;padding-bottom:0.45rem">Sending happens from the button up top.</small></div>' +
-      '</div>' +
-      (b.delivery_approved_at
-        ? '<div class="adm-confnote ok" style="text-align:left">&#10003; Client approved the delivery ' + dstr(b.delivery_approved_at) + '</div>'
-        : (b.delivery_feedback
-            ? '<div class="adm-notes" style="margin-top:0.9rem"><b style="display:block;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:#a03a3a;font-weight:600;margin-bottom:0.4rem">Changes requested</b>' + esc(b.delivery_feedback) + '</div>'
-            : '')) +
-      '</div>';
-
-    // ---- activity: timeline events + notes + downloads, newest first ----
+    // ---- LEFT · activity timeline ----
     var events = ls ? ls.events : null;
     var items = [];
     if (ls && ls.timeline) ls.timeline.forEach(function (e) {
@@ -1998,7 +1986,7 @@ select.lx-input { padding-right: 2rem; }
     });
     items.sort(function (a, c) { return new Date(c.at) - new Date(a.at); });
     var DOT = { created: '', stage: '', confirmed: 'grn', files: '', cover: '', lock: 'amb', delivery: 'grn', invoice: 'amb', approved: 'grn', changes: 'red', proposal: '', accepted: 'grn', reminder: 'amb', testimonial: 'grn', note: 'note', download: '', view: 'dim' };
-    var activity = '<div class="adm-card">' +
+    var activity = card('Activity timeline',
       '<form class="dz-add" style="margin:0 0 0.9rem;padding:0;border:0" onsubmit="event.preventDefault();ADM.lsNote(' + b.id + ')">' +
         '<input id="ls-note" placeholder="Add a note — call summary, access details, what the client asked for…" autocomplete="off">' +
         '<button class="adm-btn adm-btn--sm" type="submit">Add note</button></form>' +
@@ -2011,10 +1999,135 @@ select.lx-input { padding-right: 2rem; }
                 '<div class="tl__meta">' + stamp(it.at) + (it.actor && it.actor !== 'system' ? ' &middot; ' + esc(it.actor) : '') +
                   (it.id ? ' &middot; <a onclick="ADM.lsDelNote(' + b.id + ',' + it.id + ')">delete</a>' : '') + '</div></div></div>';
             }).join('') + '</div>'
-          : '<p class="adm-empty">Nothing yet — confirmations, deliveries, invoices, client approvals, downloads and your notes will show up here.</p>') +
-      '</div>';
+          : '<p class="adm-empty">Nothing yet — confirmations, deliveries, invoices, client approvals, downloads and your notes will show up here.</p>'));
 
-    // ---- cover photo grid (all files) ----
+    // ---- RIGHT · payment ----
+    var payChip = inv === 'paid' ? '<span class="dv-chip dv-chip--sent">Paid</span>'
+      : inv === 'unpaid' ? '<span class="dv-chip dv-chip--amber">Awaiting payment</span>'
+      : '<span class="dv-chip dv-chip--draft">Not invoiced</span>';
+    var invUrl = b.invoice_token ? 'https://www.jacobcschrader.com/invoice?t=' + b.invoice_token : '';
+    var payBtns = '';
+    if (b.client_id && b.price) {
+      var pct = parseFloat((state.settings || {}).deposit_pct) || 0;
+      var dep = Number(b.deposit_amount) || 0;
+      var suggested = Math.round((total || 0) * pct / 100);
+      payBtns = '<div class="pj-btnrow">' +
+        (invUrl ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invCopy(' + b.id + ')">Copy link</button>' +
+                  '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="' + esc(invUrl) + '" target="_blank" rel="noopener">Open link &nearr;</a>' : '');
+      if (pct > 0 && !dep && b.status !== 'paid') {
+        payBtns += '<button class="adm-btn adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'deposit\',' + suggested + ')">Send deposit invoice (' + pct + '% &middot; ' + money(suggested) + ')</button>';
+      }
+      if (dep && !b.deposit_paid_at && b.status !== 'paid') {
+        payBtns += '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'deposit\')">Resend deposit invoice</button>' +
+                   '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.depositPaid(' + b.id + ')">Deposit received</button>';
+      }
+      var mainKind = dep && b.deposit_paid_at ? 'balance' : 'full';
+      var mainLabel = b.invoice_sent_at ? (mainKind === 'balance' ? 'Resend balance invoice' : 'Resend invoice') : (mainKind === 'balance' ? 'Send balance invoice' : 'Send invoice');
+      if (b.status !== 'paid' || b.invoice_sent_at) payBtns += '<button class="adm-btn adm-btn--sm" onclick="ADM.invSend(' + b.id + ',\'' + mainKind + '\')">' + mainLabel + '</button>';
+      payBtns += '</div>' +
+        (b.status !== 'paid' && b.invoice_sent_at
+          ? '<div class="pj-btnrow"><button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.stage(' + b.id + ',\'paid\')">&#10003; Mark as paid manually</button></div>' +
+            '<p class="pj-caveat">Use only when the payment happened outside the invoice flow &mdash; marking paid unlocks the client\'s downloads.</p>'
+          : '');
+    } else if (!b.price) {
+      payBtns = '<p class="pj-caveat">Set a price first (Edit, top right) to invoice this project.</p>';
+    }
+    var payment = card('Payment',
+      '<div class="pj-amount">' + (total != null ? money(total) : '&mdash;') + '</div>' +
+      (b.invoice_sent_at || b.status === 'paid'
+        ? '<div class="pj-line"><span class="adm-mono">' + invNum + '</span> <span class="mut">&middot; ' + (inv === 'paid' ? 'paid' : 'unpaid') +
+          ' &middot; sent ' + dstr(b.invoice_sent_at) + (b.invoice_sends > 1 ? ' &middot; ' + b.invoice_sends + '&times;' : '') + '</span></div>'
+        : '<div class="pj-line mut">No invoice sent yet.</div>') +
+      (Number(b.deposit_amount)
+        ? '<div class="pj-line">Deposit ' + money(b.deposit_amount) + ' <span class="mut">&middot; ' +
+          (b.deposit_paid_at ? '<span style="color:#2f6b3f">paid ' + dstr(b.deposit_paid_at) + '</span>' : 'unpaid') +
+          ' &middot; balance ' + money(Math.max(0, (total || 0) - Number(b.deposit_amount))) + '</span></div>'
+        : '') +
+      (b.paid_via === 'stripe' ? '<div class="pj-line mut" style="font-size:0.74rem">Paid online via Stripe' + (b.paid_at ? ' · ' + dstr(b.paid_at) : '') + '</div>' : '') +
+      payBtns, payChip);
+
+    // ---- RIGHT · delivery (summary — the workspace lives at #delivery/<id>) ----
+    var hasDelivery = !!(nFiles || b.delivery_sent_at || b.delivery_created_at);
+    var sentLine = b.delivery_sent_at
+      ? fileWord(nFiles) + ' &middot; sent ' + stamp(b.delivery_sent_at) + (b.delivery_sends > 1 ? ' &middot; ' + b.delivery_sends + '&times;' : '')
+      : (hasDelivery ? fileWord(nFiles) + ' &middot; <span class="mut">not sent yet</span>' : '<span class="mut">No delivery yet — create one and drop the media in.</span>');
+    var toLine = cl && cl.email ? '<div class="pj-line mut" style="font-size:0.74rem">Goes to ' + esc(cl.email) + (b.delivery_cc ? ' + CC' : '') + '</div>'
+      : (b.client_id ? '<div class="pj-line mut" style="font-size:0.74rem">Client has no email on file.</div>' : '');
+    var deliveryCard = card('Delivery',
+      '<div class="pj-line">' + sentLine + '</div>' + toLine +
+      '<div class="pj-btnrow">' +
+        // Create delivery → the workspace; once media/sends exist it reads Open delivery
+        '<button class="adm-btn adm-btn--sm" onclick="ADM.go(\'delivery/' + b.id + '\')">' + (hasDelivery ? 'Open delivery &rarr;' : '+ Create delivery') + '</button>' +
+        (hasDelivery ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSend(' + b.id + ')">' + (b.delivery_sent_at ? 'Re-send email' : 'Send delivery email') + '</button>' : '') +
+        (hasDelivery ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsLock(' + b.id + ',' + (locked ? 'false' : 'true') + ')">' + (locked ? 'Unlock' : 'Lock') + '</button>' : '') +
+      '</div>' +
+      (b.delivery_approved_at
+        ? '<div class="adm-confnote ok" style="text-align:left">&#10003; Client approved the delivery ' + dstr(b.delivery_approved_at) + '</div>'
+        : (b.delivery_feedback
+            ? '<div class="adm-notes" style="margin-top:0.9rem"><b style="display:block;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:#a03a3a;font-weight:600;margin-bottom:0.4rem">Changes requested</b>' + esc(b.delivery_feedback) + '</div>'
+            : '')),
+      b.delivery_sent_at ? '<span class="dv-chip dv-chip--sent">Sent</span>' : (hasDelivery ? '<span class="dv-chip dv-chip--draft">Not sent</span>' : ''));
+
+    // ---- RIGHT · quick actions ----
+    var quick = card('Quick actions',
+      '<div class="adm-field full" style="margin-bottom:0.8rem"><label>Change status</label>' +
+        '<select style="width:100%;font-family:var(--sans);font-size:0.86rem;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:8px;padding:0.5rem 0.6rem" onchange="ADM.stage(' + b.id + ', this.value)">' +
+        STAGES.map(function (st2) { return '<option value="' + st2 + '"' + (b.status === st2 ? ' selected' : '') + '>' + STAGE_LABEL[st2] + '</option>'; }).join('') +
+        (b.status === 'pending' ? '<option value="pending" selected>Pending proposal</option>' : '') +
+        (b.status === 'canceled' ? '<option value="canceled" selected>Canceled</option>' : '') + '</select></div>' +
+      '<div class="pj-btnrow" style="margin-top:0">' +
+        '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.confirm(' + b.id + ')">' + (b.confirmed_at ? 'Resend confirmation' : 'Confirm &amp; send') + '</button>' +
+        (slug ? '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/portal/' + esc(slug) + '" target="_blank" rel="noopener">Preview as client &rarr;</a>' : '') +
+        (b.client_id ? '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.go(\'client/' + b.client_id + '\')">Client profile &rarr;</button>' : '') +
+      '</div>');
+
+    return html +
+      '<div class="pj-cols">' +
+        '<div class="pj-main">' + info + shoot + activity + '</div>' +
+        '<div class="pj-side">' + payment + deliveryCard + quick + '</div>' +
+      '</div>';
+  }
+
+  // ---- Delivery workspace (#delivery/<id>) — Visaro pattern: the project
+  //      page's "Create delivery / Open delivery" lands here; files,
+  //      message + CC and custom links live on THIS page now.
+  function vDeliveryPage(id) {
+    var b = state.bookings.find(function (x) { return x.id == id; });
+    if (!b) return head('Delivery not found', '', true);
+    var ls = (state.ls && state.ls.id == b.id) ? state.ls : null;
+    var files = ls ? ls.files : null;
+    var nFiles = files ? files.length : (Number(b.files_count) || 0);
+    var nPhotos = files ? files.filter(function (f) { return f.kind === 'photo'; }).length : null;
+    var nFilms = files ? files.filter(function (f) { return f.kind === 'film'; }).length : null;
+    var cl = b.client_id ? state.clients.find(function (c) { return c.id == b.client_id; }) : null;
+    var locked = !!b.downloads_locked;
+    var slug = b.delivery_slug || '';
+    var cover = (b.delivery_cover_url && b.delivery_cover_url !== '-') ? b.delivery_cover_url : '';
+    function card(label, inner, chip) {
+      return '<div class="adm-card"><div class="pj-lbl">' + label + '<span class="grow"></span>' + (chip || '') + '</div>' + inner + '</div>';
+    }
+
+    // ---- header ----
+    var meta = [
+      b.client_id ? '<a onclick="ADM.go(\'client/' + b.client_id + '\')">' + esc(b.client_name || 'Client') + '</a>' : 'No client',
+      cl && cl.email ? esc(cl.email) : '',
+      nPhotos === null ? fileWord(nFiles) : fileWord(nFiles) + ' &middot; ' + nPhotos + ' photo' + (nPhotos === 1 ? '' : 's') + ' &middot; ' + nFilms + ' film' + (nFilms === 1 ? '' : 's'),
+      b.delivery_sent_at ? 'sent ' + stamp(b.delivery_sent_at) + (b.delivery_sends > 1 ? ' &middot; ' + b.delivery_sends + '&times;' : '') : '<span class="mut">not sent yet</span>',
+      locked ? '<span style="color:#a03a3a">downloads locked</span>' : ''
+    ].filter(Boolean).join(' &middot; ');
+    var html = '<span class="adm-back" onclick="ADM.go(\'project/' + b.id + '\')">&larr; Back to project</span>' +
+      '<div class="adm-lhead"><div>' +
+        '<h1 style="display:inline">' + esc(b.title) + '</h1>' +
+        '<span class="pj-titlechips">' + (b.delivery_sent_at ? '<span class="dv-chip dv-chip--sent">Sent</span>' : '<span class="dv-chip dv-chip--draft">Not sent</span>') +
+          (locked ? '<span class="dv-chip dv-chip--locked">Locked</span>' : '') + '</span>' +
+        '<div class="meta">' + meta + '</div>' +
+      '</div><div class="acts">' +
+        (slug ? '<a class="adm-btn adm-btn--ghost" href="/portal/' + esc(slug) + '" target="_blank" rel="noopener">Preview as client &rarr;</a>' : '') +
+        (b.delivery_token ? '<button class="adm-btn adm-btn--ghost" onclick="ADM.lsShare(' + b.id + ')">Share</button>' : '') +
+        '<button class="adm-btn" onclick="ADM.lsSend(' + b.id + ')">' + (b.delivery_sent_at ? 'Re-send delivery email' : 'Send delivery email') + '</button>' +
+      '</div></div>';
+
+    // ---- files: toolbar + cover grid + dropzone (moved from the project page) ----
     var grid;
     var selMode = !!(ls && ls.selMode), sel = (ls && ls.sel) || {};
     var nSel = Object.keys(sel).length;
@@ -2051,7 +2164,6 @@ select.lx-input { padding-right: 2rem; }
       '</div>';
     }).join('') + '</div>';
 
-    // ---- upload dropzone ----
     var busy = ls && ls.busy;
     var drop = '<div class="adm-drop' + (busy ? ' busy' : '') + '" id="ls-drop" ' +
         (busy ? '' : 'onclick="if(!event.target.closest(\'.ls-folder\'))document.getElementById(\'ls-file\').click()" ondragover="event.preventDefault();this.classList.add(\'over\')" ondragleave="this.classList.remove(\'over\')" ondrop="event.preventDefault();this.classList.remove(\'over\');ADM.lsDrop(' + b.id + ', event)"') + '>' +
@@ -2063,23 +2175,35 @@ select.lx-input { padding-right: 2rem; }
       '<input type="file" id="ls-file" multiple accept="image/*,video/*,.pdf" hidden onchange="ADM.lsUpload(' + b.id + ', this.files); this.value=\'\'">' +
       '<input type="file" id="ls-folder" webkitdirectory directory multiple hidden onchange="ADM.lsUpload(' + b.id + ', this.files); this.value=\'\'">' +
       '</div>';
+    var filesCard = card('Files &mdash; click a photo to set the cover', grid + '<div style="margin-top:0.75rem">' + drop + '</div>',
+      files && files.length ? '<span style="font-weight:400;letter-spacing:0.02em;text-transform:none">' + fileWord(files.length) + (locked ? ' &middot; downloads locked' : '') + '</span>' : '');
 
-    // ---- extra links ----
+    // ---- additional links (rendered inside Delivery settings) ----
     var links = dvLinks(b);
-    var extra = '<div class="adm-card"><div id="dv-links">' + links.map(dvRow).join('') + '</div>' +
+    var extra = card('Additional links',
+      '<div id="dv-links">' + links.map(dvRow).join('') + '</div>' +
       '<div style="display:flex;gap:0.6rem;flex-wrap:wrap">' +
         '<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.delAddLink()">+ Add link</button>' +
         '<button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSaveLinks(' + b.id + ')">Save links</button></div>' +
-      '<p class="adm-empty" style="padding-bottom:0">Anything hosted elsewhere &mdash; 3D tour, floor plans, a Vimeo film. Each becomes a button on the client\'s listing page.</p></div>';
+      '<p class="adm-empty" style="padding-bottom:0">Anything hosted elsewhere &mdash; 3D tour, floor plans, a Vimeo film. Each becomes a button on the client\'s listing page.</p>');
 
-    return html +
-      sec('Project', facts) +
-      sec('Files &mdash; click a photo to set the cover', grid + '<div style="margin-top:0.75rem">' + drop + '</div>',
-          files && files.length ? '<span style="font-weight:400;letter-spacing:0.02em;text-transform:none">' + fileWord(files.length) + (locked ? ' &middot; downloads locked' : '') + '</span>' : '') +
-      sec('Delivery email', mail) +
-      sec('Invoices', invoices) +
-      sec('Activity', activity) +
-      sec('Additional links', extra);
+
+    // ---- delivery settings: message + CC (+ links editor above) ----
+    var settings = card('Delivery settings',
+      '<div class="adm-form">' +
+        '<div class="adm-field full"><label for="dv-msg">Message to client <small style="text-transform:none;letter-spacing:0">(goes in the delivery email)</small></label>' +
+          '<textarea id="dv-msg" placeholder="Add a note — e.g. Twilights are in the second half.">' + esc(b.delivery_message || '') + '</textarea></div>' +
+        fld('dv-cc', 'CC recipients', '<input id="dv-cc" placeholder="Buyer\'s agent, spouse… — comma-separated emails" value="' + esc(b.delivery_cc || '') + '">') +
+        '<div class="adm-field" style="display:flex;align-items:flex-end;gap:0.6rem"><button type="button" class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsSaveMail(' + b.id + ')">Save settings</button>' +
+          '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsLock(' + b.id + ',' + (locked ? 'false' : 'true') + ')">' + (locked ? 'Unlock downloads' : 'Lock downloads') + '</button></div>' +
+      '</div>' +
+      (b.delivery_approved_at
+        ? '<div class="adm-confnote ok" style="text-align:left">&#10003; Client approved the delivery ' + dstr(b.delivery_approved_at) + '</div>'
+        : (b.delivery_feedback
+            ? '<div class="adm-notes" style="margin-top:0.9rem"><b style="display:block;font-size:0.56rem;letter-spacing:0.2em;text-transform:uppercase;color:#a03a3a;font-weight:600;margin-bottom:0.4rem">Changes requested</b>' + esc(b.delivery_feedback) + '</div>'
+            : '')));
+
+    return html + settings + extra + filesCard;
   }
 
   function vPortfolio() {
@@ -2480,46 +2604,79 @@ select.lx-input { padding-right: 2rem; }
       '</div>';
   }
 
-  // ---- Deliveries: every listing's media + download state in one table ----
-  function vDeliveries() {
+  // ---- Deliveries: cover-card board of every listing with media ---------
+  //  (reference: delivery-tool board — chips All/Not sent/Sent, newest/
+  //  oldest toggle, client-or-address search, cover cards with a SENT
+  //  chip, client · files, date left + download count right.)
+  function dvRows() {
+    var q = (state.dvQ || '').toLowerCase();
     var rows = state.bookings.filter(function (b) {
       return b.status !== 'canceled' && b.status !== 'pending' && (Number(b.files_count) > 0 || b.delivery_sent_at);
-    }).sort(function (a, b) {
-      return String(b.delivery_sent_at || b.shoot_date || '').localeCompare(String(a.delivery_sent_at || a.shoot_date || ''));
     });
-    // download activity, grouped per listing (loaded async — dlLoad)
+    if (state.dvTab === 'sent') rows = rows.filter(function (b) { return b.delivery_sent_at; });
+    if (state.dvTab === 'draft') rows = rows.filter(function (b) { return !b.delivery_sent_at; });
+    if (q) rows = rows.filter(function (b) {
+      return [b.title, b.location, b.client_name, b.client_email].filter(Boolean).join(' ').toLowerCase().indexOf(q) > -1;
+    });
+    rows.sort(function (a, b) {
+      var ka = String(a.delivery_sent_at || a.shoot_date || ''), kb = String(b.delivery_sent_at || b.shoot_date || '');
+      return state.dvSort === 'old' ? ka.localeCompare(kb) : kb.localeCompare(ka);
+    });
+    return rows;
+  }
+  function dvCards() {
+    var rows = dvRows();
     var agg = {};
     ((state.dl || {}).events || []).forEach(function (e) {
       if (e.kind === 'view') return;
       var a = agg[e.booking_id] = agg[e.booking_id] || { n: 0, last: '' };
       a.n++; if (!a.last || e.created_at > a.last) a.last = e.created_at;
     });
+    if (!rows.length) return '<div class="adm-card"><p class="adm-empty">' +
+      ((state.dvQ || state.dvTab !== 'all') ? 'Nothing matches — clear the filters above.'
+        : 'No deliveries yet &mdash; upload media on a project page and it shows up here.') + '</p></div>';
+    return '<div class="dv-grid">' + rows.map(function (b) {
+      var a = agg[b.id];
+      var cover = (b.delivery_cover_url && b.delivery_cover_url !== '-') ? b.delivery_cover_url : '';
+      var locked = !!b.downloads_locked;
+      var chips = '<span class="dv-card__chips">' +
+        (b.delivery_sent_at ? '<span class="dv-chip dv-chip--sent">Sent</span>' : '<span class="dv-chip dv-chip--draft">Not sent</span>') +
+        (locked ? '<span class="dv-chip dv-chip--locked">Locked</span>' : '') + '</span>';
+      var when = b.delivery_sent_at ? stamp(b.delivery_sent_at).slice(0, 10) : (b.shoot_date ? 'shot ' + String(b.shoot_date).slice(0, 10) : '');
+      return '<div class="dv-card">' +
+        '<div class="dv-card__ph" onclick="ADM.go(\'delivery/' + b.id + '\')">' +
+          (cover ? '<img loading="lazy" src="' + esc(cover) + '" alt="">' : '<span class="none">No cover yet</span>') +
+          '<div class="dv-card__acts" onclick="event.stopPropagation()">' +
+            (b.delivery_slug ? '<a href="/portal/' + esc(b.delivery_slug) + '" target="_blank" rel="noopener" title="Open the client listing">&nearr;</a>' : '') +
+            '<button onclick="ADM.lsLock(' + b.id + ',' + (locked ? 'false' : 'true') + ')" title="' + (locked ? 'Unlock downloads' : 'Lock downloads') + '">' + (locked ? '&#128274;' : '&#128275;') + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="dv-card__body">' +
+          '<div class="dv-card__top"><b onclick="ADM.go(\'delivery/' + b.id + '\')">' + esc(b.title) + '</b>' + chips + '</div>' +
+          (b.location ? '<div class="dv-card__loc">' + esc(b.location) + '</div>' : '') +
+          '<div class="dv-card__meta">' + esc(b.client_name || '—') + ' &middot; ' + fileWord(Number(b.files_count) || 0) +
+            (invoiceState(b) === 'unpaid' ? ' &middot; <b>unpaid</b>' : '') + '</div>' +
+          '<div class="dv-card__foot"><span>' + esc(when) + '</span>' +
+            '<span class="dl">' + (state.dl ? (a ? a.n + '&times;' : '0&times;') : '&hellip;') + '</span></div>' +
+        '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+  }
+  function vDeliveries() {
     var week = (state.dl || {}).week;
     return head('Deliveries', '<span class="mut" style="font-size:0.74rem">' +
-        (state.dl ? fileWord(week) .replace(' file', ' download').replace(' files', ' downloads') + ' in the last 7 days' : 'Loading activity&hellip;') + '</span>') +
-      (rows.length
-        ? '<div class="adm-card adm-card--flush"><table class="adm-table"><tr><th>Listing</th><th>Client</th><th class="hide-m">Files</th><th>Delivered</th><th class="hide-m">Downloads</th><th>Invoice</th><th></th></tr>' +
-          rows.map(function (b) {
-            var a = agg[b.id];
-            var inv = invoiceState(b);
-            var invHtml = inv === 'paid' ? '<span class="adm-badge adm-badge--paid">Paid</span>'
-              : inv === 'unpaid' ? '<span class="adm-badge adm-badge--delivered">Unpaid</span>'
-              : '<span class="mut">—</span>';
-            var locked = !!b.downloads_locked;
-            return '<tr>' +
-              '<td><a onclick="ADM.go(\'project/' + b.id + '\')" style="cursor:pointer"><b>' + esc(b.title) + '</b></a>' +
-                (b.location ? '<br><small class="mut">' + esc(b.location) + '</small>' : '') + '</td>' +
-              '<td>' + esc(b.client_name || '—') + '</td>' +
-              '<td class="hide-m">' + fileWord(Number(b.files_count) || 0) + '</td>' +
-              '<td>' + (b.delivery_sent_at ? stamp(b.delivery_sent_at).slice(0, 10) : '<span class="mut">not sent</span>') + '</td>' +
-              '<td class="hide-m">' + (state.dl ? (a ? a.n + ' &middot; <span class="mut">last ' + stamp(a.last).slice(0, 10) + '</span>' : '<span class="mut">none yet</span>') : '<span class="mut">&hellip;</span>') + '</td>' +
-              '<td>' + invHtml + '</td>' +
-              '<td style="white-space:nowrap;text-align:right">' +
-                (b.delivery_slug ? '<a class="adm-btn adm-btn--ghost adm-btn--sm" href="/portal/' + esc(b.delivery_slug) + '" target="_blank" rel="noopener">Open &nearr;</a> ' : '') +
-                '<button class="adm-btn adm-btn--ghost adm-btn--sm" onclick="ADM.lsLock(' + b.id + ',' + (locked ? 'false' : 'true') + ')">' + (locked ? 'Unlock' : 'Lock') + '</button>' +
-              '</td></tr>';
-          }).join('') + '</table></div>'
-        : '<div class="adm-card"><p class="adm-empty">No deliveries yet &mdash; upload media on a project page and it shows up here.</p></div>');
+        (state.dl ? week + ' download' + (week === 1 ? '' : 's') + ' in the last 7 days' : 'Loading activity&hellip;') + '</span>') +
+      '<div class="adm-tools">' +
+        '<span class="adm-seg">' + [['all', 'All'], ['draft', 'Not sent'], ['sent', 'Sent']].map(function (t) {
+          return '<button class="' + ((state.dvTab || 'all') === t[0] ? 'on' : '') + '" onclick="ADM.dvTab(\'' + t[0] + '\')">' + t[1] + '</button>';
+        }).join('') + '</span>' +
+        '<span class="adm-seg">' + [['new', 'Newest first'], ['old', 'Oldest first']].map(function (t) {
+          return '<button class="' + ((state.dvSort || 'new') === t[0] ? 'on' : '') + '" onclick="ADM.dvSort(\'' + t[0] + '\')">' + t[1] + '</button>';
+        }).join('') + '</span>' +
+        '<span style="flex:1"></span>' +
+        '<input type="search" id="dv-q" placeholder="Search client or address&hellip;" value="' + esc(state.dvQ || '') + '" oninput="ADM.dvQ(this.value)">' +
+      '</div>' +
+      '<div id="dv-board">' + dvCards() + '</div>';
   }
 
   // ---- Settings: collapsible sections with a status line each ----------
@@ -2812,8 +2969,8 @@ select.lx-input { padding-right: 2rem; }
     var section = r.split('/')[0];
     // legacy routes from older emails/bookmarks
 
-    if (section === 'delivery') { location.replace('#project/' + (r.split('/')[1] || '')); return; }
-    var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline', deliveries:'deliveries', calendar:'calendar',
+
+    var owns = { dash:'dash', requests:'requests', pipeline:'pipeline', project:'pipeline', deliveries:'deliveries', delivery:'deliveries', calendar:'calendar',
                  proposals:'proposals', proposal:'proposals', licensing:'licensing', billing:'billing',
                  clients:'clients', client:'clients', portfolio:'portfolio', siteproject:'portfolio', settings:'settings' }[section] || 'dash';
     document.querySelectorAll('#nav a').forEach(function (a) { a.classList.toggle('on', a.dataset.r === owns); });
@@ -2825,6 +2982,12 @@ select.lx-input { padding-right: 2rem; }
     else if (section === 'billing') m.innerHTML = vBilling();
     else if (section === 'calendar') m.innerHTML = vCalendar();
     else if (section === 'pipeline') m.innerHTML = vPipeline();
+    else if (section === 'delivery') {
+      var did = r.split('/')[1];
+      m.innerHTML = vDeliveryPage(did);
+      if (!state.ls || String(state.ls.id) !== String(did)) ADM.lsLoad(did);
+      window.scrollTo(0, 0);
+    }
     else if (section === 'project') {
       var pid = r.split('/')[1];
       m.innerHTML = vBookingDetail(pid);
@@ -2884,6 +3047,14 @@ select.lx-input { padding-right: 2rem; }
       if ($('s-archive')) body.archive_months = $('s-archive').value.trim();
       try { var j = await api('settings', 'PUT', body); state.settings = j.settings || state.settings; toast('Saved.'); }
       catch (e) { toast(friendly(e), 'err'); }
+    },
+    dvTab: function (t) { state.dvTab = t; render(); },
+    dvSort: function (v) { state.dvSort = v; render(); },
+    dvQ: function (v) {
+      // update the board in place — re-rendering the page would eat the
+      // search field's focus on every keystroke
+      state.dvQ = v;
+      var el = $('dv-board'); if (el) el.innerHTML = dvCards();
     },
     dlLoad: async function () {
       if (state.dlBusy) return; state.dlBusy = true;
@@ -3605,7 +3776,7 @@ select.lx-input { padding-right: 2rem; }
         var j = await api('files?id=' + id);
         if (!state.ls || state.ls.id != id) return;   // navigated away
         state.ls.files = j.files || []; state.ls.events = j.events || []; state.ls.timeline = j.timeline || []; state.ls.booking = j.booking || null;
-        if (route() === 'project/' + id) render();
+        if (route() === 'project/' + id || route() === 'delivery/' + id) render();
       } catch (e) {
         if (state.ls && state.ls.id == id) { state.ls.files = []; state.ls.events = []; }
         toast(friendly(e), 'err');
@@ -3764,7 +3935,7 @@ select.lx-input { padding-right: 2rem; }
       if (state.ls && state.ls.id == id) state.ls.busy = null;
       try { await reload(); } catch (e) {}
       await ADM.lsRefresh(id);
-      if (route() === 'project/' + id) render();
+      if (route() === 'project/' + id || route() === 'delivery/' + id) render();
       if (failed.length) toast(failed.length + ' failed: ' + failed[0] + (failed.length > 1 ? ' …' : ''), 'err');
       else toast(recs.length + (recs.length === 1 ? ' file' : ' files') + ' uploaded.');
     },
@@ -3786,6 +3957,25 @@ select.lx-input { padding-right: 2rem; }
         if (state.ls && state.ls.id == id) state.ls.files = j.files || [];
         await reload(); render();
       } catch (e) { toast(friendly(e), 'err'); }
+    },
+    pjQuickSave: async function (id) {
+      var b = state.bookings.find(function (x) { return x.id == id; }); if (!b) return;
+      var body = Object.assign({}, b, {
+        title: $('pj-title').value.trim() || b.title,
+        location: $('pj-location').value.trim(),
+        shoot_date: $('pj-date').value,
+        shoot_time: $('pj-time').value,
+        price: $('pj-price').value
+      });
+      try { await api('bookings', 'PUT', body); await reload(); render(); toast('Shoot details saved.'); }
+      catch (e) { toast(friendly(e), 'err'); }
+    },
+    invCopy: async function (id) {
+      var b = state.bookings.find(function (x) { return x.id == id; });
+      if (!b || !b.invoice_token) return;
+      var url = 'https://www.jacobcschrader.com/invoice?t=' + b.invoice_token;
+      try { await navigator.clipboard.writeText(url); toast('Invoice link copied.'); }
+      catch (e) { prompt('Invoice link:', url); }
     },
     lsLock: async function (id, locked) {
       try {

@@ -1820,3 +1820,33 @@ vars exist.
 - Workspace note: Desktop reorganized — repo now at
   ~/Desktop/Live Apps/JCS Terminal/website.
 
+## 2026-08-30 — Admin Deliveries: table → cover-card board
+
+- Deliveries now renders as cards with the cover image (reference:
+  Jacob's delivery-tool frame): All/Not sent/Sent chips, Newest/Oldest
+  toggle, client-or-address search (focus-preserving), Sent/Not sent/
+  Locked chips, ↗ + lock actions on the image, date + "N×" downloads
+  in the card foot. dvRows/dvCards/vDeliveries in admin.html.
+
+## 2026-08-30 — Project page rebuilt (Visaro layout) + Delivery workspace
+
+- Project detail is a two-column board: left Project info / inline
+  Update-shoot-details (ADM.pjQuickSave) / Activity; right rail Payment
+  (big total, Awaiting-payment chip, Copy/Open invoice link, deposit +
+  balance flows, Mark as paid manually), Delivery summary, Quick actions
+  (status select, confirm, preview, client). Header: Edit + Delete.
+- New #delivery/<id> workspace: "+ Create delivery" on the project page
+  (turns into "Open delivery →" once media/sends exist) lands here —
+  delivery settings (message/CC), additional links, and the full files
+  grid + dropzone moved off the project page. Deliveries-board cards
+  open it. Legacy #delivery redirect removed.
+- Admin api() adds cache:'no-store' so admin GETs can never come from
+  the browser's disk cache.
+- Verified in preview: both pages, Create→Open transition, payment
+  button matrix (deposit paid → balance kind), plus a multi-agent
+  coverage diff of old vs new page (no handler/id lost). The adversarial
+  review caught two real repaint bugs — lsLoad and lsUpload only
+  re-rendered on the project route, so a deep-linked/board-opened
+  delivery page stuck on "Loading files…" and uploads froze at the busy
+  dropzone — both gates now accept delivery/<id> too.
+

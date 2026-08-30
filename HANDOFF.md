@@ -450,13 +450,47 @@ except the nightly encrypted backups.
   name → status accepted + email to Jacob. Public page auto-pulls 2
   portfolio films + a photo set + testimonials.
 
+- **Project page = two-column board (2026-08-30, Visaro reference):**
+  header (title + stage/locked chips, location · service, client · files
+  · portal slug; Edit + Delete right). LEFT: Project info (kv facts +
+  deliverables/access notes) · Update shoot details (inline quick-edit:
+  date/time/price/title/location → ADM.pjQuickSave PUTs the FULL booking
+  object merged — partial bodies would blank fields) · Activity timeline
+  (notes + events). RIGHT rail: **Payment** (chip Awaiting payment/Paid/
+  Not invoiced, big total, invoice + deposit lines, Copy link
+  (ADM.invCopy) / Open link ↗ / send-resend/deposit/balance buttons /
+  Mark as paid manually + caveat) · **Delivery** (summary card —
+  "+ Create delivery" when nothing exists, else "Open delivery →", both
+  → #delivery/<id>; Re-send email + Lock; approved/changes notes) ·
+  **Quick actions** (Change-status select, confirmation, preview,
+  client profile).
+- **Delivery workspace (#delivery/<id>, 2026-08-30):** the files half of
+  the old project page, now its own page (Visaro Delivery pattern):
+  header = title + Sent/Not sent/Locked chips + client · email · N files
+  · X photos · Y films · sent line; actions Preview as client / Share
+  (copy link) / Send–Re-send delivery email. Cards: Delivery settings
+  (message to client + CC + Save + Lock toggle; approved/changes notes)
+  · Additional links (dv-links editor) · Files (cover grid + drag
+  reorder + select mode + dropzone/folder upload — moved verbatim).
+  Deliveries-board cards open this page; sidebar highlights Deliveries.
+  The old #delivery→#project legacy redirect is gone. state.ls is shared
+  with the project page (loaded once per booking). Admin api() now
+  fetches with cache:'no-store' (stale disk-cached GETs bit us in
+  preview; belt-and-braces for prod).
 - **Deliveries page (admin, 2026-08-30):** sidebar Work → Deliveries
-  (#deliveries; the old legacy redirect to #pipeline is gone). One table
-  of every listing with media or a sent delivery: Listing · Client ·
-  Files · Delivered · Downloads (count + last, aggregated client-side
-  from admin route `downloads?limit=300`, loaded once per visit via
-  ADM.dlLoad/state.dl) · Invoice badge · Open ↗ + Lock/Unlock
-  (ADM.lsLock). Head shows the 7-day download count.
+  (#deliveries; the old legacy redirect to #pipeline is gone). A
+  cover-image CARD BOARD (delivery-tool reference) of every listing with
+  media or a sent delivery: toolbar = All / Not sent / Sent chips +
+  Newest/Oldest toggle + client-or-address search (state.dvTab/dvSort/
+  dvQ; the search re-renders only #dv-board so focus survives). Each
+  .dv-card: cover (bookings.delivery_cover_url; navy "No cover yet"
+  fallback), corner actions over the image (↗ open client listing,
+  padlock = ADM.lsLock), serif address + Sent/Not sent/Locked chips
+  (wrap under long titles), location, client · N files (+ "unpaid"),
+  foot = delivered/shot date left + download count "N×" right
+  (aggregated client-side from admin route `downloads?limit=300`,
+  loaded once per visit via ADM.dlLoad/state.dl). Card/title click →
+  project page. Head shows the 7-day download count.
 
 ## 6. Client experience
 
