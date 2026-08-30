@@ -528,15 +528,24 @@ emailMatches() rule. Typing an email still never opens data — the
 emailed link is the only key.
 
 **Listing page (delivery.html) additions (2026-08-30):**
-- Film hero: when the listing has a film, the hero IS the film — cover
-  stays as poster, white play circle, click = sound + native controls
-  (`.lp-hero.playing` fades the scrim/title; ended restores it).
+- Hero is ALWAYS the set cover image (a film hero was tried and removed
+  same day at Jacob's call — films play only in the Films section).
+- Photo gallery: JS-built columns (`.lp-pcol`, renderPhotoCols) — strict
+  top-to-bottom order balanced by aspect ratio, re-split on resize. CSS
+  multicol was removed: with lazy images it piled all photos into one
+  column live.
+- Vertical reels: `.lp-film__stage` (16:9 slot) + `.lp-film--vert` sizes
+  the video element itself 9:16, centered — no letterbox bars, same
+  spacing; detected from stored w/h or video metadata.
+- The bottom Feedback box (and Invoice box when shown) is a centered
+  pair; Feedback content is center-aligned.
 - The status pill slot is a NAVY "Pay invoice INV-… — $X →" link
   (`#lp-pay` → d.invoice.url) whenever an invoice is sent and unpaid;
   paid keeps "Paid — downloads unlocked", locked keeps the locked pill.
-- Custom links (bookings.delivery_links, edited on the admin project
-  page) render in their own `#lp-links` row of `.lp-linkbtn` buttons —
-  side by side, above FILMS (no longer mixed into the download pills).
+- Custom links (bookings.delivery_links, edited in the admin delivery
+  workspace) render in their own centered `#lp-links` button row ABOVE
+  the download pills (2026-08-30 order: top row → links → bundles →
+  films → photos).
 - Portal grid: film-only listings (no cover) show a play-glyph tile
   (`.pt-card__play`; feed sends per-project `films` count).
 

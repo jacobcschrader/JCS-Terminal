@@ -1870,3 +1870,13 @@ vars exist.
   560px each); the Feedback card and its Approve/Request buttons are
   text-centered, and it sits alone dead-center when no invoice box shows.
 
+## 2026-08-30 — Listing page: image hero, gallery columns, vertical reels
+
+- Film hero removed — the hero is always the set cover image.
+- Photo gallery rebuilt as JS columns with strict top-to-bottom order
+  (CSS multicol + lazy loading was collapsing all photos into a single
+  column on the live site); balanced by aspect ratio, responsive 4/3/2,
+  selection survives resize re-renders.
+- Vertical reels play without letterbox bars: video element is true
+  9:16 centered in the same 16:9 slot as landscape films.
+- Custom/extra links now sit ABOVE the download pills, centered.
