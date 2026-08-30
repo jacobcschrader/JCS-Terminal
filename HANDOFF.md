@@ -534,9 +534,8 @@ emailed link is the only key.
   top-to-bottom order balanced by aspect ratio, re-split on resize. CSS
   multicol was removed: with lazy images it piled all photos into one
   column live.
-- Vertical reels: `.lp-film__stage` (16:9 slot) + `.lp-film--vert` sizes
-  the video element itself 9:16, centered — no letterbox bars, same
-  spacing; detected from stored w/h or video metadata.
+- Films render as plain full-width 16:9 players (a vertical-reel
+  no-letterbox variant was tried and reverted same day at Jacob's call).
 - The bottom Feedback box (and Invoice box when shown) is a centered
   pair; Feedback content is center-aligned.
 - The status pill slot is a NAVY "Pay invoice INV-… — $X →" link

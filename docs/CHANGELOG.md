@@ -1880,3 +1880,11 @@ vars exist.
 - Vertical reels play without letterbox bars: video element is true
   9:16 centered in the same 16:9 slot as landscape films.
 - Custom/extra links now sit ABOVE the download pills, centered.
+
+## 2026-08-30 — Films display reverted
+
+- The vertical-reel 9:16 stage treatment is reverted at Jacob's call —
+  films are back to plain full-width 16:9 players (letterbox and all).
+  The top-to-bottom photo columns stay (verified live: col 1 = photos
+  1–13 in order, col 2 continues, etc.).
+

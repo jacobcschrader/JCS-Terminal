@@ -75,11 +75,7 @@ body { background: #f8f7f4; }
 .lp-films { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.9rem; }
 @media (max-width: 760px) { .lp-films { grid-template-columns: 1fr; } }
 .lp-film { background: #fff; border: 1px solid var(--line); }
-.lp-film__stage { aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center; }
-.lp-film__stage video { display: block; width: 100%; height: 100%; background: #000; }
-/* vertical reels: the element itself is 9:16, centered in the same 16:9
-   slot — no letterbox bars, spacing identical to landscape films */
-.lp-film--vert .lp-film__stage video { width: auto; aspect-ratio: 9 / 16; }
+.lp-film video { display: block; width: 100%; aspect-ratio: 16 / 9; background: #000; }
 .lp-film__row { display: flex; align-items: center; gap: 0.7rem; padding: 0.7rem 0.9rem; font-size: 0.8rem; color: var(--ink); }
 .lp-film__row .nm { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lp-dl { font-family: var(--sans); font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; color: var(--ink);
@@ -475,18 +471,10 @@ body { background: #f8f7f4; }
     $('lp-filmsec').hidden = false;
     $('lp-filmlbl').textContent = 'Films · ' + films.length;
     $('lp-films').innerHTML = films.map(function (f) {
-      var vert = f.width && f.height && Number(f.height) > Number(f.width);
-      return '<div class="lp-film' + (vert ? ' lp-film--vert' : '') + '"><div class="lp-film__stage"><video controls preload="metadata" playsinline' + (f.thumb ? ' poster="' + esc(f.thumb) + '"' : '') + ' src="' + esc(f.url) + '"></video></div>' +
+      return '<div class="lp-film"><video controls preload="metadata" playsinline' + (f.thumb ? ' poster="' + esc(f.thumb) + '"' : '') + ' src="' + esc(f.url) + '"></video>' +
         '<div class="lp-film__row">' + chk(f) + '<span class="nm">' + esc(f.name) + '</span>' +
         (!locked ? '<a class="lp-dl" href="' + esc(dlUrl(f.url)) + '" data-id="' + f.id + '">Download</a>' : '') + '</div></div>';
     }).join('');
-    // stored dimensions are optional — detect portrait reels from the
-    // video metadata too, so old uploads without w/h still lose the bars
-    document.querySelectorAll('.lp-film video').forEach(function (v) {
-      v.addEventListener('loadedmetadata', function () {
-        if (v.videoHeight > v.videoWidth) v.closest('.lp-film').classList.add('lp-film--vert');
-      });
-    });
   }
 
   // ---- photos: explicit columns, order running top-to-bottom ----
