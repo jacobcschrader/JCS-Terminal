@@ -1864,3 +1864,9 @@ vars exist.
 - New .lp-empty state: a listing with zero delivered files says "Your
   gallery is on its way." instead of trailing off after the hero.
 
+## 2026-08-30 — Listing page: feedback centered
+
+- The bottom Invoice/Feedback boxes are a centered flex pair (max-width
+  560px each); the Feedback card and its Approve/Request buttons are
+  text-centered, and it sits alone dead-center when no invoice box shows.
+

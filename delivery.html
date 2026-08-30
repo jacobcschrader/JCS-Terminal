@@ -134,8 +134,13 @@ body { background: #f8f7f4; }
 .lp-toast .bar i { display: block; height: 100%; background: var(--navy); width: 0; transition: width 0.2s; }
 
 /* invoice + review */
-.lp-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
-@media (max-width: 760px) { .lp-meta { grid-template-columns: 1fr; } }
+/* bottom boxes — centered: feedback alone sits as one centered card,
+   with the invoice box they pair up, still centered as a group */
+.lp-meta { display: flex; justify-content: center; gap: 0.9rem; flex-wrap: wrap; }
+.lp-meta .lp-box { flex: 1 1 380px; max-width: 560px; }
+#lp-review { text-align: center; }
+#lp-review .acts { justify-content: center; }
+@media (max-width: 760px) { .lp-meta { display: block; } .lp-meta .lp-box { max-width: none; } .lp-meta .lp-box + .lp-box { margin-top: 0.9rem; } }
 .lp-box { background: #fff; border: 1px solid var(--line); padding: 1.3rem 1.4rem; }
 .lp-box h3 { font-family: var(--sans); font-size: 0.56rem; letter-spacing: 0.24em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 0.8rem; }
 .lp-box p { font-size: 0.86rem; color: var(--muted); line-height: 1.7; margin: 0 0 1rem; }
