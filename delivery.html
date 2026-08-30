@@ -492,20 +492,19 @@ body { background: #f8f7f4; }
     var n = photoCols();
     if (n === lastCols) return;
     lastCols = n;
-    // sequential fill balanced by aspect height: column 1 reads top to
-    // bottom, column 2 continues, and so on — never scrambled
+    // classic masonry order (Pixieset / the reference galleries): each
+    // photo in sequence drops into the currently-shortest column, so the
+    // set reads LEFT-TO-RIGHT across the top and flows downward — photo 2
+    // sits beside photo 1, never underneath it
     var hts = photos.map(function (f) { return (f.width && f.height) ? f.height / f.width : 2 / 3; });
-    var totalH = hts.reduce(function (a, x) { return a + x; }, 0);
-    var cols = [], cur = [], sum = 0, done = 0;
+    var cols = [], colH = [];
+    for (var c0 = 0; c0 < n; c0++) { cols.push([]); colH.push(0); }
     photos.forEach(function (f, i) {
-      cur.push(photoCell(f, i)); sum += hts[i];
-      var remainingCols = n - cols.length;
-      if (cols.length < n - 1 && sum >= (totalH - done) / remainingCols - 0.01 && cur.length) {
-        cols.push(cur); done += sum; cur = []; sum = 0;
-      }
+      var k = 0;
+      for (var j = 1; j < n; j++) if (colH[j] < colH[k] - 0.0001) k = j;
+      cols[k].push(photoCell(f, i));
+      colH[k] += hts[i];
     });
-    if (cur.length) cols.push(cur);
-    while (cols.length < n) cols.push([]);
     $('lp-photos').innerHTML = cols.map(function (c) { return '<div class="lp-pcol">' + c.join('') + '</div>'; }).join('');
     // re-apply any selection made before a resize re-render
     Object.keys(selected).forEach(function (id) {

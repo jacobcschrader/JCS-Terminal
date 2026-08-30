@@ -1888,3 +1888,9 @@ vars exist.
   The top-to-bottom photo columns stay (verified live: col 1 = photos
   1–13 in order, col 2 continues, etc.).
 
+## 2026-08-30 — Gallery order: masonry reading order
+
+- Photo columns now fill shortest-column-first, so the sequence reads
+  ACROSS rows (1,2,3,4 on top, 5 under the shortest) — matching the
+  admin delivery grid, per Jacob. Column-major fill rejected.
+

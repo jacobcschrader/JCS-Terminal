@@ -530,10 +530,12 @@ emailed link is the only key.
 **Listing page (delivery.html) additions (2026-08-30):**
 - Hero is ALWAYS the set cover image (a film hero was tried and removed
   same day at Jacob's call — films play only in the Films section).
-- Photo gallery: JS-built columns (`.lp-pcol`, renderPhotoCols) — strict
-  top-to-bottom order balanced by aspect ratio, re-split on resize. CSS
-  multicol was removed: with lazy images it piled all photos into one
-  column live.
+- Photo gallery: JS-built columns (`.lp-pcol`, renderPhotoCols) in
+  classic masonry READING ORDER — each photo in sequence drops into the
+  shortest column, so the set reads left-to-right across rows (matches
+  the admin file grid / Pixieset; Jacob rejected column-major fill).
+  Re-splits on resize; CSS multicol was removed because lazy images
+  made it collapse into one column live.
 - Films render as plain full-width 16:9 players (a vertical-reel
   no-letterbox variant was tried and reverted same day at Jacob's call).
 - The bottom Feedback box (and Invoice box when shown) is a centered
